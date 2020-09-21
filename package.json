@@ -1,0 +1,43 @@
+{
+  "private": true,
+  "name": "nr1-open-boards",
+  "version": "0.1.1",
+  "scripts": {
+    "start": "nr1 nerdpack:serve",
+    "test": "exit 0",
+    "eslint-check": "eslint nerdlets/",
+    "eslint-fix": "eslint nerdlets/ --fix"
+  },
+  "nr1": {
+    "uuid": "991e1a1f-bc13-420c-bfcf-234c616fd6e7"
+  },
+  "dependencies": {
+    "@newrelic/nr1-community": "^1.2.0",
+    "ace-builds": "^1.4.12",
+    "graphql": "^15.3.0",
+    "graphql-tag": "^2.11.0",
+    "prop-types": "^15.6.2",
+    "react": "^16.6.3",
+    "react-ace": "^9.1.2",
+    "react-dom": "^16.6.3",
+    "react-grid-layout": "^1.0.0",
+    "react-hexagon-grid": "1.0.1",
+    "react-select": "^3.1.0",
+    "react-toastify": "^5.5.0",
+    "semantic-ui-react": "^1.1.1",
+    "semver": "^7.3.2",
+    "wildcard-match": "^4.0.0"
+  },
+  "browserslist": [
+    "last 2 versions",
+    "not ie < 11",
+    "not dead"
+  ],
+  "devDependencies": {
+    "@newrelic/eslint-plugin-newrelic": "^0.3.0",
+    "@semantic-release/changelog": "^5.0.1",
+    "@semantic-release/git": "^9.0.0",
+    "eslint": "^6.8.0",
+    "prettier": "^1.19.1"
+  }
+}
