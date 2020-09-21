@@ -1,0 +1,7 @@
+{
+  "schemaType": "LAUNCHER",
+  "id": "nr1-open-boards-launcher",
+  "displayName": "Open Boards",
+  "description": "Describe me",
+  "rootNerdletId": "nr1-open-boards-nerdlet"
+}

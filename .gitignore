@@ -1,0 +1,6 @@
+dist*
+node_modules*
+tmp*
+nerdlets/*/test/*
+.DS_Store
+old*
