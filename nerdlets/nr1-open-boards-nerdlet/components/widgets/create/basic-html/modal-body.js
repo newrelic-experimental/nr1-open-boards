@@ -20,6 +20,8 @@ export default class BasicHTMLModalBody extends React.PureComponent {
   }
 
   componentDidMount() {
+    document.getElementById('basic-create-title').click();
+
     if (this.props.widget) {
       const { widget } = this.props;
       this.setState({

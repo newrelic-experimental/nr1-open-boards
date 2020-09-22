@@ -94,7 +94,9 @@ export default class CreateEntityHdvWidget extends React.PureComponent {
                 />
               }
             >
-              <Modal.Header>Entity High Density View Widget</Modal.Header>
+              <Modal.Header id="entityhdv-create-title">
+                Entity High Density View Widget
+              </Modal.Header>
 
               <Modal.Content>
                 <EntityHdvModalBody

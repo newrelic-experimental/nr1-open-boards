@@ -89,6 +89,8 @@ export default class CreateNrqlWidget extends React.PureComponent {
                 />
               }
             >
+              <Modal.Header id="nrql-create-title">NRQL Widget</Modal.Header>
+
               <NrqlModalBody
                 widget={widget}
                 widgetNo={widgetSplit ? widgetSplit[1] : null}

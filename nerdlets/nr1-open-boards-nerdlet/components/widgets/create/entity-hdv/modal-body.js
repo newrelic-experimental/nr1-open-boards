@@ -18,6 +18,8 @@ export default class EntityHdvModalBody extends React.PureComponent {
   }
 
   componentDidMount() {
+    document.getElementById('entityhdv-create-title').click();
+
     if (this.props.widget) {
       const { widget } = this.props;
       this.setState({

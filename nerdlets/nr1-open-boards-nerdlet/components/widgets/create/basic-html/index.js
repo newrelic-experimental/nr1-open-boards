@@ -76,7 +76,7 @@ export default class BasicHTMLWidget extends React.Component {
                 />
               }
             >
-              <Modal.Header>HTML Widget</Modal.Header>
+              <Modal.Header id="basic-create-title">HTML Widget</Modal.Header>
 
               <Modal.Content>
                 <BasicHTMLModalBody

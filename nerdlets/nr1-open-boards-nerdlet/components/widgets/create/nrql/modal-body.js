@@ -46,7 +46,9 @@ export default class NrqlModalBody extends React.PureComponent {
 
   componentDidMount() {
     // workaround to close the drop down menu
-    // document.getElementById('nrql-create-title').click();
+    setTimeout(() => {
+      document.getElementById('nrql-create-title').click();
+    }, 100);
 
     if (this.props.widget) {
       const { widget } = this.props;
@@ -374,11 +376,10 @@ export default class NrqlModalBody extends React.PureComponent {
           );
           accounts.shift();
 
-          const title = widget ? 'Edit NRQL Widget' : 'Create NRQL Widget';
+          // const title = widget ? 'Edit NRQL Widget' : 'Create NRQL Widget';
 
           return (
             <>
-              <Modal.Header id="nrql-create-title">{title}</Modal.Header>
               <Modal.Content>
                 <div className="utility-bar">
                   <div className="react-select-input-group">
