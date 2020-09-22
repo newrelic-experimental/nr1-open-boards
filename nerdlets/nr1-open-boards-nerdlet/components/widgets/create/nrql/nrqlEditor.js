@@ -153,7 +153,7 @@ export default class NrqlEditor extends React.PureComponent {
             ref={c => {
               this[`aceEditor${i}`] = c;
             }}
-            height="27px"
+            // height="27px"
             width="100%"
             mode="text"
             theme="tomorrow"

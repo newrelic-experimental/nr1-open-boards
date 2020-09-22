@@ -90,11 +90,9 @@ export default class MenuBar extends React.PureComponent {
 
                 <div className="flex-push" />
 
-                {selectedBoard ? <BasicHTMLWidget /> : ''}
+                {selectedBoard ? <CreateNrqlWidget /> : ''}
 
                 {selectedBoard ? <CreateEntityHdvWidget /> : ''}
-
-                {selectedBoard ? <CreateNrqlWidget /> : ''}
 
                 {selectedBoard ? (
                   <ManageFilters
@@ -115,6 +113,8 @@ export default class MenuBar extends React.PureComponent {
                 ) : (
                   ''
                 )}
+
+                {selectedBoard ? <BasicHTMLWidget /> : ''}
               </div>
             </div>
           );

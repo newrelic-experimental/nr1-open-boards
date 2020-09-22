@@ -1,10 +1,38 @@
 import React from 'react';
-import { Modal, Icon, Button, Popup, Form, Divider } from 'semantic-ui-react';
+import {
+  Modal,
+  Icon,
+  Button,
+  Popup,
+  Form,
+  Divider,
+  Message
+} from 'semantic-ui-react';
 import AceEditor from 'react-ace';
 import 'ace-builds/src-noconflict/mode-html';
 import 'ace-builds/src-noconflict/theme-tomorrow';
 import { writeUserDocument, writeAccountDocument } from '../../lib/utils';
 import { DataConsumer } from '../../context/data';
+
+const example = index => {
+  switch (index) {
+    case 0: {
+      return '${ Q1:count }';
+    }
+    case 1: {
+      return '${ Q1:1234567:count }';
+    }
+    case 2: {
+      return "<div style=\"background-color: ${ Q1:123:count > 0 ? 'red' : 'orange' };\">";
+    }
+    case 3: {
+      return '<div>Name: ${ ACCOUNT_NAME } <br/> ${ Q1:ACCOUNTS:count }</div>';
+    }
+    case 4: {
+      return '<div>Name: ${ ACCOUNT_NAME } <br/> ${ ( Q1:ACCOUNTS:count ).toFixed(2) }</div>';
+    }
+  }
+};
 
 export default class ManageHTMLWidgets extends React.Component {
   constructor(props) {
@@ -107,7 +135,7 @@ export default class ManageHTMLWidgets extends React.Component {
               trigger={
                 <Popup
                   basic
-                  content="Manage HTML Widgets"
+                  content="Manage Dynamic HTML Widgets"
                   trigger={
                     <Button
                       onClick={this.handleOpen}
@@ -133,6 +161,32 @@ export default class ManageHTMLWidgets extends React.Component {
               <Modal.Header>Manage HTML Widgets</Modal.Header>
 
               <Modal.Content>
+                <Message>
+                  Examples:
+                  <Message.List>
+                    <Message.Item>
+                      Accessing the value from the first query and first
+                      account: {example(0)}
+                    </Message.Item>
+                    <Message.Item>
+                      Accessing the value from the first query and specific
+                      account: {example(1)}
+                    </Message.Item>
+                    <Message.Item>
+                      Using a javascript ternary operator to dynamically set
+                      styling: {example(2)}
+                    </Message.Item>
+                    <Message.Item>
+                      If multiple accounts have been queried dynamically loop
+                      through them {example(3)}
+                    </Message.Item>
+                    <Message.Item>
+                      Using javascript functions to transform values:
+                      {example(4)}
+                    </Message.Item>
+                  </Message.List>
+                </Message>
+
                 <Form>
                   <Form.Group>
                     <Form.Input

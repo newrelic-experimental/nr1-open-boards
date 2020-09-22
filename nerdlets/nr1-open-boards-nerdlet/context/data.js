@@ -52,7 +52,7 @@ export class DataProvider extends Component {
   }
 
   async componentDidMount() {
-    // this.checkVersion();
+    this.checkVersion();
     const userConfig = await getUserCollection(userConfig, 'main');
     await this.getBoards('user');
     const { accounts, storageOptions } = await this.getAccounts();
@@ -121,7 +121,7 @@ export class DataProvider extends Component {
 
   checkVersion = async () => {
     fetch(
-      'https://raw.githubusercontent.com/newrelic/nr1-open-boards/master/package.json'
+      'https://raw.githubusercontent.com/newrelic-experimental/nr1-open-boards/master/package.json'
     )
       .then(response => {
         return response.json();
@@ -134,7 +134,7 @@ export class DataProvider extends Component {
             <a
               onClick={() =>
                 window.open(
-                  'https://github.com/newrelic/nr1-open-boards/',
+                  'https://github.com/newrelic-experimental/nr1-open-boards/',
                   '_blank'
                 )
               }
