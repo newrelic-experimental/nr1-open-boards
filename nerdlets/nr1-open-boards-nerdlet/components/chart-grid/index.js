@@ -204,7 +204,17 @@ export default class ChartGrid extends React.Component {
                     </div>
                   );
                 } else {
-                  return <div>Select a board.</div>;
+                  return (
+                    <div
+                      style={{
+                        textAlign: 'center'
+                      }}
+                    >
+                      <div style={{ marginTop: '25%' }}>
+                        <h2>Select or create a new Open Board to begin!</h2>
+                      </div>
+                    </div>
+                  );
                 }
               }}
             </DataConsumer>
