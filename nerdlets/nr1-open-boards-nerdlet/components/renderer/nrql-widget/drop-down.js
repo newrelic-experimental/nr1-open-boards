@@ -30,7 +30,7 @@ export default class WidgetDropDown extends React.Component {
         }
         break;
       }
-      case 'accounts': {
+      case 'account': {
         const result = await writeAccountDocument(
           storageLocation.value,
           'OpenBoards',

@@ -204,7 +204,7 @@ export default class NrqlModalBody extends React.PureComponent {
         }
         break;
       }
-      case 'accounts': {
+      case 'account': {
         const result = await writeAccountDocument(
           storageLocation.value,
           'OpenBoards',
@@ -347,6 +347,9 @@ export default class NrqlModalBody extends React.PureComponent {
     let createDisabled = false;
     if (!name) createDisabled = true;
     if (selectedChart && selectedChart.key === 'open:html' && !htmlChart) {
+      createDisabled = true;
+    }
+    if (!selectedChart) {
       createDisabled = true;
     }
 

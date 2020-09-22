@@ -88,7 +88,7 @@ export default class EntityHdvModalBody extends React.PureComponent {
         }
         break;
       }
-      case 'accounts': {
+      case 'account': {
         const result = await writeAccountDocument(
           storageLocation.value,
           'OpenBoards',

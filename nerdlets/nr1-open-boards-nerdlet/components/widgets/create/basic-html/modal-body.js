@@ -88,7 +88,7 @@ export default class BasicHTMLModalBody extends React.PureComponent {
         }
         break;
       }
-      case 'accounts': {
+      case 'account': {
         const result = await writeAccountDocument(
           storageLocation.value,
           'OpenBoards',
