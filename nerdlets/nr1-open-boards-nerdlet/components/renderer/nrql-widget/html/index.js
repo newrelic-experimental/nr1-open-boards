@@ -115,12 +115,12 @@ export default class OpenHtml extends React.Component {
           return (
             <div
               style={{
-                height,
                 overflow: 'auto'
               }}
               className="force-select"
             >
               <div
+                style={{ height: `${height}px`, width: `${width - 15}px` }}
                 dangerouslySetInnerHTML={createMarkup(baseChartHtml, accounts)}
               />
             </div>
