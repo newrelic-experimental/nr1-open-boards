@@ -1,6 +1,6 @@
 import React from 'react';
-import HexagonGrid from 'react-hexagon-grid';
-import { Icon } from 'semantic-ui-react';
+import HexagonGrid from './grid';
+import { Popup } from 'semantic-ui-react';
 import { navigation } from 'nr1';
 
 export default class EntityHdvWidget extends React.Component {
@@ -32,6 +32,7 @@ export default class EntityHdvWidget extends React.Component {
           fill,
           stroke: 'white'
         },
+        onMouseOver: () => console.log('over2'),
         onMouseEnter: () => console.log('enter'),
         onClick: () => navigation.openStackedEntity(hexagon.guid)
       };
@@ -39,15 +40,31 @@ export default class EntityHdvWidget extends React.Component {
 
     const renderHexagonContent = hexagon => {
       return (
-        <text
-          x="50%"
-          y="50%"
-          fontSize={100}
-          fontWeight="lighter"
-          style={{ fill: 'white' }}
-          textAnchor="middle"
-        />
+        <span
+          style={{
+            x: '50%',
+            y: '50%',
+            fontSize: 100,
+            textAnchor: 'middle',
+            color: 'white',
+            fill: 'white'
+          }}
+        >
+          abc
+        </span>
       );
+      // <text
+      //   title={hexagon.name}
+      //   x="50%"
+      //   y="50%"
+      //   fontSize={100}
+      //   fontWeight="lighter"
+      //   style={{ fill: 'white' }}
+      //   textAnchor="middle"
+      //   onMouseOver={() => console.log('over')}
+      // >
+      //   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+      // </text>
     };
 
     const alerts = {
