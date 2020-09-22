@@ -1,5 +1,6 @@
 import React from 'react';
 import HexagonGrid from 'react-hexagon-grid';
+import { Icon } from 'semantic-ui-react';
 import { navigation } from 'nr1';
 
 export default class EntityHdvWidget extends React.Component {

@@ -41,13 +41,13 @@ export default class StyleEditor extends React.PureComponent {
         <Form>
           <Form.Group inline style={{ marginBottom: '5px' }}>
             <Form.Input
-              width="4"
+              width="3"
               label="Class name"
               value={styleCondition.class}
               onChange={(e, d) => edit('class', d.value)}
             />
             <Form.Input
-              width="4"
+              width="3"
               label="Attribute"
               value={styleCondition.attr}
               onChange={(e, d) => edit('attr', d.value)}
@@ -68,6 +68,16 @@ export default class StyleEditor extends React.PureComponent {
               label="Value"
               value={styleCondition.value}
               onChange={(e, d) => edit('value', d.value)}
+            />
+            <Form.Input
+              width="2"
+              label="Priority"
+              value={styleCondition.priority}
+              onChange={(e, d) =>
+                Number.isInteger(parseInt(d.value)) || d.value === ''
+                  ? edit('priority', d.value)
+                  : 0
+              }
             />
             <Form.Button
               width="2"

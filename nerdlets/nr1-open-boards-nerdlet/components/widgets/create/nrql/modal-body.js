@@ -126,7 +126,13 @@ export default class NrqlModalBody extends React.PureComponent {
 
   addStyleCondition = () => {
     const { styleConditions } = this.state;
-    styleConditions.push({ class: '', attr: '', operator: '', value: '' });
+    styleConditions.push({
+      class: '',
+      attr: '',
+      operator: '',
+      value: '',
+      priority: 0
+    });
     this.setState({ styleConditions: [...styleConditions] });
   };
 

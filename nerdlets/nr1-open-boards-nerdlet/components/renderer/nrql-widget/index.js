@@ -162,7 +162,9 @@ export default class NrqlWidget extends React.Component {
     const hdrStyle = widget.headerStyle || {};
 
     const firstRawData = rawData[0] || null;
-    const styleConditions = widget.styleConditions || [];
+    const styleConditions = (widget.styleConditions || []).sort(
+      (a, b) => (a.priority || 0) - (b.priority || 0)
+    );
     let dynamicClass = '';
 
     if (firstRawData) {
