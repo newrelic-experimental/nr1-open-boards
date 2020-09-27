@@ -2,38 +2,36 @@
 no-console: 0
 */
 import React from 'react';
-import { Dropdown, Icon } from 'semantic-ui-react';
 import { DataConsumer } from '../../context/data';
-import CreatableSelect from 'react-select/creatable';
-
-const customStyles = {
-  menu: (provided, state) => ({
-    ...provided,
-    borderRadius: '0px'
-  }),
-
-  control: (provided, { selectProps: { width } }) => ({
-    ...provided,
-    borderRadius: '0px',
-    fontSize: '13px',
-    color: '#2a3434'
-  }),
-
-  valueContainer: (provided, state) => {
-    // const opacity = state.isDisabled ? 0.5 : 1;
-    // const transition = 'opacity 300ms';
-
-    return { ...provided, top: '6px', fontSize: '12px' };
-  }
-};
+import Filter from './filter';
 
 export default class FilterBar extends React.PureComponent {
   render() {
     return (
       <DataConsumer>
-        {({ selectedBoard, filters, updateDataStateContext }) => {
+        {({ selectedBoard, filters }) => {
           if (selectedBoard) {
             const dashboardFilters = selectedBoard.document.filters || [];
+            const widgets = selectedBoard.document.widgets || [];
+            let eventTypes = '';
+            let accounts = [];
+
+            widgets.forEach(w => {
+              (w.sources || []).forEach(s => {
+                if (s.nrqlQuery) {
+                  accounts = [...accounts, ...s.accounts];
+                  const regex = /FROM (\S+)/;
+                  const found = s.nrqlQuery.match(regex);
+                  if (found) {
+                    eventTypes += `${found[1]},`;
+                  }
+                }
+              });
+            });
+
+            eventTypes = eventTypes.split(',') || [];
+            eventTypes = [...new Set(eventTypes)].filter(e => e);
+            accounts = [...new Set(accounts)];
 
             return (
               <div
@@ -53,50 +51,15 @@ export default class FilterBar extends React.PureComponent {
                     flexDirection: 'row'
                   }}
                 >
-                  {dashboardFilters.map((f, i) => {
-                    const filterName = `filter_${f.name}`;
-                    const all = { value: '*', label: 'All *' };
-                    const defaultValue = {
-                      value: f.default,
-                      label:
-                        f.default === '*' ? 'All *' : `${f.default} (Default)`
-                    };
-
-                    const filterValue = filters[filterName] || defaultValue;
-                    const options = [defaultValue];
-
-                    return (
-                      <div
-                        key={i}
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          width: '250px',
-                          marginRight: '8px'
-                        }}
-                        className="react-create-input-group"
-                      >
-                        <label style={{ zIndex: 1 }}>
-                          {f.name} {f.operator || ''}
-                        </label>
-                        <CreatableSelect
-                          styles={customStyles}
-                          isClearable
-                          formatCreateLabel={d => `Filter: ${d}`}
-                          options={options}
-                          value={filterValue}
-                          onCreateOption={v => {
-                            filters[filterName] = { value: v, label: v };
-                            updateDataStateContext({ filters });
-                          }}
-                          onChange={v => {
-                            filters[filterName] = v ? v : all;
-                            updateDataStateContext({ filters });
-                          }}
-                        />
-                      </div>
-                    );
-                  })}
+                  {dashboardFilters.map((f, i) => (
+                    <Filter
+                      key={i}
+                      filter={f}
+                      filters={filters}
+                      eventTypes={eventTypes}
+                      accounts={accounts}
+                    />
+                  ))}
                 </div>
               </div>
             );

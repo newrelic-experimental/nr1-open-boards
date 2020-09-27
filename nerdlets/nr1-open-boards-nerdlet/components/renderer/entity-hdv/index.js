@@ -73,8 +73,6 @@ export default class EntityHdv extends React.Component {
   fetchData = () => {
     const { isFetching, query } = this.state;
     if (!isFetching) {
-      const data = [];
-
       this.setState({ isFetching: true }, async () => {
         const result = await NerdGraphQuery.query({
           query: entityQuery(query, null)
@@ -137,10 +135,6 @@ export default class EntityHdv extends React.Component {
     const { data } = this.state;
     const { widget, i } = this.props;
     const hdrStyle = widget.headerStyle || {};
-
-    const createMarkup = value => {
-      return { __html: value };
-    };
 
     return (
       <div style={{ width: '100%', height: '100%' }}>
