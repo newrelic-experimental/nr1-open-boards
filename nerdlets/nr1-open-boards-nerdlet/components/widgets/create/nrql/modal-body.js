@@ -1,5 +1,12 @@
 import React from 'react';
-import { Modal, Button, Input, Divider, Message } from 'semantic-ui-react';
+import {
+  Modal,
+  Button,
+  Input,
+  Divider,
+  Message,
+  Header
+} from 'semantic-ui-react';
 import { DataConsumer } from '../../../../context/data';
 import { nrqlCharts } from '../../list';
 import { validateSources } from '../../utils';
@@ -28,6 +35,7 @@ export default class NrqlModalBody extends React.PureComponent {
       name: '',
       ms: '',
       sources: [],
+      events: [],
       styleConditions: [],
       htmlChart: null,
       selectedChart: null,
@@ -77,6 +85,7 @@ export default class NrqlModalBody extends React.PureComponent {
               }
             : null,
           sources: [...(widget.sources || [])],
+          events: [...(widget.events || [])],
           props: { ...(widget.props || []) },
           x: widget.x,
           y: widget.y,
@@ -95,9 +104,10 @@ export default class NrqlModalBody extends React.PureComponent {
           }
         },
         () => {
-          const { sources, styleConditions } = this.state;
+          const { sources, events, styleConditions } = this.state;
           this.setState({
             sources: [...sources],
+            events: [...events],
             styleConditions: [...styleConditions]
           });
         }
@@ -106,17 +116,20 @@ export default class NrqlModalBody extends React.PureComponent {
   }
 
   handleOpen = updateDataStateContext => {
-    this.setState({ name: '', sources: [], styleConditions: [] }, () =>
-      updateDataStateContext({ createNrqlWidgetOpen: true })
+    this.setState(
+      { name: '', sources: [], events: [], styleConditions: [] },
+      () => updateDataStateContext({ createNrqlWidgetOpen: true })
     );
   };
 
   handleClose = updateDataStateContext => {
-    this.setState({ name: '', sources: [], styleConditions: [] }, () =>
-      updateDataStateContext({
-        createNrqlWidgetOpen: false,
-        selectedWidget: null
-      })
+    this.setState(
+      { name: '', sources: [], events: [], styleConditions: [] },
+      () =>
+        updateDataStateContext({
+          createNrqlWidgetOpen: false,
+          selectedWidget: null
+        })
     );
   };
 
@@ -124,6 +137,12 @@ export default class NrqlModalBody extends React.PureComponent {
     const { sources } = this.state;
     sources.push({ nrqlQuery: 'FROM ', accounts: [] });
     this.setState({ sources: [...sources] });
+  };
+
+  addNrqlEvents = () => {
+    const { events } = this.state;
+    events.push({ nrqlQuery: 'FROM ', accounts: [] });
+    this.setState({ events: [...events] });
   };
 
   addStyleCondition = () => {
@@ -151,6 +170,7 @@ export default class NrqlModalBody extends React.PureComponent {
       styleConditions,
       htmlChart,
       sources,
+      events,
       multiQueryMode,
       ms,
       props,
@@ -164,6 +184,7 @@ export default class NrqlModalBody extends React.PureComponent {
       chart: selectedChart.value,
       styleConditions,
       sources,
+      events,
       multiQueryMode: multiQueryMode.value,
       props,
       ms,
@@ -222,6 +243,10 @@ export default class NrqlModalBody extends React.PureComponent {
 
   updateSources = sources => {
     this.setState({ sources: [...sources] });
+  };
+
+  updateEvents = events => {
+    this.setState({ events: [...events] });
   };
 
   updateStyles = styleConditions => {
@@ -337,6 +362,7 @@ export default class NrqlModalBody extends React.PureComponent {
       name,
       styleConditions,
       sources,
+      events,
       selectedChart,
       htmlChart,
       multiQueryMode,
@@ -363,6 +389,18 @@ export default class NrqlModalBody extends React.PureComponent {
           createDisabled = true;
         }
       });
+    }
+
+    let eventsHasTimeseries = false;
+
+    if (events.length > 0) {
+      for (let z = 0; z < events.length; z++) {
+        if (events[z].nrqlQuery.includes('TIMESERIES')) {
+          createDisabled = true;
+          eventsHasTimeseries = true;
+          break;
+        }
+      }
     }
 
     return (
@@ -399,11 +437,15 @@ export default class NrqlModalBody extends React.PureComponent {
 
                   <div className="flex-push" />
 
-                  <div className="react-select-input-group">
+                  <div
+                    className="react-select-input-group"
+                    style={{ width: '185px' }}
+                  >
                     <Input
+                      className="input-poll"
                       label="Poll (ms)"
-                      style={{ width: '235px', height: '45px' }}
-                      placeholder="Leave blank for auto"
+                      style={{ width: '115px', height: '45px' }}
+                      placeholder="blank for auto"
                       value={ms}
                       onChange={(e, d) =>
                         this.setState({ ms: d.value.replace(/[^0-9]/g, '') })
@@ -419,6 +461,21 @@ export default class NrqlModalBody extends React.PureComponent {
                       onClick={() => this.addNrqlSource('nrql')}
                     />
                   </div>
+
+                  {/* {selectedChart &&
+                  (selectedChart.key === 'newrelic:line' ||
+                    selectedChart.key === 'newrelic:area') ? (
+                    <div>
+                      <Button
+                        style={{ height: '45px' }}
+                        icon="plus"
+                        content="Events"
+                        onClick={() => this.addNrqlEvents('nrql')}
+                      />
+                    </div>
+                  ) : (
+                    ''
+                  )} */}
 
                   <div>
                     <Button
@@ -479,6 +536,35 @@ export default class NrqlModalBody extends React.PureComponent {
                       ))}
                     </Message.List>
                   </Message>
+                ) : (
+                  ''
+                )}
+
+                {events.length > 0 ? (
+                  <>
+                    <Header as="h4" content="Events" />
+
+                    {events.map((s, i) => (
+                      <NrqlEditor
+                        key={i}
+                        i={i}
+                        sources={this.state.events}
+                        accounts={accounts}
+                        updateSources={this.updateEvents}
+                      />
+                    ))}
+
+                    {eventsHasTimeseries ? (
+                      <Message negative>
+                        <Message.Header>Errors</Message.Header>
+                        <Message.List>
+                          Event queries should not contain TIMESERIES.
+                        </Message.List>
+                      </Message>
+                    ) : (
+                      ''
+                    )}
+                  </>
                 ) : (
                   ''
                 )}

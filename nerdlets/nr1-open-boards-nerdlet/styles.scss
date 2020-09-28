@@ -32,6 +32,10 @@ i {
   background-color: transparent !important;
 }
 
+.input-poll > input {
+  width: 150px !important;
+}
+
 .cell-hover:hover {
   background-color: orange;
   color: white;

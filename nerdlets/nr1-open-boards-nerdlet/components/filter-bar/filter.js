@@ -50,18 +50,32 @@ export default class Filter extends React.PureComponent {
       eventTypesStr = eventTypesStr.slice(0, -1);
     }
 
-    const query = `FROM ${eventTypesStr} SELECT uniques(${filter.name}) ${whereClause}`;
+    const filterValues = filter.name.split(',');
+
+    // const query = `FROM ${eventTypesStr} SELECT uniques(\`${filter.name}\`) ${whereClause}`;
 
     if (
       eventTypesStr !== this.state.eventTypesStr ||
       whereClause !== this.state.whereClause
     ) {
-      const nrqlPromises = accounts.map(accountId => {
-        return NrqlQuery.query({
-          accountId,
-          query
+      const nrqlPromises = [];
+
+      filterValues.forEach(v => {
+        accounts.forEach(accountId => {
+          nrqlPromises.push(
+            NrqlQuery.query({
+              accountId,
+              query: `FROM ${eventTypesStr} SELECT uniques(\`${v}\`) ${whereClause}`
+            })
+          );
         });
       });
+      // const nrqlPromises = accounts.map(accountId => {
+      //   return NrqlQuery.query({
+      //     accountId,
+      //     query
+      //   });
+      // });
 
       const results = await Promise.all(nrqlPromises);
       let autoComplete = [];
@@ -72,8 +86,15 @@ export default class Filter extends React.PureComponent {
       });
 
       autoComplete = autoComplete
-        .map(c => c[filter.name])
-        .filter(a => !a.includes("'") && !a.includes('"'));
+        .map(c => {
+          for (let z = 0; z < filterValues.length; z++) {
+            if (c[filterValues[z]]) {
+              return c[filterValues[z]];
+            }
+          }
+          return null;
+        })
+        .filter(a => a && !a.includes("'") && !a.includes('"'));
 
       this.setState({
         eventTypesStr,
