@@ -462,7 +462,7 @@ export default class NrqlModalBody extends React.PureComponent {
                     />
                   </div>
 
-                  {/* {selectedChart &&
+                  {selectedChart &&
                   (selectedChart.key === 'newrelic:line' ||
                     selectedChart.key === 'newrelic:area') ? (
                     <div>
@@ -475,7 +475,7 @@ export default class NrqlModalBody extends React.PureComponent {
                     </div>
                   ) : (
                     ''
-                  )} */}
+                  )}
 
                   <div>
                     <Button
