@@ -145,8 +145,9 @@ export default class NrqlWidget extends React.Component {
   nrqlQuery = (nrqlQuery, accountId, sourceIndex) => {
     return new Promise(resolve => {
       // where clause with timestamp is used to forceably break cache
+      const time = Date.now();
       NrqlQuery.query({
-        query: `${nrqlQuery} WHERE ${Date.now()}=${Date.now()}`,
+        query: `${nrqlQuery} WHERE ${time}=${time}`,
         accountId
       }).then(value => {
         value.accountId = accountId;

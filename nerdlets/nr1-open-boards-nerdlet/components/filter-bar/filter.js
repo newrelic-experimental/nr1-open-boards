@@ -30,46 +30,31 @@ const customStyles = {
 export default class Filter extends React.PureComponent {
   constructor(props) {
     super(props);
-    this.state = { eventTypesStr: '', filterVal: '', autoComplete: [] };
+    this.state = { eventTypesStr: '', autoComplete: [], whereClause: '' };
   }
 
   componentDidMount() {
-    const { filter, filters, accounts, eventTypes } = this.props;
-    this.updateEventTypes(eventTypes, filter, filters, accounts);
+    const { filter, accounts, eventTypes, whereClause } = this.props;
+    this.updateEventTypes(eventTypes, filter, accounts, whereClause);
   }
 
   componentDidUpdate() {
-    const { filter, filters, accounts, eventTypes } = this.props;
-    this.updateEventTypes(eventTypes, filter, filters, accounts);
+    const { filter, accounts, eventTypes, whereClause } = this.props;
+    this.updateEventTypes(eventTypes, filter, accounts, whereClause);
   }
 
-  updateEventTypes = async (eventTypes, filter, filters, accounts) => {
+  updateEventTypes = async (eventTypes, filter, accounts, whereClause) => {
     let eventTypesStr = (eventTypes || []).join(',');
-    const filterName = `filter_${filter.name}`;
-    const defaultValue = {
-      value: filter.default,
-      label: filter.default === '*' ? 'All *' : `${filter.default} (Default)`
-    };
-
-    const filterValue = filters[filterName] || defaultValue;
 
     if (eventTypesStr.endsWith(',')) {
       eventTypesStr = eventTypesStr.slice(0, -1);
     }
 
-    let query = `FROM ${eventTypesStr} SELECT uniques(${filter.name})`;
-
-    if (
-      filterValue.value &&
-      filterValue.value !== '*' &&
-      filterValue.value.includes('%')
-    ) {
-      query += ` WHERE ${filter.name} LIKE '${filterValue.value}'`;
-    }
+    const query = `FROM ${eventTypesStr} SELECT uniques(${filter.name}) ${whereClause}`;
 
     if (
       eventTypesStr !== this.state.eventTypesStr ||
-      filterValue.value !== this.state.filterVal
+      whereClause !== this.state.whereClause
     ) {
       const nrqlPromises = accounts.map(accountId => {
         return NrqlQuery.query({
@@ -92,8 +77,8 @@ export default class Filter extends React.PureComponent {
 
       this.setState({
         eventTypesStr,
-        filterVal: filterValue.value,
-        autoComplete
+        autoComplete,
+        whereClause
       });
     }
   };

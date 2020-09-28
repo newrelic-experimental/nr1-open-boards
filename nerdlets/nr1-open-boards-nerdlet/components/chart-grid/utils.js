@@ -1,3 +1,65 @@
+export const buildFilterClause = (filters, dbFilters) => {
+  if (Object.keys(filters).length > 0) {
+    let value = '';
+    Object.keys(filters).forEach((f, i) => {
+      const filterName = f.replace('filter_', '');
+      if (filters[f] && filters[f].value !== '*') {
+        const filterValue = filters[f].value;
+        const whereValue = isNaN(filterValue)
+          ? `'${filterValue}'`
+          : filterValue;
+        // const endValue =
+        //   Object.keys(filters).length === 1 ||
+        //   Object.keys(filters).length === i + 1
+        //     ? ''
+        //     : 'AND';
+
+        let operator = '';
+        for (let z = 0; z < dbFilters.length; z++) {
+          if (dbFilters[z].name === filterName) {
+            operator = dbFilters[z].operator || '';
+            break;
+          }
+        }
+
+        if (operator === '') {
+          operator = whereValue.includes('%') ? ' LIKE ' : '=';
+        }
+
+        value += ` WHERE ${filterName} ${operator} ${whereValue}`;
+      }
+    });
+    return value !== 'WHERE ' ? value : '';
+  } else if (dbFilters.length > 0) {
+    let value = '';
+    for (let z = 0; z < dbFilters.length; z++) {
+      const filterName = dbFilters[z].name;
+      const filterValue = dbFilters[z].default;
+
+      if (filterValue !== '*') {
+        const whereValue = isNaN(filterValue)
+          ? `'${filterValue}'`
+          : filterValue;
+
+        // const endValue =
+        //   dbFilters.length === 1 || dbFilters.length === z + 1 ? '' : 'AND';
+        let operator = '';
+        if (dbFilters[z].operator) {
+          operator = dbFilters[z].operator;
+        } else {
+          operator = whereValue.includes('%') ? ' LIKE ' : '=';
+        }
+
+        value += ` WHERE ${filterName} ${operator} ${whereValue}`;
+      }
+    }
+
+    return value !== 'WHERE ' ? value : '';
+  }
+
+  return '';
+};
+
 export const writeStyle = (styleName, cssText) => {
   let styleElement = document.getElementById(styleName);
   if (styleElement)
