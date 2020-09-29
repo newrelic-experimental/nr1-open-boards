@@ -10,6 +10,23 @@ import { addCompleter } from 'ace-builds/src-noconflict/ext-language_tools';
 import { nrqlCompleter } from '../../../../lib/completers';
 import { nrdbQuery } from '../../../../lib/utils';
 
+// additional attributes need to be lowercase so it is DOM friendly
+const presetEvents = [
+  {
+    key: 'Kubernetes HPA',
+    text: 'Kubernetes HPA',
+    value:
+      "FROM InfrastructureEvent SELECT * WHERE `event.involvedObject.kind` = 'HorizontalPodAutoscaler'"
+  },
+  {
+    key: 'AWS Health Events',
+    text: 'AWS Health Events',
+    value:
+      "SELECT * FROM InfrastructureEvent WHERE changedPath LIKE 'aws/health/%' AND changeType = 'added' ",
+    ignore_filters: 'true'
+  }
+];
+
 export default class NrqlEditor extends React.PureComponent {
   constructor(props) {
     super(props);
@@ -109,6 +126,23 @@ export default class NrqlEditor extends React.PureComponent {
       updateSources(sources);
     };
 
+    const handlePresetChange = d => {
+      const { value } = d;
+      const { key, ignore_filters, color } = d.options.find(
+        o => o.value === value
+      );
+
+      edit('nrqlQuery', value, source.accounts);
+      edit('name', key);
+      if (ignore_filters === 'true') {
+        edit('ignoreFilters', 'true');
+      } else {
+        edit('ignoreFilters', '');
+      }
+
+      if (color) edit('color', color);
+    };
+
     return (
       <div
         style={{
@@ -146,6 +180,15 @@ export default class NrqlEditor extends React.PureComponent {
         {type === 'events' ? (
           <Form>
             <Form.Group>
+              <Form.Field width="4">
+                <label>Presets</label>
+                <Dropdown
+                  placeholder="Use a preset"
+                  selection
+                  onChange={(e, d) => handlePresetChange(d)}
+                  options={presetEvents}
+                />
+              </Form.Field>
               <Form.Input
                 width="4"
                 label="Name &nbsp;"
