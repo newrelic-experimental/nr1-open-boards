@@ -3,11 +3,13 @@ no-eval: 0
 */
 
 import React from 'react';
-import { AutoSizer, NrqlQuery } from 'nr1';
+import { AutoSizer, NrqlQuery, NerdGraphQuery } from 'nr1';
 import WidgetDropDown from './drop-down';
 import WidgetChart from './chart';
 import wcm from 'wildcard-match';
-import { randomColor } from './utils';
+import { getAlertsDeploysQuery, getGuidsQuery, randomColor } from './utils';
+import queue from 'async/queue';
+import { chunk } from '../../../lib/helper';
 
 // import { DataConsumer } from '../../context/data';
 
@@ -47,25 +49,38 @@ export default class NrqlWidget extends React.Component {
       isFetching: false,
       filterClause: '',
       sinceClause: '',
+      begin_time: 0,
+      end_time: 0,
       rawData: [],
       rawEventData: [],
+      nerdgraphEventData: [],
       color: '',
       pollInterval: 2000
     };
   }
 
   componentDidMount() {
-    const { widget, filterClause, sinceClause, timeRange } = this.props;
+    const {
+      widget,
+      filterClause,
+      sinceClause,
+      timeRange,
+      begin_time,
+      end_time
+    } = this.props;
     const pollInterval = this.getPollInterval(timeRange, widget);
 
     // fetch data on mount
     this.setState(
       {
+        widgetStr: JSON.stringify(widget),
         filterClause,
         sinceClause,
         init: true,
         color: randomColor(),
-        pollInterval
+        pollInterval,
+        begin_time,
+        end_time
       },
       () => {
         this.fetchData(widget);
@@ -77,13 +92,22 @@ export default class NrqlWidget extends React.Component {
   }
 
   componentDidUpdate() {
-    const { filterClause, sinceClause, widget, timeRange } = this.props;
+    const {
+      filterClause,
+      sinceClause,
+      widget,
+      timeRange,
+      begin_time,
+      end_time
+    } = this.props;
     const pollInterval = this.getPollInterval(timeRange, widget);
+    const widgetStr = JSON.stringify(widget);
 
     if (
       filterClause !== this.state.filterClause ||
       sinceClause !== this.state.sinceClause ||
-      pollInterval !== this.state.pollInterval
+      pollInterval !== this.state.pollInterval ||
+      widgetStr !== this.state.widgetStr
     ) {
       const updateFilter =
         filterClause !== this.state.filterClause
@@ -93,7 +117,16 @@ export default class NrqlWidget extends React.Component {
         sinceClause !== this.state.sinceClause
           ? sinceClause
           : this.state.sinceClause;
-      this.updateFilter(widget, updateFilter, updateSince, pollInterval);
+
+      this.updateFilter(
+        widgetStr,
+        widget,
+        updateFilter,
+        updateSince,
+        pollInterval,
+        begin_time,
+        end_time
+      );
     }
   }
 
@@ -103,12 +136,23 @@ export default class NrqlWidget extends React.Component {
     }
   }
 
-  updateFilter = (widget, filterClause, sinceClause, pollInterval) => {
+  updateFilter = (
+    widgetStr,
+    widget,
+    filterClause,
+    sinceClause,
+    pollInterval,
+    begin_time,
+    end_time
+  ) => {
     const stateUpdate = {
       init: false,
       filterClause,
       sinceClause,
-      pollInterval
+      pollInterval,
+      begin_time,
+      end_time,
+      widgetStr
     };
     this.setState(stateUpdate, () => {
       if (this.widgetPoll) {
@@ -142,7 +186,15 @@ export default class NrqlWidget extends React.Component {
   };
 
   fetchData = widget => {
-    const { isFetching, filterClause, sinceClause, init, color } = this.state;
+    const {
+      isFetching,
+      filterClause,
+      sinceClause,
+      init,
+      color,
+      begin_time,
+      end_time
+    } = this.state;
     if (!isFetching) {
       const queryPromises = [];
       const rawData = [];
@@ -186,10 +238,12 @@ export default class NrqlWidget extends React.Component {
         });
 
         const eventPromises = [];
+        const nerdGraphEventPromises = [];
+
         widget.events.forEach((e, sourceIndex) => {
-          e.accounts.forEach(accountId => {
-            // handle nrdb queries
-            if (e.nrqlQuery) {
+          // handle nrdb queries
+          if (e.nrqlQuery) {
+            (e.accounts || []).forEach(accountId => {
               const nrqlQuery = useSince
                 ? stripQueryTime(e.nrqlQuery)
                 : e.nrqlQuery;
@@ -207,8 +261,12 @@ export default class NrqlWidget extends React.Component {
                   e.color || color
                 )
               );
-            }
-          });
+            });
+          } else if (e.entitySearchQuery) {
+            nerdGraphEventPromises.push(
+              this.entitySearchQuery(e.entitySearchQuery, begin_time, end_time)
+            );
+          }
         });
 
         const eventData = await Promise.all(eventPromises);
@@ -231,10 +289,13 @@ export default class NrqlWidget extends React.Component {
           }
         });
 
+        const nerdgraphEventData = await Promise.all(nerdGraphEventPromises);
+
         this.setState({
           isFetching: false,
           rawData: [...rawData],
-          rawEventData: [...rawEventData]
+          rawEventData: [...rawEventData],
+          nerdgraphEventData: [...nerdgraphEventData.flat()]
         });
       });
     }
@@ -257,9 +318,76 @@ export default class NrqlWidget extends React.Component {
     });
   };
 
+  entitySearchQuery = (query, begin_time, end_time) => {
+    return new Promise(async resolve => {
+      const entityGuids = await this.recursiveGuidFetch(query);
+      const entityChunks = chunk(entityGuids, 25);
+
+      const entityPromises = entityChunks.map(chunk => {
+        return new Promise(async resolve => {
+          const guids = `"${chunk.join(`","`)}"`;
+          const nerdGraphResult = await NerdGraphQuery.query({
+            query: getAlertsDeploysQuery(guids, end_time, begin_time)
+          });
+          resolve(nerdGraphResult);
+        });
+      });
+
+      let nerdgraphEventData = [];
+      await Promise.all(entityPromises).then(values => {
+        values.forEach(v => {
+          const entities = (((v || {}).data || {}).actor || {}).entities || [];
+          nerdgraphEventData = [...nerdgraphEventData, ...entities];
+        });
+      });
+
+      nerdgraphEventData = nerdgraphEventData.filter(
+        e =>
+          (e.alertViolations || []).length > 0 ||
+          (e.deployments || []).length > 0
+      );
+
+      resolve(nerdgraphEventData);
+    });
+  };
+
+  recursiveGuidFetch = async query => {
+    return new Promise(async resolve => {
+      const guidData = [];
+
+      const q = queue((task, callback) => {
+        NerdGraphQuery.query({
+          query: getGuidsQuery(task.query, task.cursor)
+        }).then(value => {
+          const results =
+            ((((value || {}).data || {}).actor || {}).entitySearch || {})
+              .results || null;
+
+          if (results) {
+            if (results.entities.length > 0) {
+              guidData.push(results.entities);
+            }
+
+            if (results.nextCursor) {
+              q.push({ query, cursor: results.nextCursor });
+            }
+          }
+
+          callback();
+        });
+      }, 1);
+
+      q.push({ query, cursor: null });
+
+      await q.drain();
+
+      resolve(guidData.flat().map(g => g.guid));
+    });
+  };
+
   render() {
     const { widget, i } = this.props;
-    const { rawData, rawEventData } = this.state;
+    const { rawData, rawEventData, nerdgraphEventData } = this.state;
     const hdrStyle = widget.headerStyle || {};
 
     const firstRawData = rawData[0] || null;
@@ -358,6 +486,7 @@ export default class NrqlWidget extends React.Component {
                     widget={widget}
                     rawData={rawData}
                     rawEventData={rawEventData}
+                    nerdgraphEventData={nerdgraphEventData}
                     width={width}
                     height={maxWidgetHeight}
                   />

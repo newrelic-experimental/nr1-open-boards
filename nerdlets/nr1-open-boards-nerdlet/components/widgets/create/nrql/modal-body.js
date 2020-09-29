@@ -141,7 +141,7 @@ export default class NrqlModalBody extends React.PureComponent {
 
   addNrqlEvents = () => {
     const { events } = this.state;
-    events.push({ nrqlQuery: 'FROM ', accounts: [], name: '' });
+    events.push({ accounts: [], name: '' });
     this.setState({ events: [...events] });
   };
 

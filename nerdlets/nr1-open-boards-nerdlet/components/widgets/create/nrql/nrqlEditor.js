@@ -13,17 +13,34 @@ import { nrdbQuery } from '../../../../lib/utils';
 // additional attributes need to be lowercase so it is DOM friendly
 const presetEvents = [
   {
+    key: 'App Alerts & Deploys',
+    text: 'App Alerts & Deploys',
+    value: `name LIKE 'MyApp' AND type IN ('APPLICATION')`,
+    mode: 'entitySearchQuery'
+  },
+  {
     key: 'Kubernetes HPA',
     text: 'Kubernetes HPA',
     value:
-      "FROM InfrastructureEvent SELECT * WHERE `event.involvedObject.kind` = 'HorizontalPodAutoscaler'"
+      "FROM InfrastructureEvent SELECT * WHERE `event.involvedObject.kind` = 'HorizontalPodAutoscaler'",
+    mode: 'nrqlQuery'
   },
   {
-    key: 'AWS Health Events',
-    text: 'AWS Health Events',
+    key: 'AWS Change Events',
+    text: 'AWS Change Events',
     value:
       "SELECT * FROM InfrastructureEvent WHERE changedPath LIKE 'aws/health/%' AND changeType = 'added' ",
-    ignore_filters: 'true'
+    ignore_filters: 'true',
+    mode: 'nrqlQuery'
+  }
+];
+
+const modes = [
+  { key: 'nrqlQuery', text: 'NRQL', value: 'nrqlQuery' },
+  {
+    key: 'entitySearchQuery',
+    text: 'Entity Search Query',
+    value: 'entitySearchQuery'
   }
 ];
 
@@ -34,9 +51,32 @@ export default class NrqlEditor extends React.PureComponent {
       isFetchingKeysets: false,
       keysets: [],
       keysetEventLength: 0,
-      keysetAccountsLength: 0
+      keysetAccountsLength: 0,
+      mode: 'nrqlQuery',
+      preset: ''
     };
   }
+
+  componentDidMount() {
+    this.handleModeUpdate(this.props);
+  }
+
+  componentDidUpdate() {
+    this.handleModeUpdate(this.props);
+  }
+
+  handleModeUpdate = props => {
+    const { i, sources } = props;
+    const currentMode = this.state.mode;
+    const source = sources[i];
+    let mode = '';
+    if ('nrqlQuery' in source) mode = 'nrqlQuery';
+    if ('entitySearchQuery' in source) mode = 'entitySearchQuery';
+
+    if (currentMode !== mode) {
+      this.setState({ mode });
+    }
+  };
 
   fetchKeysets = (eventTypes, accounts) => {
     const {
@@ -70,6 +110,10 @@ export default class NrqlEditor extends React.PureComponent {
         }
       );
     }
+  };
+
+  updateState = state => {
+    this.setState(state);
   };
 
   render() {
@@ -128,12 +172,21 @@ export default class NrqlEditor extends React.PureComponent {
 
     const handlePresetChange = d => {
       const { value } = d;
-      const { key, ignore_filters, color } = d.options.find(
+      const { key, mode, ignore_filters, color } = d.options.find(
         o => o.value === value
       );
 
-      edit('nrqlQuery', value, source.accounts);
       edit('name', key);
+
+      if (mode === 'nrqlQuery') {
+        delete source.entitySearchQuery;
+        edit('nrqlQuery', value, source.accounts);
+      } else if (mode === 'entitySearchQuery') {
+        delete source.nrqlQuery;
+        source.accounts = [];
+        edit('entitySearchQuery', value, source.accounts);
+      }
+
       if (ignore_filters === 'true') {
         edit('ignoreFilters', 'true');
       } else {
@@ -141,6 +194,21 @@ export default class NrqlEditor extends React.PureComponent {
       }
 
       if (color) edit('color', color);
+    };
+
+    const handleModeChange = (d, accounts) => {
+      if (d.value === 'nrqlQuery') {
+        delete source.entitySearchQuery;
+        sources[i] = source;
+        edit('nrqlQuery', 'FROM ', accounts);
+      } else if (d.value === 'entitySearchQuery') {
+        delete source.nrqlQuery;
+        sources[i] = source;
+        edit(
+          'entitySearchQuery',
+          `name LIKE 'MyApp' AND type IN ('APPLICATION')`
+        );
+      }
     };
 
     return (
@@ -151,16 +219,24 @@ export default class NrqlEditor extends React.PureComponent {
         }}
       >
         <Form>
-          <Form.Group inline style={{ marginBottom: '5px' }}>
+          <Form.Group
+            inline
+            style={{
+              marginBottom: '5px'
+            }}
+          >
             <Form.Field width="14">
               <Dropdown
-                style={{ width: '100%' }}
+                style={{
+                  width: '100%'
+                }}
                 placeholder="Select accounts"
                 fluid
                 multiple
                 selection
+                disabled={this.state.mode === 'entitySearchQuery'}
                 onChange={(e, d) => edit('accounts', d.value)}
-                value={source.accounts}
+                value={source.accounts || []}
                 options={accounts}
               />
             </Form.Field>
@@ -180,22 +256,41 @@ export default class NrqlEditor extends React.PureComponent {
         {type === 'events' ? (
           <Form>
             <Form.Group>
-              <Form.Field width="4">
+              <Form.Field width="3">
                 <label>Presets</label>
                 <Dropdown
                   placeholder="Use a preset"
                   selection
-                  onChange={(e, d) => handlePresetChange(d)}
+                  onChange={(e, d) => {
+                    this.setState({ preset: d.value }, () => {
+                      handlePresetChange(d);
+                    });
+                  }}
                   options={presetEvents}
+                  value={this.state.preset}
+                />
+              </Form.Field>
+              <Form.Field width="3">
+                <label>Mode</label>
+                <Dropdown
+                  placeholder="NRQL/EntitySearch"
+                  selection
+                  options={modes}
+                  onChange={(e, d) =>
+                    this.setState({ preset: '' }, () => {
+                      handleModeChange(d, source.accounts);
+                    })
+                  }
+                  value={this.state.mode}
                 />
               </Form.Field>
               <Form.Input
-                width="4"
+                width="3"
                 label="Name &nbsp;"
                 value={source.name}
                 onChange={e => edit('name', e.target.value)}
               />
-              <Form.Field width="4">
+              <Form.Field width="3">
                 <label>Ignore Filters</label>
                 <Dropdown
                   placeholder="Default false"
@@ -213,7 +308,7 @@ export default class NrqlEditor extends React.PureComponent {
                 />
               </Form.Field>
               <Form.Input
-                width="4"
+                width="2"
                 label="Color &nbsp;"
                 placeholder="Empty randomized"
                 value={source.color}
@@ -230,7 +325,11 @@ export default class NrqlEditor extends React.PureComponent {
           style={{
             backgroundColor: 'white',
             paddingTop: '10px',
-            display: source.accounts.length === 0 ? 'none' : ''
+            display:
+              this.state.mode === 'nrqlQuery' &&
+              (source.accounts || []).length === 0
+                ? 'none'
+                : ''
           }}
         >
           <AceEditor
@@ -248,8 +347,8 @@ export default class NrqlEditor extends React.PureComponent {
             fontFamily="monospace"
             fontSize={14}
             showGutter={false}
-            value={source.nrqlQuery}
-            onChange={str => edit('nrqlQuery', str, source.accounts)}
+            value={source[this.state.mode]}
+            onChange={str => edit(this.state.mode, str, source.accounts)}
             setOptions={{
               enableBasicAutocompletion: true,
               enableLiveAutocompletion: true

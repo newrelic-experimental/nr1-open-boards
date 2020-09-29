@@ -61,6 +61,15 @@ export default class ChartGrid extends React.Component {
         {platformState => {
           const { timeRange } = platformState;
           const sinceClause = timeRangeToNrql({ timeRange });
+          let begin_time = 0;
+          let end_time = 0;
+
+          if (timeRange.begin_time) begin_time = timeRange.begin_time;
+          if (timeRange.end_time) end_time = timeRange.end_time;
+          if (timeRange.duration) {
+            end_time = Date.now();
+            begin_time = end_time - timeRange.duration;
+          }
 
           return (
             <DataConsumer>
@@ -97,6 +106,8 @@ export default class ChartGrid extends React.Component {
                             filterClause={filterClause}
                             sinceClause={sinceClause}
                             timeRange={timeRange}
+                            begin_time={begin_time}
+                            end_time={end_time}
                           />
                         );
                       }

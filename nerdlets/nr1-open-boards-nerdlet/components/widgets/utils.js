@@ -82,10 +82,22 @@ export const validateEvents = events => {
       if (!events[z].name) {
         errors.push(`Event ${z + 1}: Name cannot be empty`);
       }
-      if (!events[z].nrqlQuery) {
-        errors.push(`Event ${z + 1}: Query cannot be empty`);
+      if (!events[z].nrqlQuery && !events[z].entitySearchQuery) {
+        errors.push(`Event ${z + 1}: Select query mode`);
       }
-      if (events[z].nrqlQuery.toLowerCase().includes('timeseries')) {
+      if ('nrqlQuery' in events[z] && events[z].nrqlQuery === '') {
+        errors.push(`Event ${z + 1}: NRQL Query cannot be empty`);
+      }
+      if (
+        'entitySearchQuery' in events[z] &&
+        events[z].entitySearchQuery === ''
+      ) {
+        errors.push(`Event ${z + 1}: Entity Search Query cannot be empty`);
+      }
+      if (
+        events[z].nrqlQuery &&
+        events[z].nrqlQuery.toLowerCase().includes('timeseries')
+      ) {
         errors.push(`Event ${z + 1}: Event query cannot use TIMESERIES`);
       }
     }

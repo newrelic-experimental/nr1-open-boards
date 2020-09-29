@@ -18,7 +18,14 @@ export default class WidgetChart extends React.Component {
     return (
       <DataConsumer>
         {({ updateDataStateContext, selectedBoard, filters }) => {
-          const { widget, rawData, rawEventData, width, height } = this.props;
+          const {
+            widget,
+            rawData,
+            rawEventData,
+            nerdgraphEventData,
+            width,
+            height
+          } = this.props;
           const nrDarkModeClass = 'force-select';
           const dbFilters = selectedBoard.document.filters || [];
 
@@ -90,7 +97,8 @@ export default class WidgetChart extends React.Component {
               case 'newrelic:line': {
                 const dataWithEvents = decorateWithEvents(
                   rawData,
-                  rawEventData
+                  rawEventData,
+                  nerdgraphEventData
                 );
                 return (
                   <NrLineChart
