@@ -1,3 +1,7 @@
+/* eslint 
+no-eval: 0
+*/
+
 import React from 'react';
 import { AutoSizer, NrqlQuery } from 'nr1';
 import WidgetDropDown from './drop-down';
@@ -45,22 +49,26 @@ export default class NrqlWidget extends React.Component {
       sinceClause: '',
       rawData: [],
       rawEventData: [],
-      color: ''
+      color: '',
+      pollInterval: 2000
     };
   }
 
   componentDidMount() {
-    const { widget, filterClause, sinceClause } = this.props;
+    const { widget, filterClause, sinceClause, timeRange } = this.props;
+    const pollInterval = this.getPollInterval(timeRange, widget);
+
     // fetch data on mount
     this.setState(
-      { filterClause, sinceClause, init: true, color: randomColor() },
+      {
+        filterClause,
+        sinceClause,
+        init: true,
+        color: randomColor(),
+        pollInterval
+      },
       () => {
         this.fetchData(widget);
-        // fetch data on poll
-        let pollInterval = widget.ms || 15000;
-        // do not allow poll intervals to be faster than 2.5 seconds
-        pollInterval = pollInterval < 2500 ? 2500 : pollInterval;
-
         this.widgetPoll = setInterval(() => {
           this.fetchData(widget);
         }, pollInterval);
@@ -69,11 +77,13 @@ export default class NrqlWidget extends React.Component {
   }
 
   componentDidUpdate() {
-    const { filterClause, sinceClause, widget } = this.props;
+    const { filterClause, sinceClause, widget, timeRange } = this.props;
+    const pollInterval = this.getPollInterval(timeRange, widget);
 
     if (
       filterClause !== this.state.filterClause ||
-      sinceClause !== this.state.sinceClause
+      sinceClause !== this.state.sinceClause ||
+      pollInterval !== this.state.pollInterval
     ) {
       const updateFilter =
         filterClause !== this.state.filterClause
@@ -83,7 +93,7 @@ export default class NrqlWidget extends React.Component {
         sinceClause !== this.state.sinceClause
           ? sinceClause
           : this.state.sinceClause;
-      this.updateFilter(widget, updateFilter, updateSince);
+      this.updateFilter(widget, updateFilter, updateSince, pollInterval);
     }
   }
 
@@ -93,9 +103,42 @@ export default class NrqlWidget extends React.Component {
     }
   }
 
-  updateFilter = (widget, filterClause, sinceClause) => {
-    const stateUpdate = { init: false, filterClause, sinceClause };
-    this.setState(stateUpdate, () => this.fetchData(widget));
+  updateFilter = (widget, filterClause, sinceClause, pollInterval) => {
+    const stateUpdate = {
+      init: false,
+      filterClause,
+      sinceClause,
+      pollInterval
+    };
+    this.setState(stateUpdate, () => {
+      if (this.widgetPoll) {
+        clearInterval(this.widgetPoll);
+      }
+      this.fetchData(widget);
+      this.widgetPoll = setInterval(() => {
+        this.fetchData(widget);
+      }, pollInterval);
+    });
+  };
+
+  getPollInterval = (timeRange, widget) => {
+    if (widget.ms) return widget.ms;
+
+    let pollInterval = this.state.pollInterval;
+
+    if (timeRange) {
+      if (timeRange.duration) {
+        pollInterval = timeRange.duration / 60;
+      } else if (timeRange.begin_time && timeRange.end_time) {
+        pollInterval = (timeRange.end_time - timeRange.begin_time) / 60;
+      }
+    }
+
+    if (pollInterval >= 2500) {
+      return pollInterval;
+    }
+
+    return this.state.pollInterval;
   };
 
   fetchData = widget => {

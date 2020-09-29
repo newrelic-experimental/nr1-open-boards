@@ -96,6 +96,7 @@ export default class ChartGrid extends React.Component {
                             widget={w.widget}
                             filterClause={filterClause}
                             sinceClause={sinceClause}
+                            timeRange={timeRange}
                           />
                         );
                       }
