@@ -3,6 +3,7 @@ import { AutoSizer, NrqlQuery } from 'nr1';
 import WidgetDropDown from './drop-down';
 import WidgetChart from './chart';
 import wcm from 'wildcard-match';
+import { randomColor } from './utils';
 
 // import { DataConsumer } from '../../context/data';
 
@@ -42,24 +43,29 @@ export default class NrqlWidget extends React.Component {
       isFetching: false,
       filterClause: '',
       sinceClause: '',
-      rawData: []
+      rawData: [],
+      rawEventData: [],
+      color: ''
     };
   }
 
   componentDidMount() {
     const { widget, filterClause, sinceClause } = this.props;
     // fetch data on mount
-    this.setState({ filterClause, sinceClause, init: true }, () => {
-      this.fetchData(widget);
-      // fetch data on poll
-      let pollInterval = widget.ms || 15000;
-      // do not allow poll intervals to be faster than 2.5 seconds
-      pollInterval = pollInterval < 2500 ? 2500 : pollInterval;
-
-      this.widgetPoll = setInterval(() => {
+    this.setState(
+      { filterClause, sinceClause, init: true, color: randomColor() },
+      () => {
         this.fetchData(widget);
-      }, pollInterval);
-    });
+        // fetch data on poll
+        let pollInterval = widget.ms || 15000;
+        // do not allow poll intervals to be faster than 2.5 seconds
+        pollInterval = pollInterval < 2500 ? 2500 : pollInterval;
+
+        this.widgetPoll = setInterval(() => {
+          this.fetchData(widget);
+        }, pollInterval);
+      }
+    );
   }
 
   componentDidUpdate() {
@@ -93,7 +99,7 @@ export default class NrqlWidget extends React.Component {
   };
 
   fetchData = widget => {
-    const { isFetching, filterClause, sinceClause, init } = this.state;
+    const { isFetching, filterClause, sinceClause, init, color } = this.state;
     if (!isFetching) {
       const queryPromises = [];
       const rawData = [];
@@ -136,13 +142,63 @@ export default class NrqlWidget extends React.Component {
           }
         });
 
-        this.setState({ isFetching: false, rawData: [...rawData] });
+        const eventPromises = [];
+        widget.events.forEach((e, sourceIndex) => {
+          e.accounts.forEach(accountId => {
+            // handle nrdb queries
+            if (e.nrqlQuery) {
+              const nrqlQuery = useSince
+                ? stripQueryTime(e.nrqlQuery)
+                : e.nrqlQuery;
+
+              const ignoreFilter =
+                e.ignoreFilter && e.ignoreFilter === 'true' ? true : false;
+
+              eventPromises.push(
+                this.nrqlQuery(
+                  `${nrqlQuery} ${
+                    ignoreFilter ? '' : filterClause
+                  } ${useSince}`,
+                  accountId,
+                  sourceIndex,
+                  e.color || color
+                )
+              );
+            }
+          });
+        });
+
+        const eventData = await Promise.all(eventPromises);
+        const rawEventData = [];
+        eventData.forEach((result, i) => {
+          if (!result.error) {
+            const { accountId, sourceIndex, color } = result;
+            const chartData = ((result || {}).data || {}).chart || [];
+            chartData.forEach(c => {
+              const finalResult = {
+                ...c,
+                accountId,
+                sourceIndex,
+                nrqlQuery: widget.events[i].nrqlQuery || '',
+                name: widget.events[i].name || '',
+                color
+              };
+              rawEventData.push(finalResult);
+            });
+          }
+        });
+
+        this.setState({
+          isFetching: false,
+          rawData: [...rawData],
+          rawEventData: [...rawEventData]
+        });
       });
     }
   };
 
   // wrap NrqlQuery so we can stitch additional data
-  nrqlQuery = (nrqlQuery, accountId, sourceIndex) => {
+  nrqlQuery = (nrqlQuery, accountId, sourceIndex, color) => {
     return new Promise(resolve => {
       // where clause with timestamp is used to forceably break cache
       const time = Date.now();
@@ -152,6 +208,7 @@ export default class NrqlWidget extends React.Component {
       }).then(value => {
         value.accountId = accountId;
         value.sourceIndex = sourceIndex;
+        if (color) value.color = color;
         resolve(value);
       });
     });
@@ -159,7 +216,7 @@ export default class NrqlWidget extends React.Component {
 
   render() {
     const { widget, i } = this.props;
-    const { rawData } = this.state;
+    const { rawData, rawEventData } = this.state;
     const hdrStyle = widget.headerStyle || {};
 
     const firstRawData = rawData[0] || null;
@@ -257,6 +314,7 @@ export default class NrqlWidget extends React.Component {
                   <WidgetChart
                     widget={widget}
                     rawData={rawData}
+                    rawEventData={rawEventData}
                     width={width}
                     height={maxWidgetHeight}
                   />

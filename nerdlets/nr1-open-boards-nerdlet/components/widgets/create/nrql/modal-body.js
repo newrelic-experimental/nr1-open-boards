@@ -9,7 +9,7 @@ import {
 } from 'semantic-ui-react';
 import { DataConsumer } from '../../../../context/data';
 import { nrqlCharts } from '../../list';
-import { validateSources } from '../../utils';
+import { validateSources, validateEvents } from '../../utils';
 import Select from 'react-select';
 import NrqlEditor from './nrqlEditor';
 import { writeUserDocument, writeAccountDocument } from '../../../../lib/utils';
@@ -141,7 +141,7 @@ export default class NrqlModalBody extends React.PureComponent {
 
   addNrqlEvents = () => {
     const { events } = this.state;
-    events.push({ nrqlQuery: 'FROM ', accounts: [] });
+    events.push({ nrqlQuery: 'FROM ', accounts: [], name: '' });
     this.setState({ events: [...events] });
   };
 
@@ -391,17 +391,7 @@ export default class NrqlModalBody extends React.PureComponent {
       });
     }
 
-    let eventsHasTimeseries = false;
-
-    if (events.length > 0) {
-      for (let z = 0; z < events.length; z++) {
-        if (events[z].nrqlQuery.includes('TIMESERIES')) {
-          createDisabled = true;
-          eventsHasTimeseries = true;
-          break;
-        }
-      }
-    }
+    const eventErrors = validateEvents(events);
 
     return (
       <DataConsumer>
@@ -548,17 +538,20 @@ export default class NrqlModalBody extends React.PureComponent {
                       <NrqlEditor
                         key={i}
                         i={i}
+                        type="events"
                         sources={this.state.events}
                         accounts={accounts}
                         updateSources={this.updateEvents}
                       />
                     ))}
 
-                    {eventsHasTimeseries ? (
+                    {events.length > 0 && eventErrors.length > 0 ? (
                       <Message negative>
                         <Message.Header>Errors</Message.Header>
                         <Message.List>
-                          Event queries should not contain TIMESERIES.
+                          {eventErrors.map((e, i) => (
+                            <Message.Item key={i}>{e}</Message.Item>
+                          ))}
                         </Message.List>
                       </Message>
                     ) : (

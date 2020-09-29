@@ -2,7 +2,7 @@
 no-console: 0
 */
 import React from 'react';
-import { Form, Dropdown } from 'semantic-ui-react';
+import { Form, Dropdown, Input } from 'semantic-ui-react';
 import AceEditor from 'react-ace';
 import 'ace-builds/src-noconflict/theme-tomorrow';
 import CustomNrqlMode from '../../../../lib/customNrqlMode';
@@ -57,7 +57,7 @@ export default class NrqlEditor extends React.PureComponent {
 
   render() {
     const { keysets } = this.state;
-    const { i, sources, accounts, updateSources } = this.props;
+    const { i, sources, accounts, updateSources, type } = this.props;
     const source = sources[i];
 
     const customMode = new CustomNrqlMode();
@@ -140,6 +140,47 @@ export default class NrqlEditor extends React.PureComponent {
             />
           </Form.Group>
         </Form>
+
+        <br />
+
+        {type === 'events' ? (
+          <Form>
+            <Form.Group>
+              <Form.Input
+                width="4"
+                label="Name &nbsp;"
+                value={source.name}
+                onChange={e => edit('name', e.target.value)}
+              />
+              <Form.Field width="4">
+                <label>Ignore Filters</label>
+                <Dropdown
+                  placeholder="Default false"
+                  selection
+                  onChange={(e, d) =>
+                    d.value === 'false'
+                      ? edit('ignoreFilters', '')
+                      : edit('ignoreFilters', d.value)
+                  }
+                  value={source.ignoreFilters}
+                  options={[
+                    { key: 'false', value: 'false', text: 'false' },
+                    { key: 'true', value: 'true', text: 'true' }
+                  ]}
+                />
+              </Form.Field>
+              <Form.Input
+                width="4"
+                label="Color &nbsp;"
+                placeholder="Empty randomized"
+                value={source.color}
+                onChange={e => edit('color', e.target.value)}
+              />
+            </Form.Group>
+          </Form>
+        ) : (
+          ''
+        )}
 
         <div
           className="App"

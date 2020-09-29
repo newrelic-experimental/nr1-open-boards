@@ -73,3 +73,23 @@ export const validateSources = (sources, selectedChart) => {
 
   return errors;
 };
+
+export const validateEvents = events => {
+  const errors = [];
+
+  if (events.length > 0) {
+    for (let z = 0; z < events.length; z++) {
+      if (!events[z].name) {
+        errors.push(`Event ${z + 1}: Name cannot be empty`);
+      }
+      if (!events[z].nrqlQuery) {
+        errors.push(`Event ${z + 1}: Query cannot be empty`);
+      }
+      if (events[z].nrqlQuery.toLowerCase().includes('timeseries')) {
+        errors.push(`Event ${z + 1}: Event query cannot use TIMESERIES`);
+      }
+    }
+  }
+
+  return errors;
+};
