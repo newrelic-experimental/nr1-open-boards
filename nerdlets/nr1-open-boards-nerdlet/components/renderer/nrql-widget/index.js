@@ -151,13 +151,13 @@ export default class NrqlWidget extends React.Component {
                 ? stripQueryTime(e.nrqlQuery)
                 : e.nrqlQuery;
 
-              const ignoreFilter =
-                e.ignoreFilter && e.ignoreFilter === 'true' ? true : false;
+              const ignoreFilters =
+                e.ignoreFilters && e.ignoreFilters === 'true' ? true : false;
 
               eventPromises.push(
                 this.nrqlQuery(
                   `${nrqlQuery} ${
-                    ignoreFilter ? '' : filterClause
+                    ignoreFilters ? '' : filterClause
                   } ${useSince}`,
                   accountId,
                   sourceIndex,
