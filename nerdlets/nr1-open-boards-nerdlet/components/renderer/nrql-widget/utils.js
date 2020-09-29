@@ -28,7 +28,6 @@ export const randomColor = () => {
 
 export const decorateWithEvents = (rawData, rawEventData) => {
   let newEvents = rawData;
-  // console.log(rawData, rawEventData);
 
   if ((rawEventData || []).length > 0) {
     rawEventData.forEach(r => {
@@ -36,20 +35,15 @@ export const decorateWithEvents = (rawData, rawEventData) => {
         metadata: {
           id: 'events',
           name: r.name,
-          color: r.color || '#32a852',
+          color: r.color || '#000000',
           viz: 'event'
         },
-        data: []
+        data: r.data.map(d => ({
+          x0: d.timestamp,
+          x1: d.timestamp + 1
+        }))
       };
 
-      r.data.forEach(d => {
-        formattedEvents.data.push({
-          x0: d.timestamp,
-          x1: d.timestamp + 1,
-          title: 'some title',
-          message: 'some message'
-        });
-      });
       newEvents = [...newEvents, formattedEvents];
     });
   }
