@@ -1,36 +1,64 @@
 import React from 'react';
-import { Modal, Icon, Button, Popup, Form, Divider } from 'semantic-ui-react';
+import {
+  Modal,
+  Icon,
+  Button,
+  Popup,
+  Form,
+  Divider,
+  Message
+} from 'semantic-ui-react';
 import AceEditor from 'react-ace';
-import 'ace-builds/src-noconflict/mode-css';
+import 'ace-builds/src-noconflict/mode-html';
 import 'ace-builds/src-noconflict/theme-tomorrow';
-import { writeUserDocument, writeAccountDocument } from '../../lib/utils';
-import { DataConsumer } from '../../context/data';
+import { writeUserDocument, writeAccountDocument } from '../../../lib/utils';
+import { DataConsumer } from '../../../context/data';
 
-export default class ManageStyles extends React.Component {
+const example = index => {
+  switch (index) {
+    case 0: {
+      return '${ Q1:count }';
+    }
+    case 1: {
+      return '${ Q1:1234567:count }';
+    }
+    case 2: {
+      return "<div style=\"background-color: ${ Q1:123:count > 0 ? 'red' : 'orange' };\">";
+    }
+    case 3: {
+      return '<div>Name: ${ ACCOUNT_NAME } <br/> ${ Q1:ACCOUNTS:count }</div>';
+    }
+    case 4: {
+      return '<div>Name: ${ ACCOUNT_NAME } <br/> ${ ( Q1:ACCOUNTS:count ).toFixed(2) }</div>';
+    }
+  }
+};
+
+export default class ManageHTMLWidgets extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      styleOpen: false,
-      className: '',
-      classValue: `{\n\n}`,
-      styles: []
+      htmlOpen: false,
+      htmlName: '',
+      htmlValue: `<div>\n     Hello World\n</div>`,
+      htmlWidgets: []
     };
   }
 
   componentDidMount() {
-    if (this.props.styles) {
-      this.setState({ styles: this.props.styles });
+    if (this.props.htmlWidgets) {
+      this.setState({ htmlWidgets: this.props.htmlWidgets });
     }
   }
 
-  handleOpen = () => this.setState({ styleOpen: true });
+  handleOpen = () => this.setState({ htmlOpen: true });
 
-  handleClose = () => this.setState({ styleOpen: false });
+  handleClose = () => this.setState({ htmlOpen: false });
 
   filterUpdate = async (selectedBoard, storageLocation, updateBoard) => {
-    const { styles } = this.state;
+    const { htmlWidgets } = this.state;
     const { document } = selectedBoard;
-    document.styles = styles;
+    document.htmlWidgets = htmlWidgets;
 
     switch (storageLocation.type) {
       case 'user': {
@@ -60,24 +88,27 @@ export default class ManageStyles extends React.Component {
   };
 
   addFilter = (selectedBoard, storageLocation, updateBoard) => {
-    const { styles, className, classValue } = this.state;
-    const cssValue = { name: className, value: classValue };
-    styles.push(cssValue);
+    const { htmlWidgets, htmlName, htmlValue } = this.state;
+    const cssValue = { name: htmlName, value: htmlValue };
+    htmlWidgets.push(cssValue);
 
-    this.setState({ className: '', classValue: '{\n\n}' }, () => {
-      this.filterUpdate(selectedBoard, storageLocation, updateBoard);
-    });
+    this.setState(
+      { htmlName: '', htmlValue: '<div>\n     Hello World\n</div>' },
+      () => {
+        this.filterUpdate(selectedBoard, storageLocation, updateBoard);
+      }
+    );
   };
 
   editFilter = (index, key, value) => {
-    const { styles } = this.state;
-    styles[index][key] = value;
-    this.setState({ styles });
+    const { htmlWidgets } = this.state;
+    htmlWidgets[index][key] = value;
+    this.setState({ htmlWidgets });
   };
 
   deleteFilter = (selectedBoard, storageLocation, updateBoard, index) => {
-    const { styles } = this.state;
-    styles.splice(index, 1);
+    const { htmlWidgets } = this.state;
+    htmlWidgets.splice(index, 1);
     this.filterUpdate(selectedBoard, storageLocation, updateBoard);
   };
 
@@ -90,13 +121,13 @@ export default class ManageStyles extends React.Component {
           updateBoard,
           updateDataStateContext
         }) => {
-          const { styles, styleOpen, className, classValue } = this.state;
+          const { htmlWidgets, htmlOpen, htmlName, htmlValue } = this.state;
 
           return (
             <Modal
               dimmer="inverted"
               closeIcon
-              open={styleOpen}
+              open={htmlOpen}
               onUnmount={() => updateDataStateContext({ closeCharts: false })}
               onMount={() => updateDataStateContext({ closeCharts: true })}
               onClose={this.handleClose}
@@ -104,7 +135,7 @@ export default class ManageStyles extends React.Component {
               trigger={
                 <Popup
                   basic
-                  content="Manage Styles"
+                  content="Manage Dynamic HTML Widgets"
                   trigger={
                     <Button
                       onClick={this.handleOpen}
@@ -119,7 +150,7 @@ export default class ManageStyles extends React.Component {
                           marginRight: '-10px'
                         }}
                       >
-                        <Icon name="css3" />
+                        <Icon name="code" />
                         <Icon corner="bottom right" name="add" />
                       </Icon.Group>
                     </Button>
@@ -127,31 +158,57 @@ export default class ManageStyles extends React.Component {
                 />
               }
             >
-              <Modal.Header>Manage Styles</Modal.Header>
+              <Modal.Header>Manage HTML Widgets</Modal.Header>
 
               <Modal.Content>
+                <Message>
+                  Examples:
+                  <Message.List>
+                    <Message.Item>
+                      Accessing the value from the first query and first
+                      account: {example(0)}
+                    </Message.Item>
+                    <Message.Item>
+                      Accessing the value from the first query and specific
+                      account: {example(1)}
+                    </Message.Item>
+                    <Message.Item>
+                      Using a javascript ternary operator to dynamically set
+                      styling: {example(2)}
+                    </Message.Item>
+                    <Message.Item>
+                      If multiple accounts have been queried dynamically loop
+                      through them {example(3)}
+                    </Message.Item>
+                    <Message.Item>
+                      Using javascript functions to transform values:
+                      {example(4)}
+                    </Message.Item>
+                  </Message.List>
+                </Message>
+
                 <Form>
                   <Form.Group>
                     <Form.Input
                       width="4"
-                      label="New class name"
-                      value={className}
-                      onChange={(e, d) => this.setState({ className: d.value })}
+                      label="New name"
+                      value={htmlName}
+                      onChange={(e, d) => this.setState({ htmlName: d.value })}
                     />
 
                     <Form.Field width="8">
                       <AceEditor
-                        height="100px"
+                        height="175px"
                         width="100%"
-                        mode="css"
+                        mode="html"
                         theme="tomorrow"
                         name="editorMain"
                         editorProps={{ $blockScrolling: false }}
                         fontFamily="monospace"
                         fontSize={14}
                         showGutter={false}
-                        value={classValue}
-                        onChange={d => this.setState({ classValue: d })}
+                        value={htmlValue}
+                        onChange={d => this.setState({ htmlValue: d })}
                         setOptions={{
                           enableBasicAutocompletion: true,
                           enableLiveAutocompletion: true
@@ -162,8 +219,8 @@ export default class ManageStyles extends React.Component {
                     <Form.Button
                       width="4"
                       label="&nbsp;"
-                      disabled={!className || !classValue}
-                      content="Add Class"
+                      disabled={!htmlName || !htmlValue}
+                      content="Add Widget"
                       icon="plus"
                       onClick={() =>
                         this.addFilter(
@@ -178,16 +235,16 @@ export default class ManageStyles extends React.Component {
 
                 <Divider />
 
-                {styles.length === 0 ? 'No classes defined.' : ''}
+                {htmlWidgets.length === 0 ? 'No widgets defined.' : ''}
 
-                {styles.map((s, i) => {
+                {htmlWidgets.map((s, i) => {
                   return (
                     <div key={i}>
                       <Form>
                         <Form.Group>
                           <Form.Input
                             width="4"
-                            label="Class name"
+                            label="Name"
                             value={s.name}
                             onChange={(e, d) =>
                               this.editFilter(i, 'name', d.value)
@@ -196,9 +253,9 @@ export default class ManageStyles extends React.Component {
 
                           <Form.Field width="8">
                             <AceEditor
-                              height="75px"
+                              height="175px"
                               width="100%"
-                              mode="css"
+                              mode="html"
                               theme="tomorrow"
                               name={`aceEditorMain.${i}`}
                               editorProps={{ $blockScrolling: false }}

@@ -8,8 +8,8 @@ import {
   Divider,
   Select
 } from 'semantic-ui-react';
-import { writeUserDocument, writeAccountDocument } from '../../lib/utils';
-import { DataConsumer } from '../../context/data';
+import { writeUserDocument, writeAccountDocument } from '../../../lib/utils';
+import { DataConsumer } from '../../../context/data';
 
 const operators = [
   { key: '=', value: '=', text: '=' },
@@ -22,7 +22,7 @@ const operators = [
   { key: 'NOT RLIKE', value: 'NOT RLIKE', text: 'NOT RLIKE' }
 ];
 
-export default class ManageFilters extends React.Component {
+export default class ManageEventStreams extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
