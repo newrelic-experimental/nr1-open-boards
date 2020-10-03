@@ -23,7 +23,8 @@ export default class Grid extends React.Component {
       eventStreamsStr: '',
       init: true,
       nrqlEventData: {},
-      entitySearchEventData: {}
+      entitySearchEventData: {},
+      timeRangeStr: ''
     };
   }
 
@@ -77,12 +78,17 @@ export default class Grid extends React.Component {
     const eventStreams = document.eventStreams || [];
     const eventStreamsStr = JSON.stringify(eventStreams);
     const prevEventStreamsStr = this.state.eventStreamsStr;
+    const timeRangeStr = JSON.stringify(timeRange);
+    const prevTimeRangeStr = this.state.timeRangeStr;
 
-    if (eventStreamsStr !== prevEventStreamsStr) {
+    if (
+      eventStreamsStr !== prevEventStreamsStr ||
+      prevTimeRangeStr !== timeRangeStr
+    ) {
       this.setState(
         {
           eventStreamsStr,
-          timeRange,
+          timeRangeStr,
           sinceClause,
           filterClause,
           begin_time,

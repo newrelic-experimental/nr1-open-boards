@@ -21,11 +21,7 @@ export default class NrqlWidget extends React.Component {
       isFetching: false,
       filterClause: '',
       sinceClause: '',
-      begin_time: 0,
-      end_time: 0,
       rawData: [],
-      rawEventData: [],
-      nerdgraphEventData: [],
       color: '',
       pollInterval: 2000
     };
@@ -158,15 +154,7 @@ export default class NrqlWidget extends React.Component {
   };
 
   fetchData = widget => {
-    const {
-      isFetching,
-      filterClause,
-      sinceClause,
-      init,
-      color,
-      begin_time,
-      end_time
-    } = this.state;
+    const { isFetching, filterClause, sinceClause, init, color } = this.state;
     if (!isFetching) {
       const queryPromises = [];
       const rawData = [];
@@ -210,7 +198,6 @@ export default class NrqlWidget extends React.Component {
         });
 
         const eventPromises = [];
-        const nerdGraphEventPromises = [];
 
         widget.events.forEach((e, sourceIndex) => {
           // handle nrdb queries
@@ -234,40 +221,12 @@ export default class NrqlWidget extends React.Component {
                 )
               );
             });
-          } else if (e.entitySearchQuery) {
-            nerdGraphEventPromises.push(
-              this.entitySearchQuery(e.entitySearchQuery, begin_time, end_time)
-            );
           }
         });
-
-        const eventData = await Promise.all(eventPromises);
-        const rawEventData = [];
-        eventData.forEach((result, i) => {
-          if (!result.error) {
-            const { accountId, sourceIndex, color } = result;
-            const chartData = ((result || {}).data || {}).chart || [];
-            chartData.forEach(c => {
-              const finalResult = {
-                ...c,
-                accountId,
-                sourceIndex,
-                nrqlQuery: widget.events[i].nrqlQuery || '',
-                name: widget.events[i].name || '',
-                color
-              };
-              rawEventData.push(finalResult);
-            });
-          }
-        });
-
-        const nerdgraphEventData = await Promise.all(nerdGraphEventPromises);
 
         this.setState({
           isFetching: false,
-          rawData: [...rawData],
-          rawEventData: [...rawEventData],
-          nerdgraphEventData: [...nerdgraphEventData.flat()]
+          rawData: [...rawData]
         });
       });
     }
@@ -290,76 +249,9 @@ export default class NrqlWidget extends React.Component {
     });
   };
 
-  entitySearchQuery = (query, begin_time, end_time) => {
-    return new Promise(async resolve => {
-      const entityGuids = await this.recursiveGuidFetch(query);
-      const entityChunks = chunk(entityGuids, 25);
-
-      const entityPromises = entityChunks.map(chunk => {
-        return new Promise(async resolve => {
-          const guids = `"${chunk.join(`","`)}"`;
-          const nerdGraphResult = await NerdGraphQuery.query({
-            query: getAlertsDeploysQuery(guids, end_time, begin_time)
-          });
-          resolve(nerdGraphResult);
-        });
-      });
-
-      let nerdgraphEventData = [];
-      await Promise.all(entityPromises).then(values => {
-        values.forEach(v => {
-          const entities = (((v || {}).data || {}).actor || {}).entities || [];
-          nerdgraphEventData = [...nerdgraphEventData, ...entities];
-        });
-      });
-
-      nerdgraphEventData = nerdgraphEventData.filter(
-        e =>
-          (e.alertViolations || []).length > 0 ||
-          (e.deployments || []).length > 0
-      );
-
-      resolve(nerdgraphEventData);
-    });
-  };
-
-  recursiveGuidFetch = async query => {
-    return new Promise(async resolve => {
-      const guidData = [];
-
-      const q = queue((task, callback) => {
-        NerdGraphQuery.query({
-          query: getGuidsQuery(task.query, task.cursor)
-        }).then(value => {
-          const results =
-            ((((value || {}).data || {}).actor || {}).entitySearch || {})
-              .results || null;
-
-          if (results) {
-            if (results.entities.length > 0) {
-              guidData.push(results.entities);
-            }
-
-            if (results.nextCursor) {
-              q.push({ query, cursor: results.nextCursor });
-            }
-          }
-
-          callback();
-        });
-      }, 1);
-
-      q.push({ query, cursor: null });
-
-      await q.drain();
-
-      resolve(guidData.flat().map(g => g.guid));
-    });
-  };
-
   render() {
     const { widget, i, eventData } = this.props;
-    const { rawData, rawEventData, nerdgraphEventData } = this.state;
+    const { rawData } = this.state;
     const hdrStyle = widget.headerStyle || {};
 
     const firstRawData = rawData[0] || null;
@@ -458,8 +350,6 @@ export default class NrqlWidget extends React.Component {
                     widget={widget}
                     rawData={rawData}
                     eventData={eventData}
-                    rawEventData={rawEventData}
-                    nerdgraphEventData={nerdgraphEventData}
                     width={width}
                     height={maxWidgetHeight}
                   />
