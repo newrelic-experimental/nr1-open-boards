@@ -21,6 +21,7 @@ export default class WidgetChart extends React.Component {
           const {
             widget,
             rawData,
+            eventData,
             rawEventData,
             nerdgraphEventData,
             width,
@@ -95,16 +96,11 @@ export default class WidgetChart extends React.Component {
                 );
               }
               case 'newrelic:line': {
-                const dataWithEvents = decorateWithEvents(
-                  rawData,
-                  rawEventData,
-                  nerdgraphEventData
-                );
                 return (
                   <NrLineChart
                     style={{ width, height }}
                     className={nrDarkModeClass}
-                    data={dataWithEvents}
+                    data={[...rawData, ...eventData]}
                     onClickArea={handleFacetFilter}
                   />
                 );

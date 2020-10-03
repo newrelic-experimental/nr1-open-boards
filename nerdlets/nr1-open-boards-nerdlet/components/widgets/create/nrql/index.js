@@ -28,15 +28,9 @@ export default class CreateNrqlWidget extends React.PureComponent {
         {({
           createNrqlWidgetOpen,
           updateDataStateContext,
-          storageOptions,
           selectedBoard,
           selectedWidget
         }) => {
-          const accounts = storageOptions.map(
-            ({ label, ...keepAttrs }) => keepAttrs
-          );
-          accounts.shift();
-
           const title = selectedWidget
             ? 'Edit NRQL Widget'
             : 'Create NRQL Widget';

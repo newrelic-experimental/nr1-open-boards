@@ -12,6 +12,7 @@ import ExportBoard from '../boards/export';
 import CreateNrqlWidget from '../widgets/create/nrql';
 import BasicHTMLWidget from '../widgets/create/basic-html';
 import CreateEntityHdvWidget from '../widgets/create/entity-hdv';
+import ManageEventStreams from '../configuration/event-streams';
 import ManageFilters from '../configuration/filters';
 import ManageStyles from '../configuration/styles';
 import ManageHTMLWidgets from '../configuration/nrql-html-widgets';
@@ -90,31 +91,27 @@ export default class MenuBar extends React.PureComponent {
 
                 <div className="flex-push" />
 
-                {selectedBoard ? <CreateNrqlWidget /> : ''}
-
-                {selectedBoard ? <CreateEntityHdvWidget /> : ''}
-
                 {selectedBoard ? (
-                  <ManageFilters
-                    filters={selectedBoard.document.filters || []}
-                  />
+                  <>
+                    <CreateNrqlWidget />
+                    <CreateEntityHdvWidget />
+                    <ManageFilters
+                      filters={selectedBoard.document.filters || []}
+                    />
+                    <ManageHTMLWidgets
+                      htmlWidgets={selectedBoard.document.htmlWidgets || []}
+                    />
+                    <ManageStyles
+                      styles={selectedBoard.document.styles || []}
+                    />
+                    <ManageEventStreams
+                      eventStreams={selectedBoard.document.eventStreams || []}
+                    />
+                    <BasicHTMLWidget />
+                  </>
                 ) : (
                   ''
                 )}
-                {selectedBoard ? (
-                  <ManageHTMLWidgets
-                    htmlWidgets={selectedBoard.document.htmlWidgets || []}
-                  />
-                ) : (
-                  ''
-                )}
-                {selectedBoard ? (
-                  <ManageStyles styles={selectedBoard.document.styles || []} />
-                ) : (
-                  ''
-                )}
-
-                {selectedBoard ? <BasicHTMLWidget /> : ''}
               </div>
             </div>
           );

@@ -2,7 +2,7 @@
 no-console: 0
 */
 import React from 'react';
-import { Form, Dropdown, Input } from 'semantic-ui-react';
+import { Form, Dropdown } from 'semantic-ui-react';
 import AceEditor from 'react-ace';
 import 'ace-builds/src-noconflict/theme-tomorrow';
 import CustomNrqlMode from '../../../../lib/customNrqlMode';

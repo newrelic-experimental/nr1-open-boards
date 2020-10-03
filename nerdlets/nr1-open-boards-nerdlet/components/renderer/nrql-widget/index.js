@@ -10,36 +10,8 @@ import wcm from 'wildcard-match';
 import { getAlertsDeploysQuery, getGuidsQuery, randomColor } from './utils';
 import queue from 'async/queue';
 import { chunk } from '../../../lib/helper';
-
+import { stripQueryTime } from '../../chart-grid/utils';
 // import { DataConsumer } from '../../context/data';
-
-const stripQueryTime = nrqlQuery => {
-  nrqlQuery = nrqlQuery
-    .replace(/(SINCE|since) \d+\s+\w+\s+ago+/, '')
-    .replace(/(UNTIL|until) \d+\s+\w+\s+ago+/, '')
-    .replace(/(SINCE|since) \d+/, '')
-    .replace(/(UNTIL|until) \d+/, '');
-
-  const restricted = [
-    'today',
-    'yesterday',
-    'sunday',
-    'monday',
-    'tuesday',
-    'wednesday',
-    'thursday',
-    'friday',
-    'saturday',
-    'last week',
-    'this quarter'
-  ];
-
-  restricted.forEach(r => {
-    nrqlQuery = nrqlQuery.replace(r, '').replace(r.toUpperCase(), '');
-  });
-
-  return nrqlQuery;
-};
 
 export default class NrqlWidget extends React.Component {
   constructor(props) {
@@ -386,7 +358,7 @@ export default class NrqlWidget extends React.Component {
   };
 
   render() {
-    const { widget, i } = this.props;
+    const { widget, i, eventData } = this.props;
     const { rawData, rawEventData, nerdgraphEventData } = this.state;
     const hdrStyle = widget.headerStyle || {};
 
@@ -485,6 +457,7 @@ export default class NrqlWidget extends React.Component {
                   <WidgetChart
                     widget={widget}
                     rawData={rawData}
+                    eventData={eventData}
                     rawEventData={rawEventData}
                     nerdgraphEventData={nerdgraphEventData}
                     width={width}

@@ -5,7 +5,8 @@ import {
   Input,
   Divider,
   Message,
-  Header
+  Header,
+  Dropdown
 } from 'semantic-ui-react';
 import { DataConsumer } from '../../../../context/data';
 import { nrqlCharts } from '../../list';
@@ -391,8 +392,6 @@ export default class NrqlModalBody extends React.PureComponent {
       });
     }
 
-    const eventErrors = validateEvents(events);
-
     return (
       <DataConsumer>
         {({
@@ -406,6 +405,13 @@ export default class NrqlModalBody extends React.PureComponent {
             ({ label, ...keepAttrs }) => keepAttrs
           );
           accounts.shift();
+          const { document } = selectedBoard;
+          const eventStreams = document.eventStreams || [];
+          const eventStreamOptions = eventStreams.map(e => ({
+            key: e.name,
+            text: e.name,
+            value: e.name
+          }));
 
           // const title = widget ? 'Edit NRQL Widget' : 'Create NRQL Widget';
 
@@ -451,21 +457,6 @@ export default class NrqlModalBody extends React.PureComponent {
                       onClick={() => this.addNrqlSource('nrql')}
                     />
                   </div>
-
-                  {selectedChart &&
-                  (selectedChart.key === 'newrelic:line' ||
-                    selectedChart.key === 'newrelic:area') ? (
-                    <div>
-                      <Button
-                        style={{ height: '45px' }}
-                        icon="plus"
-                        content="Events"
-                        onClick={() => this.addNrqlEvents('nrql')}
-                      />
-                    </div>
-                  ) : (
-                    ''
-                  )}
 
                   <div>
                     <Button
@@ -530,34 +521,23 @@ export default class NrqlModalBody extends React.PureComponent {
                   ''
                 )}
 
-                {events.length > 0 ? (
-                  <>
-                    <Header as="h4" content="Events" />
-
-                    {events.map((s, i) => (
-                      <NrqlEditor
-                        key={i}
-                        i={i}
-                        type="events"
-                        sources={this.state.events}
-                        accounts={accounts}
-                        updateSources={this.updateEvents}
-                      />
-                    ))}
-
-                    {events.length > 0 && eventErrors.length > 0 ? (
-                      <Message negative>
-                        <Message.Header>Errors</Message.Header>
-                        <Message.List>
-                          {eventErrors.map((e, i) => (
-                            <Message.Item key={i}>{e}</Message.Item>
-                          ))}
-                        </Message.List>
-                      </Message>
-                    ) : (
-                      ''
-                    )}
-                  </>
+                {selectedChart &&
+                (selectedChart.key === 'newrelic:line' ||
+                  selectedChart.key === 'newrelic:area') ? (
+                  <div>
+                    <Dropdown
+                      style={{
+                        width: '100%'
+                      }}
+                      placeholder="Apply Event Streams"
+                      options={eventStreamOptions}
+                      multiple
+                      fluid
+                      selection
+                      value={events}
+                      onChange={(e, d) => this.setState({ events: d.value })}
+                    />
+                  </div>
                 ) : (
                   ''
                 )}
