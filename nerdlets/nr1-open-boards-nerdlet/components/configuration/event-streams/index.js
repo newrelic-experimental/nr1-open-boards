@@ -131,6 +131,26 @@ export default class ManageEventStreams extends React.Component {
     const { document } = selectedBoard;
     document.eventStreams = eventStreams;
 
+    // if events have been renamed, remove them from other widgets
+    document.widgets.forEach((w, i) => {
+      w.events.forEach((e, z) => {
+        if (!e) {
+          document.widgets[i].events.splice(z, 1);
+        } else {
+          let found = false;
+          for (let x = 0; x < eventStreams.length; x++) {
+            if (eventStreams[x].key === e) {
+              found = true;
+              break;
+            }
+          }
+          if (!found) {
+            document.widgets[i].events.splice(z, 1);
+          }
+        }
+      });
+    });
+
     switch (storageLocation.type) {
       case 'user': {
         const result = await writeUserDocument(
@@ -264,6 +284,12 @@ export default class ManageEventStreams extends React.Component {
     let disableAdd = false;
     if (!streamName || !streamQuery || !type) disableAdd = true;
     if (type === 'nrql' && this.state.accounts.length === 0) disableAdd = true;
+    const foundExistingName = eventStreams.find(
+      e => e.name.toLowerCase() === streamName.toLowerCase()
+    )
+      ? true
+      : false;
+    if (foundExistingName) disableAdd = true;
 
     return (
       <DataConsumer>
@@ -400,6 +426,7 @@ export default class ManageEventStreams extends React.Component {
                       onChange={(e, d) =>
                         this.setState({ streamName: d.value })
                       }
+                      error={foundExistingName ? 'Already exists' : null}
                     />
                     <Form.Field width="3">
                       <label>Type</label>
@@ -540,6 +567,15 @@ export default class ManageEventStreams extends React.Component {
                     if (f.type === 'nrql' && f.accounts.length === 0)
                       disableAddEx = true;
 
+                    const foundExistingNameEx =
+                      eventStreams.filter(
+                        e => e.name.toLowerCase() === f.name.toLowerCase()
+                      ).length > 1
+                        ? true
+                        : false;
+
+                    if (foundExistingNameEx) disableAddEx = true;
+
                     return (
                       <div key={i}>
                         <Form>
@@ -550,6 +586,9 @@ export default class ManageEventStreams extends React.Component {
                               value={f.name}
                               onChange={(e, d) =>
                                 this.editQuery(i, 'name', d.value)
+                              }
+                              error={
+                                foundExistingNameEx ? 'Already exists' : null
                               }
                             />
                             <Form.Field width="3">

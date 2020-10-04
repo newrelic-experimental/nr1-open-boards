@@ -67,10 +67,9 @@ export default class Grid extends React.Component {
   }
 
   componentWillUnmount() {
-    const { eventStreams } = this.state;
-    eventStreams.forEach((e, i) => {
-      if (this[`eventStream_${i}`]) {
-        clearInterval(this[`eventStream_${i}`]);
+    Object.keys(this).forEach(key => {
+      if (key.startsWith('eventStream_')) {
+        clearInterval(this[key]);
       }
     });
   }
@@ -96,7 +95,6 @@ export default class Grid extends React.Component {
     ) {
       this.setState(
         {
-          eventStreams,
           eventStreamsStr,
           timeRangeStr,
           sinceClause,
@@ -106,17 +104,9 @@ export default class Grid extends React.Component {
           init: false
         },
         () => {
-          let prev = '';
-
-          try {
-            prev = JSON.parse(prevEventStreamsStr);
-          } catch (e) {
-            prev = [];
-          }
-
-          prev.forEach((p, i) => {
-            if (this[`eventStream_${i}`]) {
-              clearInterval(this[`eventStream_${i}`]);
+          Object.keys(this).forEach(key => {
+            if (key.startsWith('eventStream_')) {
+              clearInterval(this[key]);
             }
           });
 
