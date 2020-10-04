@@ -4,6 +4,7 @@ import { PlatformStateContext } from 'nr1';
 import { timeRangeToNrql } from '@newrelic/nr1-community';
 import { buildFilterClause } from './utils';
 import Grid from './grid';
+import BoardSelector from './board-selector';
 
 export default class ChartGrid extends React.Component {
   render() {
@@ -45,17 +46,7 @@ export default class ChartGrid extends React.Component {
                     />
                   );
                 } else {
-                  return (
-                    <div
-                      style={{
-                        textAlign: 'center'
-                      }}
-                    >
-                      <div style={{ marginTop: '25%' }}>
-                        <h2>Select or create a new Open Board to begin!</h2>
-                      </div>
-                    </div>
-                  );
+                  return <BoardSelector />;
                 }
               }}
             </DataConsumer>

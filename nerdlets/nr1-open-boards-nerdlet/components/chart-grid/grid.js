@@ -66,6 +66,15 @@ export default class Grid extends React.Component {
     );
   }
 
+  componentWillUnmount() {
+    const { eventStreams } = this.state;
+    eventStreams.forEach((e, i) => {
+      if (this[`eventStream_${i}`]) {
+        clearInterval(this[`eventStream_${i}`]);
+      }
+    });
+  }
+
   handleEventStreams = (
     selectedBoard,
     timeRange,
@@ -87,6 +96,7 @@ export default class Grid extends React.Component {
     ) {
       this.setState(
         {
+          eventStreams,
           eventStreamsStr,
           timeRangeStr,
           sinceClause,

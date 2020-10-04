@@ -73,6 +73,7 @@ export default class MenuBar extends React.PureComponent {
                   <label>Boards</label>
                   <Select
                     options={boards}
+                    isClearable
                     onChange={selectedBoard =>
                       updateDataStateContext({ selectedBoard })
                     }

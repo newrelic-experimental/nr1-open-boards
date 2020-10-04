@@ -525,6 +525,7 @@ export default class NrqlModalBody extends React.PureComponent {
                 (selectedChart.key === 'newrelic:line' ||
                   selectedChart.key === 'newrelic:area') ? (
                   <div>
+                    <Header as="h4" content="Event Streams" />
                     <Dropdown
                       style={{
                         width: '100%'
