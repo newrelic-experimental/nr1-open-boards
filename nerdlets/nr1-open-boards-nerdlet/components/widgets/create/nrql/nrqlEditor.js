@@ -22,14 +22,14 @@ const presetEvents = [
     key: 'Kubernetes HPA',
     text: 'Kubernetes HPA',
     value:
-      "FROM InfrastructureEvent SELECT * WHERE `event.involvedObject.kind` = 'HorizontalPodAutoscaler'",
+      "FROM InfrastructureEvent SELECT * WHERE `event.involvedObject.kind` = 'HorizontalPodAutoscaler' LIMIT MAX",
     mode: 'nrqlQuery'
   },
   {
     key: 'AWS Change Events',
     text: 'AWS Change Events',
     value:
-      "SELECT * FROM InfrastructureEvent WHERE changedPath LIKE 'aws/health/%' AND changeType = 'added' ",
+      "SELECT * FROM InfrastructureEvent WHERE changedPath LIKE 'aws/health/%' AND changeType = 'added' LIMIT MAX",
     ignore_filters: 'true',
     mode: 'nrqlQuery'
   }
