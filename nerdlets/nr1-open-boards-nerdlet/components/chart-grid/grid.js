@@ -91,7 +91,9 @@ export default class Grid extends React.Component {
 
     if (
       eventStreamsStr !== prevEventStreamsStr ||
-      prevTimeRangeStr !== timeRangeStr
+      prevTimeRangeStr !== timeRangeStr ||
+      filterClause !== this.state.filterClause ||
+      sinceClause !== this.state.sinceClause
     ) {
       this.setState(
         {

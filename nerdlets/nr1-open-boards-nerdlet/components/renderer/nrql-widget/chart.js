@@ -11,22 +11,13 @@ import SemanticTable from './semantic/table';
 import { nrqlToNrTable, nrqlToNrBillboard } from './transformers/newrelic';
 import { DataConsumer } from '../../../context/data';
 import OpenHtml from './html';
-import { decorateWithEvents } from './utils';
 
 export default class WidgetChart extends React.Component {
   render() {
     return (
       <DataConsumer>
         {({ updateDataStateContext, selectedBoard, filters }) => {
-          const {
-            widget,
-            rawData,
-            eventData,
-            rawEventData,
-            nerdgraphEventData,
-            width,
-            height
-          } = this.props;
+          const { widget, rawData, eventData, width, height } = this.props;
           const nrDarkModeClass = 'force-select';
           const dbFilters = selectedBoard.document.filters || [];
 
