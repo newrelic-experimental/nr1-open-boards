@@ -793,18 +793,6 @@ export default class ManageEventStreams extends React.Component {
 
                           <Button
                             style={{ float: 'right' }}
-                            content="Update"
-                            disabled={disableAddEx}
-                            onClick={() =>
-                              this.queryUpdate(
-                                selectedBoard,
-                                storageLocation,
-                                updateBoard
-                              )
-                            }
-                          />
-                          <Button
-                            style={{ float: 'right' }}
                             content="Delete"
                             onClick={() =>
                               this.deleteQuery(
@@ -812,6 +800,18 @@ export default class ManageEventStreams extends React.Component {
                                 storageLocation,
                                 updateBoard,
                                 i
+                              )
+                            }
+                          />
+                          <Button
+                            style={{ float: 'right' }}
+                            content="Update"
+                            disabled={disableAddEx}
+                            onClick={() =>
+                              this.queryUpdate(
+                                selectedBoard,
+                                storageLocation,
+                                updateBoard
                               )
                             }
                           />
