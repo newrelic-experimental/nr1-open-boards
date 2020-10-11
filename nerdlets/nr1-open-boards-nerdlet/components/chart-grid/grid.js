@@ -257,7 +257,7 @@ export default class Grid extends React.Component {
       query += appendedTags;
     }
 
-    console.log(query);
+    //console.log(query);
 
     return new Promise(async resolve => {
       const entityGuids = await this.recursiveGuidFetch(query);
