@@ -36,9 +36,10 @@ const presetEvents = [
   {
     key: 'App Alerts & Deploys',
     text: 'App Alerts & Deploys',
-    value: `name LIKE 'MyApp' AND type IN ('APPLICATION')`,
+    value: `type IN ('APPLICATION')`,
     type: 'entitySearch',
-    color: ''
+    color: '',
+    tag_filters: ['accountId', 'name']
   },
   {
     key: 'Kubernetes HPA',
@@ -60,6 +61,31 @@ const presetEvents = [
   }
 ];
 
+const buildFilterOptions = (filters, dbFilters) => {
+  const options = [
+    { key: 'accountId', text: 'accountId', value: 'accountId' },
+    { key: 'name', text: 'name', value: 'name' }
+  ];
+
+  // // disabling temporarily
+  //
+  // for (let z = 0; z < dbFilters.length; z++) {
+  //   const { name } = dbFilters[z];
+  //   let value = dbFilters[z].default;
+  //   const key = `filter_${name}`;
+  //   if (key in filters) {
+  //     value = filters[key];
+  //   }
+
+  //   const filterKeys = name.split(',');
+  //   filterKeys.forEach(k => {
+  //     options.push({ key: k, text: k, value: k, input_value: value });
+  //   });
+  // }
+
+  return options;
+};
+
 export default class ManageEventStreams extends React.Component {
   constructor(props) {
     super(props);
@@ -77,6 +103,7 @@ export default class ManageEventStreams extends React.Component {
       ignoreFilters: null,
       accounts: [],
       streamColor: '',
+      tagFilters: '',
       menuItem: 'new',
       ms: ''
     };
@@ -187,6 +214,7 @@ export default class ManageEventStreams extends React.Component {
       accounts,
       streamColor,
       ignoreFilters,
+      tagFilters,
       ms
     } = this.state;
     const filterValue = {
@@ -196,10 +224,13 @@ export default class ManageEventStreams extends React.Component {
       type,
       accounts,
       ignoreFilters,
+      tagFilters,
       ms
     };
     if (type === 'entitySearch') {
       delete filterValue.accounts;
+    } else if (type === 'nrql') {
+      delete filterValue.tagFilters;
     }
 
     eventStreams.push(filterValue);
@@ -244,7 +275,7 @@ export default class ManageEventStreams extends React.Component {
   };
 
   selectPreset = d => {
-    const { key, type, ignore_filters, color } = d.options.find(
+    const { key, type, ignore_filters, tag_filters, color } = d.options.find(
       o => o.value === d.value
     );
     const updateState = {
@@ -257,6 +288,7 @@ export default class ManageEventStreams extends React.Component {
     };
     if (type === 'entitySearch') {
       updateState.accounts = [];
+      updateState.tagFilters = tag_filters;
     }
     this.setState(updateState);
   };
@@ -271,6 +303,7 @@ export default class ManageEventStreams extends React.Component {
       keysets,
       selectedPreset,
       ignoreFilters,
+      tagFilters,
       streamColor,
       menuItem,
       ms
@@ -298,12 +331,17 @@ export default class ManageEventStreams extends React.Component {
           storageLocation,
           updateBoard,
           updateDataStateContext,
-          storageOptions
+          storageOptions,
+          filters
         }) => {
           const accounts = storageOptions.map(
             ({ label, ...keepAttrs }) => keepAttrs
           );
           accounts.shift();
+
+          const { document } = selectedBoard;
+          const dbFilters = document.filters || [];
+          const filterOptions = buildFilterOptions(filters, dbFilters);
 
           const editQuery = (key, value, sourceAccounts, index, iType) => {
             if (type === 'nrql' || iType === 'nrql') {
@@ -420,7 +458,7 @@ export default class ManageEventStreams extends React.Component {
 
                   <Form.Group>
                     <Form.Input
-                      width={type === 'nrql' ? '4' : '7'}
+                      width="4"
                       label="Stream name"
                       value={streamName}
                       onChange={(e, d) =>
@@ -440,7 +478,7 @@ export default class ManageEventStreams extends React.Component {
                       />
                     </Form.Field>
                     {type === 'nrql' ? (
-                      <Form.Field width="3">
+                      <Form.Field width="5">
                         <label>Ignore Filters</label>
                         <Dropdown
                           placeholder="Default false"
@@ -460,8 +498,25 @@ export default class ManageEventStreams extends React.Component {
                     ) : (
                       ''
                     )}
+                    {type === 'entitySearch' ? (
+                      <Form.Field width="5">
+                        <label>Tag Filters</label>
+                        <Dropdown
+                          placeholder="Tags"
+                          selection
+                          multiple
+                          onChange={(e, d) =>
+                            this.setState({ tagFilters: d.value })
+                          }
+                          value={tagFilters}
+                          options={filterOptions}
+                        />
+                      </Form.Field>
+                    ) : (
+                      ''
+                    )}
                     <Form.Input
-                      width="3"
+                      width="2"
                       label="Poll (ms)"
                       value={ms}
                       onChange={(e, d) =>
@@ -475,7 +530,7 @@ export default class ManageEventStreams extends React.Component {
                       }
                     />
                     <Form.Input
-                      width="3"
+                      width="2"
                       label="Color"
                       value={streamColor}
                       onChange={(e, d) =>
@@ -581,7 +636,7 @@ export default class ManageEventStreams extends React.Component {
                         <Form>
                           <Form.Group>
                             <Form.Input
-                              width={f.type === 'nrql' ? '4' : '7'}
+                              width="4"
                               label="Stream name"
                               value={f.name}
                               onChange={(e, d) =>
@@ -604,7 +659,7 @@ export default class ManageEventStreams extends React.Component {
                               />
                             </Form.Field>
                             {f.type === 'nrql' ? (
-                              <Form.Field width="3">
+                              <Form.Field width="5">
                                 <label>Ignore Filters</label>
                                 <Dropdown
                                   placeholder="Default false"
@@ -636,8 +691,25 @@ export default class ManageEventStreams extends React.Component {
                             ) : (
                               ''
                             )}
+                            {f.type === 'entitySearch' ? (
+                              <Form.Field width="5">
+                                <label>Tag Filters</label>
+                                <Dropdown
+                                  placeholder="Tags"
+                                  selection
+                                  multiple
+                                  onChange={(e, d) =>
+                                    this.editQuery(i, 'tagFilters', d.value)
+                                  }
+                                  value={f.tagFilters}
+                                  options={filterOptions}
+                                />
+                              </Form.Field>
+                            ) : (
+                              ''
+                            )}
                             <Form.Input
-                              width="3"
+                              width="2"
                               label="Poll (ms)"
                               value={f.ms}
                               onChange={(e, d) =>
@@ -652,7 +724,7 @@ export default class ManageEventStreams extends React.Component {
                               }
                             />
                             <Form.Input
-                              width="3"
+                              width="2"
                               label="Color"
                               value={f.color}
                               onChange={(e, d) =>

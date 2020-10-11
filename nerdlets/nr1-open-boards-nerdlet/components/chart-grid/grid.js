@@ -8,6 +8,7 @@ import {
   writeStyle,
   stripQueryTime,
   deriveEvents,
+  deriveAccounts,
   getGuidsQuery,
   getAlertsDeploysQuery
 } from './utils';
@@ -24,7 +25,8 @@ export default class Grid extends React.Component {
       init: true,
       nrqlEventData: {},
       entitySearchEventData: {},
-      timeRangeStr: ''
+      timeRangeStr: '',
+      accounts: []
     };
   }
 
@@ -34,6 +36,7 @@ export default class Grid extends React.Component {
       timeRange,
       sinceClause,
       filterClause,
+      filters,
       begin_time,
       end_time
     } = this.props;
@@ -42,6 +45,7 @@ export default class Grid extends React.Component {
       timeRange,
       sinceClause,
       filterClause,
+      filters,
       begin_time,
       end_time
     );
@@ -53,6 +57,7 @@ export default class Grid extends React.Component {
       timeRange,
       sinceClause,
       filterClause,
+      filters,
       begin_time,
       end_time
     } = this.props;
@@ -61,6 +66,7 @@ export default class Grid extends React.Component {
       timeRange,
       sinceClause,
       filterClause,
+      filters,
       begin_time,
       end_time
     );
@@ -79,15 +85,18 @@ export default class Grid extends React.Component {
     timeRange,
     sinceClause,
     filterClause,
+    filters,
     begin_time,
     end_time
   ) => {
     const { document } = selectedBoard;
     const eventStreams = document.eventStreams || [];
+    const dbFilters = document.filters || [];
     const eventStreamsStr = JSON.stringify(eventStreams);
     const prevEventStreamsStr = this.state.eventStreamsStr;
     const timeRangeStr = JSON.stringify(timeRange);
     const prevTimeRangeStr = this.state.timeRangeStr;
+    const accounts = deriveAccounts(document);
 
     if (
       eventStreamsStr !== prevEventStreamsStr ||
@@ -101,9 +110,12 @@ export default class Grid extends React.Component {
           timeRangeStr,
           sinceClause,
           filterClause,
+          filters,
+          dbFilters,
           begin_time,
           end_time,
-          init: false
+          init: false,
+          accounts
         },
         () => {
           Object.keys(this).forEach(key => {
@@ -154,7 +166,7 @@ export default class Grid extends React.Component {
       });
     } else if (eventStream.type === 'entitySearch') {
       entitySearchPromises.push(
-        this.entitySearchQuery(eventStream.query, begin_time, end_time)
+        this.entitySearchQuery(eventStream, begin_time, end_time)
       );
     }
 
@@ -205,7 +217,48 @@ export default class Grid extends React.Component {
     });
   };
 
-  entitySearchQuery = (query, begin_time, end_time) => {
+  entitySearchQuery = (eventStream, begin_time, end_time) => {
+    let { query } = eventStream;
+    const { accounts, filters, dbFilters } = this.state;
+
+    if (eventStream.tagFilters) {
+      let appendedTags = '';
+
+      eventStream.tagFilters.forEach(t => {
+        if (t === 'accountId') {
+          const accountsStr = accounts.map(a => `'${a}'`).join(',');
+          const accountTagsQuery = ` AND tags.accountId IN (${accountsStr})`;
+          appendedTags += accountTagsQuery;
+        } else if (t === 'name') {
+          let operator = '';
+          let value = '';
+
+          for (let z = 0; z < dbFilters.length; z++) {
+            const { name } = dbFilters[z];
+            if (name === 'name' || name === 'appName') {
+              operator = dbFilters[z].operator;
+              value = dbFilters[z].default;
+              if (`filter_${name}` in filters) {
+                value = filters[`filter_${name}`].value;
+              }
+            }
+          }
+
+          value = value.replace(/\*/g, '%');
+
+          if (operator && operator !== '>' && operator !== '<') {
+            appendedTags += ` AND name ${operator} '${value}'`;
+          }
+        } else {
+          // console.log(t);
+        }
+      });
+
+      query += appendedTags;
+    }
+
+    console.log(query);
+
     return new Promise(async resolve => {
       const entityGuids = await this.recursiveGuidFetch(query);
       const entityChunks = chunk(entityGuids, 25);

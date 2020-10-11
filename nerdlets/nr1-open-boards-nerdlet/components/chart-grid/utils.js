@@ -110,6 +110,16 @@ export const stripQueryTime = nrqlQuery => {
   return nrqlQuery;
 };
 
+export const deriveAccounts = doc => {
+  const foundAccounts = doc.widgets
+    .map(w => w.sources)
+    .flat()
+    .map(s => s.accounts)
+    .flat();
+
+  return [...new Set(foundAccounts)];
+};
+
 export const deriveEvents = (events, nrqlEventData, entitySearchEventData) => {
   let newEventData = [];
   const selectedNrqlEvents = [];

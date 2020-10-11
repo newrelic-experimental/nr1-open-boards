@@ -38,6 +38,7 @@ export default class ChartGrid extends React.Component {
                       selectedBoard={selectedBoard}
                       width={width}
                       height={height}
+                      filters={filters}
                       filterClause={filterClause}
                       timeRange={timeRange}
                       sinceClause={sinceClause}
