@@ -114,7 +114,7 @@ export default class BoardSelector extends React.Component {
                                 updateDataStateContext({ selectedBoard: b })
                               }
                             >
-                              {b.key}
+                              {b.key.replace(/\+/g, ' ')}
                             </div>
                             <div style={{ float: 'right' }}>
                               <Button
