@@ -65,7 +65,7 @@ export default class BoardSelector extends React.Component {
                   textAlign: 'center'
                 }}
               >
-                <div style={{ marginTop: '25%' }}>
+                <div style={{ marginTop: '15%' }}>
                   <h2>Select or create a new Open Board to begin!</h2>
                 </div>
               </div>

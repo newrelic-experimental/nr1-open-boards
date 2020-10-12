@@ -120,7 +120,12 @@ export const deriveAccounts = doc => {
   return [...new Set(foundAccounts)];
 };
 
-export const deriveEvents = (events, nrqlEventData, entitySearchEventData) => {
+export const deriveEvents = (
+  events,
+  nrqlEventData,
+  entitySearchEventData,
+  begin_time
+) => {
   let newEventData = [];
   const selectedNrqlEvents = [];
   const selectedEntitySearchEvents = [];
@@ -158,10 +163,10 @@ export const deriveEvents = (events, nrqlEventData, entitySearchEventData) => {
       entity.forEach(r => {
         if ((r.alertViolations || []).length > 0) {
           const warningAlerts = r.alertViolations.filter(
-            a => a.alertSeverity === 'WARNING'
+            a => a.alertSeverity === 'WARNING' && a.openedAt >= begin_time
           );
           const criticalAlerts = r.alertViolations.filter(
-            a => a.alertSeverity === 'CRITICAL'
+            a => a.alertSeverity === 'CRITICAL' && a.openedAt >= begin_time
           );
 
           const warningEvents = {

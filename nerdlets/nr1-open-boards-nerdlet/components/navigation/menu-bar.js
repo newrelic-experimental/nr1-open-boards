@@ -17,6 +17,7 @@ import ManageFilters from '../configuration/filters';
 import ManageStyles from '../configuration/styles';
 import ManageHTMLWidgets from '../configuration/nrql-html-widgets';
 import ImportBoard from '../boards/import';
+import ManageTimelineWidgets from '../configuration/timeline-widgets';
 
 export default class MenuBar extends React.PureComponent {
   changeLocation = async (storageLocation, updateDataStateContext) => {
@@ -108,6 +109,11 @@ export default class MenuBar extends React.PureComponent {
                     <ManageEventStreams
                       eventStreams={selectedBoard.document.eventStreams || []}
                     />
+                    {/* <ManageTimelineWidgets
+                      eventStreams={
+                        selectedBoard.document.timelineWidgets || []
+                      }
+                    /> */}
                     <BasicHTMLWidget />
                   </>
                 ) : (

@@ -409,7 +409,8 @@ export default class Grid extends React.Component {
                 const derivedEvents = deriveEvents(
                   w.widget.events,
                   nrqlEventData,
-                  entitySearchEventData
+                  entitySearchEventData,
+                  begin_time
                 );
 
                 return (
