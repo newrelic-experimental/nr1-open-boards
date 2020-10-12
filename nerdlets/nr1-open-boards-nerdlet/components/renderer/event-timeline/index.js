@@ -8,7 +8,8 @@ const createEvents = (
   selectedEventSources,
   nrqlEventData,
   entitySearchEventData,
-  limit
+  limit,
+  begin_time
 ) => {
   const selectedNrqlData = [];
   const selectedEntityEventData = [];
@@ -67,7 +68,9 @@ const createEvents = (
     });
   });
 
-  events = events.sort((a, b) => b.timestamp - a.timestamp);
+  events = events
+    .filter(e => e.timestamp > begin_time)
+    .sort((a, b) => b.timestamp - a.timestamp);
   if (limit > 0) {
     events = events.slice(0, limit);
   }
@@ -77,14 +80,21 @@ const createEvents = (
 
 export default class EventTimeline extends React.Component {
   render() {
-    const { widget, i, nrqlEventData, entitySearchEventData } = this.props;
+    const {
+      widget,
+      i,
+      nrqlEventData,
+      entitySearchEventData,
+      begin_time
+    } = this.props;
     const hdrStyle = widget.headerStyle || {};
     const selectedEventSources = widget.value || [];
     const events = createEvents(
       selectedEventSources,
       nrqlEventData,
       entitySearchEventData,
-      widget.limit
+      widget.limit,
+      begin_time
     );
 
     return (
@@ -143,13 +153,19 @@ export default class EventTimeline extends React.Component {
                     overflow: 'auto'
                   }}
                 >
-                  <Timeline
-                    style={{ fontSize: '13px', fontFamily: 'monospace' }}
-                  >
-                    {events.map((e, i) => {
-                      return <Event key={i} event={e} />;
-                    })}
-                  </Timeline>
+                  {events.length === 0 ? (
+                    <span style={{ fontFamily: 'monospace', fontSize: '14px' }}>
+                      No events for this period...
+                    </span>
+                  ) : (
+                    <Timeline
+                      style={{ fontSize: '13px', fontFamily: 'monospace' }}
+                    >
+                      {events.map((e, i) => {
+                        return <Event key={i} event={e} />;
+                      })}
+                    </Timeline>
+                  )}
                 </div>
               </div>
             );

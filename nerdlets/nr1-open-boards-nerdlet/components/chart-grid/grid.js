@@ -467,6 +467,7 @@ export default class Grid extends React.Component {
                     widget={w.widget}
                     nrqlEventData={nrqlEventData}
                     entitySearchEventData={entitySearchEventData}
+                    begin_time={begin_time}
                   />
                 );
               }
