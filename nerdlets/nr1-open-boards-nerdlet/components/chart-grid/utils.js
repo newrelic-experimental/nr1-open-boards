@@ -111,10 +111,10 @@ export const stripQueryTime = nrqlQuery => {
 };
 
 export const deriveAccounts = doc => {
-  const foundAccounts = doc.widgets
-    .map(w => w.sources)
+  const foundAccounts = (doc.widgets || [])
+    .map(w => w.sources || [])
     .flat()
-    .map(s => s.accounts)
+    .map(s => s.accounts || [])
     .flat();
 
   return [...new Set(foundAccounts)];
