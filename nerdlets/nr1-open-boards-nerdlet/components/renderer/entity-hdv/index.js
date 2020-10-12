@@ -3,6 +3,7 @@ import { AutoSizer, NerdGraphQuery } from 'nr1';
 import EntityHdvWidgetDropDown from './drop-down';
 import gql from 'graphql-tag';
 import EntityHdvWidget from './hdv';
+import queue from 'async/queue';
 
 const entityQuery = (query, cursor) => {
   return gql`{
@@ -34,28 +35,41 @@ const entityQuery = (query, cursor) => {
 export default class EntityHdv extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { data: [], isFetching: false, error: false };
+    this.state = {
+      data: [],
+      isFetching: false,
+      error: false,
+      tagFilterQuery: ''
+    };
   }
 
   componentDidMount() {
-    const { widget } = this.props;
-    // fetch data on mount
-    this.setState({ init: true, query: widget.value }, () => {
-      this.fetchData(widget);
-      // fetch data on poll
-      let pollInterval = widget.ms || 30000;
-      pollInterval = pollInterval < 15000 ? 15000 : pollInterval;
+    const { widget, tagFilterQuery } = this.props;
+    // fetch data on poll
+    let pollInterval = widget.ms || 30000;
+    pollInterval = pollInterval < 15000 ? 15000 : pollInterval;
 
-      this.widgetPoll = setInterval(() => {
+    // fetch data on mount
+    this.setState(
+      { init: true, query: widget.value, tagFilterQuery, pollInterval },
+      () => {
         this.fetchData();
-      }, pollInterval);
-    });
+
+        this.widgetPoll = setInterval(() => {
+          this.fetchData();
+        }, pollInterval);
+      }
+    );
   }
 
   componentDidUpdate() {
-    const { widget } = this.props;
-    if (widget.value !== this.state.query) {
-      this.updateFilter(widget);
+    const { widget, tagFilterQuery } = this.props;
+
+    if (
+      widget.value !== this.state.query ||
+      tagFilterQuery !== this.state.tagFilterQuery
+    ) {
+      this.updateFilter(widget, tagFilterQuery);
     }
   }
 
@@ -65,74 +79,76 @@ export default class EntityHdv extends React.Component {
     }
   }
 
-  updateFilter = widget => {
-    const stateUpdate = { init: false, query: widget.value };
-    this.setState(stateUpdate, () => this.fetchData());
+  updateFilter = (widget, tagFilterQuery) => {
+    const stateUpdate = { init: false, query: widget.value, tagFilterQuery };
+    this.setState(stateUpdate, () => {
+      const { pollInterval } = this.state;
+
+      if (this.widgetPoll) {
+        clearInterval(this.widgetPoll);
+      }
+
+      this.fetchData();
+
+      this.widgetPoll = setInterval(() => {
+        this.fetchData();
+      }, pollInterval);
+    });
   };
 
   fetchData = () => {
-    const { isFetching, query } = this.state;
-    if (!isFetching) {
-      this.setState({ isFetching: true }, async () => {
-        const result = await NerdGraphQuery.query({
-          query: entityQuery(query, null)
-        });
+    const { isFetching } = this.state;
 
-        if (result.errors && result.errors.length > 0) {
-          //
-        } else {
-          const results =
-            ((((result || {}).data || {}).actor || {}).entitySearch || {})
-              .results || null;
-          if (results.nextCursor) {
-            this.setState({ data: results.entities }, () => {
-              this.recursiveFetch(results.nextCursor);
-            });
-          } else {
-            this.setState({ data: results.entities, isFetching: false });
-          }
-        }
+    if (!isFetching) {
+      this.setState({ isFetching: true }, () => {
+        this.recursiveEntityFetch().then(data => {
+          this.setState({ data, isFetching: false });
+        });
       });
     }
   };
 
-  recursiveFetch = async cursor => {
-    const { data, query } = this.state;
+  recursiveEntityFetch = async () => {
+    const { query, tagFilterQuery } = this.state;
 
-    const result = await NerdGraphQuery.query({
-      query: entityQuery(query, cursor)
-    });
+    return new Promise(async resolve => {
+      const guidData = [];
 
-    if (result.errors && result.errors.length > 0) {
-      //
-    } else {
-      const results =
-        ((((result || {}).data || {}).actor || {}).entitySearch || {})
-          .results || null;
-      if (results) {
-        if (results.nextCursor) {
-          this.setState({ data: [...data, ...results.entities] }, () => {
-            this.recursiveFetch(results.nextCursor);
-          });
-        } else {
-          this.setState(
-            {
-              data: [...data, ...results.entities],
-              isFetching: false
-            },
-            () => {
-              // console.log(this.state.data.length)
+      const q = queue((task, callback) => {
+        NerdGraphQuery.query({
+          query: entityQuery(
+            `${task.query} ${task.tagFilterQuery || ''}`,
+            task.cursor
+          )
+        }).then(value => {
+          const results =
+            ((((value || {}).data || {}).actor || {}).entitySearch || {})
+              .results || null;
+
+          if (results) {
+            if (results.entities.length > 0) {
+              guidData.push(results.entities);
             }
-          );
-        }
-      } else {
-        this.setState({ isFetching: false });
-      }
-    }
+
+            if (results.nextCursor) {
+              q.push({ query, tagFilterQuery, cursor: results.nextCursor });
+            }
+          }
+
+          callback();
+        });
+      }, 1);
+
+      q.push({ query, tagFilterQuery, cursor: null });
+
+      await q.drain();
+
+      resolve(guidData.flat());
+    });
   };
 
   render() {
-    const { data } = this.state;
+    const { data, isFetching } = this.state;
     const { widget, i } = this.props;
     const hdrStyle = widget.headerStyle || {};
 
@@ -188,6 +204,7 @@ export default class EntityHdv extends React.Component {
                     width={width}
                     height={maxWidgetHeight}
                     limit={widget.limit}
+                    isFetching={isFetching}
                   />
                 </div>
               </div>

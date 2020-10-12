@@ -1,11 +1,11 @@
 import React from 'react';
 import HexagonGrid from './grid';
-import { Popup } from 'semantic-ui-react';
+// import { Popup } from 'semantic-ui-react';
 import { navigation } from 'nr1';
 
 export default class EntityHdvWidget extends React.Component {
   render() {
-    const { limit, data, width, height } = this.props;
+    const { limit, data, width, height, isFetching } = this.props;
 
     const getHexProps = hexagon => {
       let fill = '';
@@ -90,6 +90,8 @@ export default class EntityHdvWidget extends React.Component {
       hexagons = hexagons.slice(0, limit);
     }
 
+    const msg = isFetching ? 'Fetching entities...' : 'No entities found';
+
     return (
       <div>
         {hexagons.length > 0 ? (
@@ -101,7 +103,7 @@ export default class EntityHdvWidget extends React.Component {
             renderHexagonContent={renderHexagonContent}
           />
         ) : (
-          'No entities found'
+          msg
         )}
       </div>
     );

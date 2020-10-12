@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Divider, Input, Message } from 'semantic-ui-react';
+import { Button, Divider, Message, Form } from 'semantic-ui-react';
 import { writeUserDocument, writeAccountDocument } from '../../../../lib/utils';
 import { DataConsumer } from '../../../../context/data';
 
@@ -26,6 +26,7 @@ export default class EntityHdvModalBody extends React.PureComponent {
         name: widget.name,
         value: widget.value,
         limit: widget.limit || 0,
+        tagFilters: widget.tagFilters || [],
         x: widget.x,
         y: widget.y,
         w: widget.w,
@@ -52,11 +53,12 @@ export default class EntityHdvModalBody extends React.PureComponent {
     updateDataStateContext,
     widgetNo
   ) => {
-    const { name, value, limit, x, y, w, h } = this.state;
+    const { name, value, limit, tagFilters, x, y, w, h } = this.state;
     const widget = {
       name,
       value,
       limit,
+      tagFilters,
       x,
       y,
       w,
@@ -110,7 +112,12 @@ export default class EntityHdvModalBody extends React.PureComponent {
       return 'Loading widget...';
     }
 
-    const { name, value, limit } = this.state;
+    const { name, value, limit, tagFilters } = this.state;
+
+    const filterOptions = [
+      { key: 'accountId', text: 'accountId', value: 'accountId' },
+      { key: 'name', text: 'name', value: 'name' }
+    ];
 
     return (
       <DataConsumer>
@@ -122,30 +129,42 @@ export default class EntityHdvModalBody extends React.PureComponent {
         }) => {
           return (
             <>
-              <Input
-                width="100%"
-                label="Widget name"
-                value={name}
-                onChange={(e, d) => this.setState({ name: d.value })}
-              />
-              <br /> <br />
-              <Input
-                width="100%"
-                label="Entity limit (0 for max)"
-                value={limit}
-                onChange={(e, d) =>
-                  this.setState({
-                    limit: Number.isInteger(parseInt(d.value)) ? d.value : 0
-                  })
-                }
-              />
-              <br /> <br />
-              <Input
-                style={{ width: '80%' }}
-                label="Entity search query"
-                value={value}
-                onChange={(e, d) => this.setState({ value: d.value })}
-              />
+              <Form>
+                <Form.Group>
+                  <Form.Input
+                    width="8"
+                    label="Widget name"
+                    value={name}
+                    onChange={(e, d) => this.setState({ name: d.value })}
+                  />
+                  <Form.Input
+                    width="8"
+                    label="Entity limit (0 for max)"
+                    value={limit}
+                    onChange={(e, d) =>
+                      this.setState({
+                        limit: Number.isInteger(parseInt(d.value)) ? d.value : 0
+                      })
+                    }
+                  />
+                </Form.Group>
+                <Form.Input
+                  width="16"
+                  label="Entity search query"
+                  value={value}
+                  onChange={(e, d) => this.setState({ value: d.value })}
+                />
+                <Form.Dropdown
+                  width="16"
+                  label="Tag Filters"
+                  placeholder="Tags"
+                  selection
+                  multiple
+                  onChange={(e, d) => this.setState({ tagFilters: d.value })}
+                  value={tagFilters}
+                  options={filterOptions}
+                />
+              </Form>
               <Divider />
               <div>
                 <Message>

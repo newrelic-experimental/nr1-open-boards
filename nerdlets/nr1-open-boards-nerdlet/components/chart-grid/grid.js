@@ -10,7 +10,8 @@ import {
   deriveEvents,
   deriveAccounts,
   getGuidsQuery,
-  getAlertsDeploysQuery
+  getAlertsDeploysQuery,
+  buildTagFilterQuery
 } from './utils';
 import EntityHdv from '../renderer/entity-hdv';
 import { NrqlQuery, NerdGraphQuery } from 'nr1';
@@ -388,7 +389,13 @@ export default class Grid extends React.Component {
       begin_time,
       end_time
     } = this.props;
-    const { nrqlEventData, entitySearchEventData } = this.state;
+    const {
+      nrqlEventData,
+      entitySearchEventData,
+      accounts,
+      filters,
+      dbFilters
+    } = this.state;
 
     return (
       <DataConsumer>
@@ -439,7 +446,19 @@ export default class Grid extends React.Component {
                 return <BasicHTML i={w.i} widget={w.widget} />;
               }
               case 'entityhdv': {
-                return <EntityHdv i={w.i} widget={w.widget} />;
+                const tagFilterQuery = buildTagFilterQuery(
+                  w.widget.tagFilters || [],
+                  accounts,
+                  filters,
+                  dbFilters
+                );
+                return (
+                  <EntityHdv
+                    i={w.i}
+                    widget={w.widget}
+                    tagFilterQuery={tagFilterQuery}
+                  />
+                );
               }
               case 'eventtimeline': {
                 return (

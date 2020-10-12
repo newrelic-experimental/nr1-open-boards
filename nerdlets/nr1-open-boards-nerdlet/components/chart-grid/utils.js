@@ -223,6 +223,63 @@ export const deriveEvents = (
   return newEventData;
 };
 
+export const buildTagFilterQuery = (
+  widgetFilters,
+  accounts,
+  filters,
+  dbFilters
+) => {
+  let query = '';
+  const tfDbFilters = dbFilters || [];
+  const tfFilters = filters || {};
+
+  if (widgetFilters) {
+    let appendedTags = '';
+
+    widgetFilters.forEach(t => {
+      if (t === 'accountId') {
+        const accountsStr = accounts.map(a => `'${a}'`).join(',');
+        const accountTagsQuery = ` AND tags.accountId IN (${accountsStr})`;
+        appendedTags += accountTagsQuery;
+      } else if (t === 'name') {
+        let operator = '';
+        let value = '';
+
+        for (let z = 0; z < tfDbFilters.length; z++) {
+          const { name } = tfDbFilters[z];
+          const names = name.split(',');
+
+          for (let x = 0; x < names.length; x++) {
+            if (names[x] === 'name' || names[x] === 'appName') {
+              operator = tfDbFilters[z].operator;
+              value = tfDbFilters[z].default;
+              if (`filter_${name}` in tfFilters) {
+                value = tfFilters[`filter_${name}`].value;
+              }
+            }
+
+            if (operator && value) {
+              break;
+            }
+          }
+        }
+
+        value = value.replace(/\*/g, '%');
+
+        if (operator && operator !== '>' && operator !== '<') {
+          appendedTags += ` AND name ${operator} '${value}'`;
+        }
+      } else {
+        // console.log(t);
+      }
+    });
+
+    query += appendedTags;
+  }
+
+  return query;
+};
+
 export const getGuidsQuery = (query, cursor) => gql`{
   actor {
     entitySearch(query: "${query}") {
