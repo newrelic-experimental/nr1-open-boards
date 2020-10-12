@@ -32,17 +32,6 @@ export default class OpenBoardsRoot extends React.Component {
       <PlatformStateContext.Consumer>
         {platformState => {
           const { timeRange } = platformState;
-          let begin_time = 0;
-          let end_time = 0;
-
-          if (timeRange.begin_time) begin_time = timeRange.begin_time;
-          if (timeRange.end_time) end_time = timeRange.end_time;
-          if (timeRange.duration) {
-            end_time = Date.now();
-            begin_time = end_time - timeRange.duration;
-            timeRange.end_time = end_time;
-            timeRange.begin_time = begin_time;
-          }
 
           return (
             <DataProvider>
