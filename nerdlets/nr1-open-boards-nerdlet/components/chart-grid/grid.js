@@ -235,11 +235,19 @@ export default class Grid extends React.Component {
 
           for (let z = 0; z < dbFilters.length; z++) {
             const { name } = dbFilters[z];
-            if (name === 'name' || name === 'appName') {
-              operator = dbFilters[z].operator;
-              value = dbFilters[z].default;
-              if (`filter_${name}` in filters) {
-                value = filters[`filter_${name}`].value;
+            const names = name.split(',');
+
+            for (let x = 0; x < names.length; x++) {
+              if (names[x] === 'name' || names[x] === 'appName') {
+                operator = dbFilters[z].operator;
+                value = dbFilters[z].default;
+                if (`filter_${name}` in filters) {
+                  value = filters[`filter_${name}`].value;
+                }
+              }
+
+              if (operator && value) {
+                break;
               }
             }
           }
@@ -257,7 +265,7 @@ export default class Grid extends React.Component {
       query += appendedTags;
     }
 
-    //console.log(query);
+    console.log(`Event Stream Entity Search Query: ${query}`);
 
     return new Promise(async resolve => {
       const entityGuids = await this.recursiveGuidFetch(query);
