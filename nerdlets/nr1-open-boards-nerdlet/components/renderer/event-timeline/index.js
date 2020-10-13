@@ -29,6 +29,8 @@ const createEvents = (
       d.data.forEach(item => {
         events.push({
           data: item,
+          entityName: item.entityName,
+          entityGuid: item.entityGuid,
           color: d.color,
           accountId: d.accountId,
           name: d.name,
@@ -70,6 +72,7 @@ const createEvents = (
 
   events = events
     .filter(e => e.timestamp > begin_time)
+    .sort((a, b) => b.entityName || b.name - a.entityName || a.name)
     .sort((a, b) => b.timestamp - a.timestamp);
   if (limit > 0) {
     events = events.slice(0, limit);

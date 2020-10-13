@@ -457,6 +457,7 @@ export default class Grid extends React.Component {
                     i={w.i}
                     widget={w.widget}
                     tagFilterQuery={tagFilterQuery}
+                    end_time={end_time}
                   />
                 );
               }

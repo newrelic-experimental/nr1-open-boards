@@ -3,6 +3,7 @@ import { AutoSizer, NerdGraphQuery } from 'nr1';
 import EntityHdvWidgetDropDown from './drop-down';
 import gql from 'graphql-tag';
 import EntityHdvWidget from './hdv';
+import { chunk } from '../../../lib/helper';
 import queue from 'async/queue';
 
 const entityQuery = (query, cursor) => {
@@ -32,26 +33,73 @@ const entityQuery = (query, cursor) => {
   }`;
 };
 
+const relationshipQuery = (guids, end_time) => {
+  return gql`{
+    actor {
+      entities(guids: [${guids}]) {
+        account {
+          id
+          name
+        }
+        guid
+        name
+        relationships(endTime: ${end_time})  {
+          source {
+            entity {
+              name
+              guid
+              entityType
+              type
+              ... on AlertableEntityOutline {
+                alertSeverity
+              }
+            }
+          }
+          target {
+            entity {
+              name
+              guid
+              entityType
+              type
+              ... on AlertableEntityOutline {
+                alertSeverity
+              }
+            }
+          }
+        }
+      }
+    }
+  }`;
+};
+
 export default class EntityHdv extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       data: [],
+      relationshipData: {},
       isFetching: false,
       error: false,
-      tagFilterQuery: ''
+      tagFilterQuery: '',
+      end_time: 4500000
     };
   }
 
   componentDidMount() {
-    const { widget, tagFilterQuery } = this.props;
+    const { widget, tagFilterQuery, end_time } = this.props;
     // fetch data on poll
     let pollInterval = widget.ms || 30000;
     pollInterval = pollInterval < 15000 ? 15000 : pollInterval;
 
     // fetch data on mount
     this.setState(
-      { init: true, query: widget.value, tagFilterQuery, pollInterval },
+      {
+        init: true,
+        query: widget.value,
+        tagFilterQuery,
+        pollInterval,
+        end_time
+      },
       () => {
         this.fetchData();
 
@@ -63,13 +111,14 @@ export default class EntityHdv extends React.Component {
   }
 
   componentDidUpdate() {
-    const { widget, tagFilterQuery } = this.props;
+    const { widget, tagFilterQuery, end_time } = this.props;
 
     if (
       widget.value !== this.state.query ||
-      tagFilterQuery !== this.state.tagFilterQuery
+      tagFilterQuery !== this.state.tagFilterQuery ||
+      end_time !== this.state.end_time
     ) {
-      this.updateFilter(widget, tagFilterQuery);
+      this.updateFilter(widget, tagFilterQuery, end_time);
     }
   }
 
@@ -79,8 +128,13 @@ export default class EntityHdv extends React.Component {
     }
   }
 
-  updateFilter = (widget, tagFilterQuery) => {
-    const stateUpdate = { init: false, query: widget.value, tagFilterQuery };
+  updateFilter = (widget, tagFilterQuery, end_time) => {
+    const stateUpdate = {
+      init: false,
+      query: widget.value,
+      tagFilterQuery,
+      end_time
+    };
     this.setState(stateUpdate, () => {
       const { pollInterval } = this.state;
 
@@ -97,12 +151,41 @@ export default class EntityHdv extends React.Component {
   };
 
   fetchData = () => {
-    const { isFetching } = this.state;
+    const { isFetching, end_time } = this.state;
 
     if (!isFetching) {
       this.setState({ isFetching: true }, () => {
         this.recursiveEntityFetch().then(data => {
-          this.setState({ data, isFetching: false });
+          // this.setState({ data, isFetching: false });
+          this.setState({ data }, async () => {
+            const entityGuids = data.map(e => e.guid);
+            const entityChunks = chunk(entityGuids, 25);
+
+            const entityPromises = entityChunks.map(chunk => {
+              return new Promise(async resolve => {
+                const guids = `"${chunk.join(`","`)}"`;
+                const nerdGraphResult = await NerdGraphQuery.query({
+                  query: relationshipQuery(guids, end_time)
+                });
+                resolve(nerdGraphResult);
+              });
+            });
+
+            let relationships = [];
+            await Promise.all(entityPromises).then(values => {
+              values.forEach(v => {
+                const entities =
+                  (((v || {}).data || {}).actor || {}).entities || [];
+                relationships = [...relationships, ...entities];
+              });
+            });
+            const relationshipData = {};
+            relationships.forEach(r => {
+              relationshipData[r.guid] = { ...r };
+            });
+
+            this.setState({ relationshipData, isFetching: false });
+          });
         });
       });
     }
@@ -148,7 +231,7 @@ export default class EntityHdv extends React.Component {
   };
 
   render() {
-    const { data, isFetching } = this.state;
+    const { data, isFetching, relationshipData } = this.state;
     const { widget, i } = this.props;
     const hdrStyle = widget.headerStyle || {};
 
@@ -205,6 +288,7 @@ export default class EntityHdv extends React.Component {
                     height={maxWidgetHeight}
                     limit={widget.limit}
                     isFetching={isFetching}
+                    relationshipData={relationshipData}
                   />
                 </div>
               </div>
