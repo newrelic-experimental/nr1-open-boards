@@ -42,5 +42,17 @@ export const nrqlCharts = [
     type: 'open',
     name: 'html',
     nrqlDisallow: ['TIMESERIES', 'FACET']
+  },
+  {
+    type: 'open',
+    name: 'react-heatmap-grid',
+    nrqlDisallow: ['TIMESERIES'],
+    messages: [
+      'Two FACETs are required, the first being the Y axis and the second the X axis.',
+      'ORDER BY is recommended for sorting time based information.'
+    ],
+    examples: [
+      `FROM Transaction SELECT count(*) FACET appName, hourOf(timestamp) ORDER BY timestamp LIMIT MAX`
+    ]
   }
 ];

@@ -11,6 +11,7 @@ import SemanticTable from './semantic/table';
 import { nrqlToNrTable, nrqlToNrBillboard } from './transformers/newrelic';
 import { DataConsumer } from '../../../context/data';
 import OpenHtml from './html';
+import HeatMapWidget from './heatmap';
 
 export default class WidgetChart extends React.Component {
   render() {
@@ -130,6 +131,16 @@ export default class WidgetChart extends React.Component {
               case 'open:html': {
                 return (
                   <OpenHtml
+                    width={width}
+                    height={height}
+                    widget={widget}
+                    data={rawData}
+                  />
+                );
+              }
+              case 'open:react-heatmap-grid': {
+                return (
+                  <HeatMapWidget
                     width={width}
                     height={height}
                     widget={widget}

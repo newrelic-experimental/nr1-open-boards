@@ -353,6 +353,46 @@ export default class NrqlModalBody extends React.PureComponent {
     );
   };
 
+  renderMessages = chart => {
+    if (!chart.messages || (chart.messages && chart.messages.length === 0)) {
+      return '';
+    }
+
+    return (
+      <>
+        <Message>
+          <Message.Header>Requirements</Message.Header>
+          <Message.List>
+            {chart.messages.map((m, i) => (
+              <Message.Item key={i}>{m}</Message.Item>
+            ))}
+          </Message.List>
+        </Message>
+        <Divider />
+      </>
+    );
+  };
+
+  renderExamples = chart => {
+    if (!chart.examples || (chart.examples && chart.examples.length === 0)) {
+      return '';
+    }
+
+    return (
+      <>
+        <Message>
+          <Message.Header>Examples</Message.Header>
+          <Message.List>
+            {chart.examples.map((e, i) => (
+              <Message.Item key={i}>{e}</Message.Item>
+            ))}
+          </Message.List>
+        </Message>
+        <Divider />
+      </>
+    );
+  };
+
   render() {
     const { widget, widgetNo } = this.props;
     if (widget && this.state.selectedChart === null) {
@@ -497,6 +537,9 @@ export default class NrqlModalBody extends React.PureComponent {
                 )}
 
                 <Divider />
+
+                {this.renderMessages(selectedChart.chart)}
+                {this.renderExamples(selectedChart.chart)}
 
                 {sources.map((s, i) => (
                   <NrqlEditor
