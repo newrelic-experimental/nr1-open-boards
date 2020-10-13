@@ -42,13 +42,130 @@ const presetEvents = [
     tag_filters: ['accountId', 'name']
   },
   {
-    key: 'Kubernetes HPA',
-    text: 'Kubernetes HPA',
+    key: 'Kubernetes HPA Events',
+    text: 'Kubernetes HPA Events',
     value:
       "FROM InfrastructureEvent SELECT * WHERE `event.involvedObject.kind` = 'HorizontalPodAutoscaler'",
     type: 'nrql',
     ignore_filters: 'false',
-    color: 'blue'
+    color: ''
+  },
+  {
+    key: 'Kubernetes Pod Events',
+    text: 'Kubernetes Pod Events',
+    value:
+      "FROM InfrastructureEvent SELECT * WHERE `event.involvedObject.kind` = 'Pod'",
+    type: 'nrql',
+    ignore_filters: 'false',
+    color: ''
+  },
+  {
+    key: 'Kubernetes PodDisruptionBudget Events',
+    text: 'Kubernetes PodDisruptionBudget Events',
+    value:
+      "FROM InfrastructureEvent SELECT * WHERE `event.involvedObject.kind` = 'PodDisruptionBudget'",
+    type: 'nrql',
+    ignore_filters: 'false',
+    color: ''
+  },
+  {
+    key: 'Kubernetes ConfigMap Events',
+    text: 'Kubernetes ConfigMap Events',
+    value:
+      "FROM InfrastructureEvent SELECT * WHERE `event.involvedObject.kind` = 'ConfigMap'",
+    type: 'nrql',
+    ignore_filters: 'false',
+    color: ''
+  },
+  {
+    key: 'Kubernetes Node Events',
+    text: 'Kubernetes Node Events',
+    value:
+      "FROM InfrastructureEvent SELECT * WHERE `event.involvedObject.kind` = 'Node'",
+    type: 'nrql',
+    ignore_filters: 'false',
+    color: ''
+  },
+  {
+    key: 'Kubernetes Deployment Events',
+    text: 'Kubernetes Deployment Events',
+    value:
+      "FROM InfrastructureEvent SELECT * WHERE `event.involvedObject.kind` = 'Deployment'",
+    type: 'nrql',
+    ignore_filters: 'false',
+    color: ''
+  },
+  {
+    key: 'Kubernetes Ingress Events',
+    text: 'Kubernetes Ingress Events',
+    value:
+      "FROM InfrastructureEvent SELECT * WHERE `event.involvedObject.kind` = 'Ingress'",
+    type: 'nrql',
+    ignore_filters: 'false',
+    color: ''
+  },
+  {
+    key: 'Kubernetes Service Events',
+    text: 'Kubernetes Service Events',
+    value:
+      "FROM InfrastructureEvent SELECT * WHERE `event.involvedObject.kind` = 'Service'",
+    type: 'nrql',
+    ignore_filters: 'false',
+    color: ''
+  },
+  {
+    key: 'Kubernetes Endpoints Events',
+    text: 'Kubernetes Endpoints Events',
+    value:
+      "FROM InfrastructureEvent SELECT * WHERE `event.involvedObject.kind` = 'Endpoints'",
+    type: 'nrql',
+    ignore_filters: 'false',
+    color: ''
+  },
+  {
+    key: 'Kubernetes CronJob Events',
+    text: 'Kubernetes CronJob Events',
+    value:
+      "FROM InfrastructureEvent SELECT * WHERE `event.involvedObject.kind` = 'CronJob'",
+    type: 'nrql',
+    ignore_filters: 'false',
+    color: ''
+  },
+  {
+    key: 'Kubernetes DaemonSet Events',
+    text: 'Kubernetes DaemonSet Events',
+    value:
+      "FROM InfrastructureEvent SELECT * WHERE `event.involvedObject.kind` = 'DaemonSet'",
+    type: 'nrql',
+    ignore_filters: 'false',
+    color: ''
+  },
+  {
+    key: 'Kubernetes PersistentVolumeClaim Events',
+    text: 'Kubernetes PersistentVolumeClaim Events',
+    value:
+      "FROM InfrastructureEvent SELECT * WHERE `event.involvedObject.kind` = 'PersistentVolumeClaim'",
+    type: 'nrql',
+    ignore_filters: 'false',
+    color: ''
+  },
+  {
+    key: 'Kubernetes Job Events',
+    text: 'Kubernetes Job Events',
+    value:
+      "FROM InfrastructureEvent SELECT * WHERE `event.involvedObject.kind` = 'Job'",
+    type: 'nrql',
+    ignore_filters: 'false',
+    color: ''
+  },
+  {
+    key: 'Kubernetes ReplicaSet Events',
+    text: 'Kubernetes ReplicaSet Events',
+    value:
+      "FROM InfrastructureEvent SELECT * WHERE `event.involvedObject.kind` = 'ReplicaSet'",
+    type: 'nrql',
+    ignore_filters: 'false',
+    color: ''
   },
   {
     key: 'AWS Change Events',
@@ -57,7 +174,7 @@ const presetEvents = [
       "SELECT * FROM InfrastructureEvent WHERE changedPath LIKE 'aws/health/%' AND changeType = 'added' ",
     ignore_filters: 'true',
     type: 'nrql',
-    color: 'yellow'
+    color: ''
   }
 ];
 
