@@ -538,8 +538,14 @@ export default class NrqlModalBody extends React.PureComponent {
 
                 <Divider />
 
-                {this.renderMessages(selectedChart.chart)}
-                {this.renderExamples(selectedChart.chart)}
+                {selectedChart ? (
+                  <>
+                    {this.renderMessages(selectedChart.chart)}
+                    {this.renderExamples(selectedChart.chart)}
+                  </>
+                ) : (
+                  ''
+                )}
 
                 {sources.map((s, i) => (
                   <NrqlEditor
