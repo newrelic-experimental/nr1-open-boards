@@ -74,7 +74,7 @@ export default class HeatMapWidget extends React.Component {
               data={heatmapData}
               squares
               height={45}
-              onClick={(x, y) => window.alert(`Clicked ${x}, ${y}`)}
+              // onClick={(x, y) => window.alert(`Clicked ${x}, ${y}`)}
               cellStyle={(background, value, min, max, data, x, y) => ({
                 background: `rgb(0, 151, 230, ${1 -
                   (max - value) / (max - min)})`,
