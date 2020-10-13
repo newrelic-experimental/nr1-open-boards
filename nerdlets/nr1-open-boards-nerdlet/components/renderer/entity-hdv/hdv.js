@@ -68,6 +68,35 @@ export default class EntityHdvWidget extends React.Component {
       };
     };
 
+    const getSubHexProps = hexagon => {
+      let fill = '';
+      switch (hexagon.alertSeverity) {
+        case 'CRITICAL': {
+          fill = 'red';
+          break;
+        }
+        case 'WARNING': {
+          fill = 'orange';
+          break;
+        }
+        case 'NOT_ALERTING': {
+          fill = 'green';
+          break;
+        }
+        case 'NOT_CONFIGURED': {
+          fill = 'grey';
+          break;
+        }
+      }
+      return {
+        style: {
+          fill,
+          stroke: 'white'
+        },
+        onClick: () => navigation.openStackedEntity(hexagon.guid)
+      };
+    };
+
     const renderHexagonContent = hexagon => {
       return (
         <span
@@ -218,7 +247,7 @@ export default class EntityHdvWidget extends React.Component {
                         selectedGuid ? height / heightDivisor : height
                       }
                       hexagons={sourceHexagons}
-                      hexProps={getHexProps}
+                      hexProps={getSubHexProps}
                       renderHexagonContent={renderHexagonContent}
                     />
                   </>
@@ -242,7 +271,7 @@ export default class EntityHdvWidget extends React.Component {
                         selectedGuid ? height / heightDivisor : height
                       }
                       hexagons={targetHexagons}
-                      hexProps={getHexProps}
+                      hexProps={getSubHexProps}
                       renderHexagonContent={renderHexagonContent}
                     />
                   </>
