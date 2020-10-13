@@ -18,27 +18,58 @@ const renderMessage = event => {
 };
 
 const nrqlEventMessage = event => {
-  return (
-    <div>
-      {event.data.entityName && event.data.entityGuid ? (
-        <span
-          onClick={() => navigation.openStackedEntity(event.data.entityGuid)}
-        >
-          {event.data.entityName}
-        </span>
-      ) : (
-        ''
-      )}
-      {event.data.message ? (
-        <>
-          <br />
-          {event.data.message}
-        </>
-      ) : (
-        ''
-      )}
-    </div>
-  );
+  switch (event.data.category) {
+    // InfrastructureEvent is hopelessly overloaded, so we need to handle differently by category
+    case 'kubernetes':
+      return (
+        <div>
+          {event.data['event.involvedObject.name'] && event.data.entityGuid ? (
+            <span
+              onClick={() =>
+                // TODO: This doesn't work for k8s guids - need to look up the cluster guid
+                navigation.openStackedEntity(event.data.entityGuid)
+              }
+            >
+              {event.data['event.involvedObject.name']}
+            </span>
+          ) : (
+            ''
+          )}
+          {event.data['event.message'] ? (
+            <>
+              <br />
+              {event.data['event.message']}
+            </>
+          ) : (
+            ''
+          )}
+        </div>
+      );
+    default:
+      return (
+        <div>
+          {event.data.entityName && event.data.entityGuid ? (
+            <span
+              onClick={() =>
+                navigation.openStackedEntity(event.data.entityGuid)
+              }
+            >
+              {event.data.entityName}
+            </span>
+          ) : (
+            ''
+          )}
+          {event.data.message ? (
+            <>
+              <br />
+              {event.data.message}
+            </>
+          ) : (
+            ''
+          )}
+        </div>
+      );
+  }
 };
 
 const alertMessage = event => {
