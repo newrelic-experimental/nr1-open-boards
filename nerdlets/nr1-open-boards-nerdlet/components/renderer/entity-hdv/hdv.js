@@ -169,7 +169,7 @@ export default class EntityHdvWidget extends React.Component {
           sourceHexagons.push(r.source.entity);
         }
 
-        if (r.target.entity.guid !== selectedGuidData) {
+        if (r.source.entity.guid === selectedGuid && r.target.entity) {
           targetHexagons.push(r.target.entity);
         }
       });
