@@ -143,7 +143,7 @@ export const deriveEvents = (
     nrql.forEach(n => {
       const formattedEvents = {
         metadata: {
-          id: 'events',
+          id: `events_${n.name}`,
           name: n.name,
           color: n.color || '#000000',
           viz: 'event'
