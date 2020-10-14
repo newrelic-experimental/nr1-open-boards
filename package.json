@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "nr1-open-boards",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "scripts": {
     "start": "nr1 nerdpack:serve",
     "test": "exit 0",
@@ -10,6 +10,9 @@
   },
   "nr1": {
     "uuid": "991e1a1f-bc13-420c-bfcf-234c616fd6e7"
+  },
+  "ep-nr1": {
+    "id": "28f03e65-b19e-49f4-9945-d706f73a28a4"
   },
   "dependencies": {
     "@newrelic/nr1-community": "^1.2.0",
