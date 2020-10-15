@@ -61,7 +61,16 @@ export const buildFilterClause = (filters, dbFilters) => {
           operator = whereValue.includes('%') ? ' LIKE ' : '=';
         }
 
-        value += ` WHERE ${filterName} ${operator} ${whereValue}`;
+        const filterNames = filterName.split(',');
+
+        let multiWhere = ' WHERE';
+        filterNames.forEach((name, i) => {
+          multiWhere += ` \`${name}\` ${operator} ${whereValue}`;
+          if (i + 1 < filterNames.length) {
+            multiWhere += ' OR';
+          }
+        });
+        value += multiWhere;
       }
     }
 
