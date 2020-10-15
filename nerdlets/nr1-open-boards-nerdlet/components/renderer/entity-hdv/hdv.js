@@ -9,15 +9,35 @@ export default class EntityHdvWidget extends React.Component {
     super(props);
     this.state = {
       selectedGuid: '',
+      selectedGuidType: '',
+      selectedGuidName: '',
       selectedGuidData: {}
     };
   }
 
-  hexClick = (guid, relationshipData) => {
+  entityNavigate = (type, entityGuid) => {
+    switch (type) {
+      case 'KUBERNETESCLUSTER':
+        const nerdletWithState = {
+          id: 'k8s-cluster-explorer-nerdlet.k8s-cluster-explorer',
+          urlState: {
+            entityId: entityGuid
+          }
+        };
+        navigation.openStackedNerdlet(nerdletWithState);
+        break;
+      default:
+        navigation.openStackedEntity(entityGuid);
+    }
+  };
+
+  hexClick = (guid, type, name, relationshipData) => {
     // navigation.openStackedEntity(guid);
     if (guid in relationshipData) {
       this.setState({
         selectedGuid: guid,
+        selectedGuidType: type,
+        selectedGuidName: name,
         selectedGuidData: relationshipData[guid]
       });
     } else {
@@ -35,7 +55,12 @@ export default class EntityHdvWidget extends React.Component {
       isFetching
     } = this.props;
 
-    const { selectedGuid, selectedGuidData } = this.state;
+    const {
+      selectedGuid,
+      selectedGuidType,
+      selectedGuidName,
+      selectedGuidData
+    } = this.state;
 
     const getHexProps = hexagon => {
       let fill = '';
@@ -62,9 +87,8 @@ export default class EntityHdvWidget extends React.Component {
           fill,
           stroke: 'white'
         },
-        onMouseOver: () => console.log('over2'),
-        onMouseEnter: () => console.log('enter'),
-        onClick: () => this.hexClick(hexagon.guid, relationshipData)
+        onClick: () =>
+          this.hexClick(hexagon.guid, hexagon.type, hexagon.name, relationshipData)
       };
     };
 
@@ -93,7 +117,7 @@ export default class EntityHdvWidget extends React.Component {
           fill,
           stroke: 'white'
         },
-        onClick: () => navigation.openStackedEntity(hexagon.guid)
+        onClick: () => this.entityNavigate(hexagon.type, hexagon.guid)
       };
     };
 
@@ -212,10 +236,65 @@ export default class EntityHdvWidget extends React.Component {
                     fontSize: '14px',
                     cursor: 'pointer'
                   }}
-                  onClick={() => navigation.openStackedEntity(selectedGuid)}
+                  onClick={() =>
+                    this.entityNavigate(selectedGuidType, selectedGuid)
+                  }
                 >
                   {selectedGuidData.name}
                 </span>
+                {selectedGuidType === 'APPLICATION' ? (
+                  <span
+                    style={{
+                      float: 'left',
+                      fontFamily: 'monospace',
+                      fontSize: '14px',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => {
+                      const nerdletWithState = {
+                        id:
+                          'distributed-tracing-nerdlets.distributed-trace-list',
+                        urlState: {
+                          query: {
+                            operator: 'AND',
+                            indexQuery: {
+                              conditionType: 'INDEX',
+                              operator: 'AND',
+                              conditions: [
+                                // {
+                                //   attr: 'entity.guid',
+                                //   operator: 'EQ',
+                                //   value: selectedGuid
+                                // }
+                              ]
+                            },
+                            spanQuery: {
+                              operator: 'AND',
+                              conditionSets: [
+                                {
+                                  conditionType: 'SPAN',
+                                  operator: 'AND',
+                                  conditions: [
+                                    {
+                                      attr: 'entity.name',
+                                      operator: 'EQ',
+                                      value: selectedGuidName
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          }
+                        }
+                      };
+                      navigation.openStackedNerdlet(nerdletWithState);
+                    }}
+                  >
+                    - Traces
+                  </span>
+                ) : (
+                  <></>
+                )}
                 <span
                   style={{
                     float: 'right',

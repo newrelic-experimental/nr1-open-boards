@@ -243,31 +243,40 @@ export const buildTagFilterQuery = (
         appendedTags += accountTagsQuery;
       } else if (t === 'name') {
         let operator = '';
-        let value = '';
+        const values = [];
 
         for (let z = 0; z < tfDbFilters.length; z++) {
           const { name } = tfDbFilters[z];
           const names = name.split(',');
 
           for (let x = 0; x < names.length; x++) {
-            if (names[x] === 'name' || names[x] === 'appName') {
+            // TODO: Replace this with a filter-mapping capability
+            if (
+              names[x] === 'name' ||
+              names[x] === 'appName' ||
+              names[x] === 'clusterName'
+            ) {
               operator = tfDbFilters[z].operator;
-              value = tfDbFilters[z].default;
+              let value = tfDbFilters[z].default;
               if (`filter_${name}` in tfFilters) {
                 value = tfFilters[`filter_${name}`].value;
               }
-            }
-
-            if (operator && value) {
-              break;
+              value = value.replace(/\*/g, '%');
+              values.push(value);
             }
           }
         }
 
-        value = value.replace(/\*/g, '%');
-
         if (operator && operator !== '>' && operator !== '<') {
-          appendedTags += ` AND name ${operator} '${value}'`;
+          let allNames = '';
+          for (let x = 0; x < values.length; x++) {
+            if (x === 0) {
+              allNames += ` name ${operator} '${values[x]}' `;
+            } else {
+              allNames += ` OR name ${operator} '${values[x]}' `;
+            }
+          }
+          appendedTags += ` AND (${allNames})`;
         }
       } else {
         // console.log(t);
