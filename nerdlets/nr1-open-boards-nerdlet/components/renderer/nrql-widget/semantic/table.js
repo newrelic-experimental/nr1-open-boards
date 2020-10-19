@@ -134,7 +134,12 @@ export default class WidgetChart extends React.Component {
 
             filterValue = filterValue.replace(/ /g, '\\ ');
 
-            queryMessage += `${key}:${filterValue} and `;
+            const filterNames = key.split(',');
+            queryMessage += '(';
+            for (let y = 0; y < filterNames.length; y++) {
+              queryMessage += `${filterNames[y]}:${filterValue} `;
+              queryMessage += filterNames.length === y + 1 ? ') and ' : ' or ';
+            }
           }
         }
       }
