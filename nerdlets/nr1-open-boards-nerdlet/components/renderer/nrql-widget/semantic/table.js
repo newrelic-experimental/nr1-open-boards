@@ -164,13 +164,16 @@ export default class WidgetChart extends React.Component {
 
     return (
       <DataConsumer>
-        {({ updateDataStateContext, selectedBoard, filters }) => {
+        {({ selectedBoard, filters }) => {
           const dbFilters = selectedBoard.document.filters || [];
 
           const hasFilter = key => {
             for (let z = 0; z < dbFilters.length; z++) {
-              if (dbFilters[z].name === key) {
-                return true;
+              const filterNames = dbFilters[z].name.split(',');
+              for (let i = 0; i < filterNames.length; i++) {
+                if (filterNames[i] === key) {
+                  return true;
+                }
               }
             }
             return false;

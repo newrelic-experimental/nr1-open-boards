@@ -1,6 +1,6 @@
 import React from 'react';
 import HexagonGrid from './grid';
-import { Divider, Icon } from 'semantic-ui-react';
+import { Divider, Dropdown, Icon } from 'semantic-ui-react';
 // import { Popup } from 'semantic-ui-react';
 import { navigation } from 'nr1';
 
@@ -88,7 +88,12 @@ export default class EntityHdvWidget extends React.Component {
           stroke: 'white'
         },
         onClick: () =>
-          this.hexClick(hexagon.guid, hexagon.type, hexagon.name, relationshipData)
+          this.hexClick(
+            hexagon.guid,
+            hexagon.type,
+            hexagon.name,
+            relationshipData
+          )
       };
     };
 
@@ -301,6 +306,13 @@ export default class EntityHdvWidget extends React.Component {
                     marginRight: '10px'
                   }}
                 >
+                  <Dropdown text="Filters" style={{ paddingRight: '5px' }}>
+                    <Dropdown.Menu>
+                      <Dropdown.Item text="Ignore Infrastructure" />
+                      <Dropdown.Item text="Ignore APM" />
+                      <Dropdown.Item icon="folder" text="icon test" />
+                    </Dropdown.Menu>
+                  </Dropdown>
                   <Icon
                     style={{ cursor: 'pointer' }}
                     name="close"

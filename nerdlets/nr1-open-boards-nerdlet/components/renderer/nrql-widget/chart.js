@@ -25,14 +25,19 @@ export default class WidgetChart extends React.Component {
           const handleTableFilter = (key, data) => {
             for (let z = 0; z < dbFilters.length; z++) {
               const { ignoreCase, name } = dbFilters[z];
-              if (
-                (ignoreCase && name.toLowerCase() === key.toLowerCase()) ||
-                (!ignoreCase && name === key)
-              ) {
-                const value = data[key];
-                filters[`filter_${key}`] = { value, label: value };
-                updateDataStateContext({ filters });
-                break;
+              const filterNames = name.split(',');
+
+              for (let y = 0; y < filterNames.length; y++) {
+                if (
+                  (ignoreCase &&
+                    filterNames[y].toLowerCase() === key.toLowerCase()) ||
+                  (!ignoreCase && filterNames[y] === key)
+                ) {
+                  const value = data[key];
+                  filters[`filter_${name}`] = { value, label: value };
+                  updateDataStateContext({ filters });
+                  break;
+                }
               }
             }
           };
