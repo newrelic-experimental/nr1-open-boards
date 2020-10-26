@@ -7,6 +7,7 @@ import { DataConsumer } from '../../context/data';
 import { getUserCollection, getAccountCollection } from '../../lib/utils';
 import CreateBoard from '../boards/create';
 import { buildBoardOptions } from '../../context/utils';
+import LockBoard from '../boards/lock';
 import DeleteBoard from '../boards/delete';
 import ExportBoard from '../boards/export';
 import CreateNrqlWidget from '../widgets/create/nrql';
@@ -90,6 +91,8 @@ export default class MenuBar extends React.PureComponent {
                 <ImportBoard />
 
                 {selectedBoard ? <ExportBoard /> : ''}
+
+                {selectedBoard ? <LockBoard /> : ''}
 
                 <div className="flex-push" />
 
