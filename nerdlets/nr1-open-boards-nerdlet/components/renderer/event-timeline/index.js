@@ -3,8 +3,10 @@ import { AutoSizer } from 'nr1';
 import EventTimelineWidgetDropDown from './drop-down';
 import { Timeline } from 'react-event-timeline';
 import Event from './event';
+import { Icon } from 'semantic-ui-react';
 
 const createEvents = (
+  sort,
   selectedEventSources,
   nrqlEventData,
   entitySearchEventData,
@@ -73,7 +75,9 @@ const createEvents = (
   events = events
     .filter(e => e.timestamp > begin_time)
     .sort((a, b) => b.entityName || b.name - a.entityName || a.name)
-    .sort((a, b) => b.timestamp - a.timestamp);
+    .sort((a, b) =>
+      sort === 'asc' ? b.timestamp - a.timestamp : a.timestamp - b.timestamp
+    );
   if (limit > 0) {
     events = events.slice(0, limit);
   }
@@ -82,6 +86,13 @@ const createEvents = (
 };
 
 export default class EventTimeline extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      sort: 'asc'
+    };
+  }
+
   render() {
     const {
       widget,
@@ -90,9 +101,12 @@ export default class EventTimeline extends React.Component {
       entitySearchEventData,
       begin_time
     } = this.props;
+    const { sort } = this.state;
+
     const hdrStyle = widget.headerStyle || {};
     const selectedEventSources = widget.value || [];
     const events = createEvents(
+      sort,
       selectedEventSources,
       nrqlEventData,
       entitySearchEventData,
@@ -142,7 +156,7 @@ export default class EventTimeline extends React.Component {
                     <EventTimelineWidgetDropDown
                       i={i}
                       height={`${headerHeight}px`}
-                    />{' '}
+                    />
                   </div>
                 </div>
 
@@ -161,13 +175,34 @@ export default class EventTimeline extends React.Component {
                       No events for this period...
                     </span>
                   ) : (
-                    <Timeline
-                      style={{ fontSize: '13px', fontFamily: 'monospace' }}
-                    >
-                      {events.map((e, i) => {
-                        return <Event key={i} event={e} />;
-                      })}
-                    </Timeline>
+                    <>
+                      <div style={{ paddingBottom: '22px' }}>
+                        <Icon
+                          style={{
+                            cursor: 'pointer',
+                            float: 'right'
+                          }}
+                          size="large"
+                          name={
+                            sort === 'asc'
+                              ? 'sort content ascending'
+                              : 'sort content descending'
+                          }
+                          onClick={() =>
+                            this.setState({
+                              sort: sort === 'asc' ? 'desc' : 'asc'
+                            })
+                          }
+                        />
+                      </div>
+                      <Timeline
+                        style={{ fontSize: '13px', fontFamily: 'monospace' }}
+                      >
+                        {events.map((e, i) => {
+                          return <Event key={i} event={e} />;
+                        })}
+                      </Timeline>
+                    </>
                   )}
                 </div>
               </div>
