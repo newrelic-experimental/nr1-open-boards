@@ -306,13 +306,13 @@ export default class EntityHdvWidget extends React.Component {
                     marginRight: '10px'
                   }}
                 >
-                  <Dropdown text="Filters" style={{ paddingRight: '5px' }}>
+                  {/* <Dropdown text="Filters" style={{ paddingRight: '5px' }}>
                     <Dropdown.Menu>
                       <Dropdown.Item text="Ignore Infrastructure" />
                       <Dropdown.Item text="Ignore APM" />
                       <Dropdown.Item icon="folder" text="icon test" />
                     </Dropdown.Menu>
-                  </Dropdown>
+                  </Dropdown> */}
                   <Icon
                     style={{ cursor: 'pointer' }}
                     name="close"
