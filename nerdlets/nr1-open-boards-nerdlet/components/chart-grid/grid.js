@@ -399,7 +399,7 @@ export default class Grid extends React.Component {
 
     return (
       <DataConsumer>
-        {({ storageLocation, updateBoard }) => {
+        {({ storageLocation, updateBoard, locked }) => {
           const { document } = selectedBoard;
 
           const styles = document.styles || [];
@@ -415,6 +415,7 @@ export default class Grid extends React.Component {
               w: w.w || 7,
               h: w.h || 6,
               type: w.type,
+              static: locked,
               widget: w
             };
           });

@@ -50,6 +50,7 @@ export default class WidgetDropDown extends React.Component {
     return (
       <DataConsumer>
         {({
+          locked,
           selectedBoard,
           storageLocation,
           updateBoard,
@@ -59,7 +60,7 @@ export default class WidgetDropDown extends React.Component {
             <Popup
               basic
               on="click"
-              open={this.state.isOpen}
+              open={!locked && this.state.isOpen}
               onClose={this.handleClose}
               onOpen={this.handleOpen}
               trigger={<Icon name="caret down" color="grey" size="large" />}
