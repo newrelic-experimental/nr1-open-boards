@@ -243,7 +243,7 @@ export default class EntityHdv extends React.Component {
               ? hdrStyle.height.replace(/\D/g, '')
               : 30;
 
-            const maxWidgetHeight = height - headerHeight - 10;
+            const maxWidgetHeight = height - headerHeight;
             const paddingTop = '5px';
             const paddingLeft = '9px';
             const paddingRight = '5px';
@@ -281,7 +281,14 @@ export default class EntityHdv extends React.Component {
                   </div>
                 </div>
 
-                <div style={{ paddingLeft, paddingRight, paddingBottom }}>
+                <div
+                  style={{
+                    paddingLeft,
+                    paddingRight,
+                    paddingBottom,
+                    overflowX: 'hidden'
+                  }}
+                >
                   <EntityHdvWidget
                     data={data}
                     width={width}

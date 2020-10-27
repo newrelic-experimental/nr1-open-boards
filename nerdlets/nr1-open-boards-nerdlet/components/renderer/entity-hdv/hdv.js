@@ -1,8 +1,47 @@
 import React from 'react';
 import HexagonGrid from './grid';
-import { Divider, Dropdown, Icon } from 'semantic-ui-react';
+import { Divider, Popup, Icon } from 'semantic-ui-react';
 // import { Popup } from 'semantic-ui-react';
 import { navigation } from 'nr1';
+
+const openDistributedTracing = selectedGuidName => {
+  const nerdletWithState = {
+    id: 'distributed-tracing-nerdlets.distributed-trace-list',
+    urlState: {
+      query: {
+        operator: 'AND',
+        indexQuery: {
+          conditionType: 'INDEX',
+          operator: 'AND',
+          conditions: [
+            // {
+            //   attr: 'entity.guid',
+            //   operator: 'EQ',
+            //   value: selectedGuid
+            // }
+          ]
+        },
+        spanQuery: {
+          operator: 'AND',
+          conditionSets: [
+            {
+              conditionType: 'SPAN',
+              operator: 'AND',
+              conditions: [
+                {
+                  attr: 'entity.name',
+                  operator: 'EQ',
+                  value: selectedGuidName
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  };
+  navigation.openStackedNerdlet(nerdletWithState);
+};
 
 export default class EntityHdvWidget extends React.Component {
   constructor(props) {
@@ -11,7 +50,9 @@ export default class EntityHdvWidget extends React.Component {
       selectedGuid: '',
       selectedGuidType: '',
       selectedGuidName: '',
-      selectedGuidData: {}
+      selectedGuidData: {},
+      showHostEntities: true,
+      showAppEntities: true
     };
   }
 
@@ -59,7 +100,9 @@ export default class EntityHdvWidget extends React.Component {
       selectedGuid,
       selectedGuidType,
       selectedGuidName,
-      selectedGuidData
+      selectedGuidData,
+      showHostEntities,
+      showAppEntities
     } = this.state;
 
     const getHexProps = hexagon => {
@@ -194,12 +237,42 @@ export default class EntityHdvWidget extends React.Component {
 
     if (selectedGuid) {
       (selectedGuidData.relationships || []).forEach(r => {
+        let showHost = true;
+        let showApp = true;
         if (r.source.entity.guid !== selectedGuid) {
-          sourceHexagons.push(r.source.entity);
+          if (showHostEntities === false && r.source.entity.type === 'HOST') {
+            showHost = false;
+          }
+
+          if (
+            showAppEntities === false &&
+            r.source.entity.type === 'APPLICATION'
+          ) {
+            showApp = false;
+          }
+
+          if (showHost && showApp) {
+            sourceHexagons.push(r.source.entity);
+          }
         }
 
+        showHost = true;
+        showApp = true;
         if (r.source.entity.guid === selectedGuid && r.target.entity) {
-          targetHexagons.push(r.target.entity);
+          if (showHostEntities === false && r.target.entity.type === 'HOST') {
+            showHost = false;
+          }
+
+          if (
+            showAppEntities === false &&
+            r.target.entity.type === 'APPLICATION'
+          ) {
+            showApp = false;
+          }
+
+          if (showHost && showApp) {
+            targetHexagons.push(r.target.entity);
+          }
         }
       });
     }
@@ -221,9 +294,7 @@ export default class EntityHdvWidget extends React.Component {
     return (
       <div>
         {hexagons.length > 0 ? (
-          <div
-            style={{ height: height + 3, width: width - 5, overflowY: 'auto' }}
-          >
+          <div style={{ height, width: width - 5, overflowY: 'none' }}>
             <HexagonGrid
               gridWidth={width - 5}
               gridHeight={selectedGuid ? height / heightDivisor : height}
@@ -239,7 +310,11 @@ export default class EntityHdvWidget extends React.Component {
                     float: 'left',
                     fontFamily: 'monospace',
                     fontSize: '14px',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    width: width - 120,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
                   }}
                   onClick={() =>
                     this.entityNavigate(selectedGuidType, selectedGuid)
@@ -247,73 +322,72 @@ export default class EntityHdvWidget extends React.Component {
                 >
                   {selectedGuidData.name}
                 </span>
-                {selectedGuidType === 'APPLICATION' ? (
-                  <span
-                    style={{
-                      float: 'left',
-                      fontFamily: 'monospace',
-                      fontSize: '14px',
-                      cursor: 'pointer'
-                    }}
-                    onClick={() => {
-                      const nerdletWithState = {
-                        id:
-                          'distributed-tracing-nerdlets.distributed-trace-list',
-                        urlState: {
-                          query: {
-                            operator: 'AND',
-                            indexQuery: {
-                              conditionType: 'INDEX',
-                              operator: 'AND',
-                              conditions: [
-                                // {
-                                //   attr: 'entity.guid',
-                                //   operator: 'EQ',
-                                //   value: selectedGuid
-                                // }
-                              ]
-                            },
-                            spanQuery: {
-                              operator: 'AND',
-                              conditionSets: [
-                                {
-                                  conditionType: 'SPAN',
-                                  operator: 'AND',
-                                  conditions: [
-                                    {
-                                      attr: 'entity.name',
-                                      operator: 'EQ',
-                                      value: selectedGuidName
-                                    }
-                                  ]
-                                }
-                              ]
-                            }
-                          }
-                        }
-                      };
-                      navigation.openStackedNerdlet(nerdletWithState);
-                    }}
-                  >
-                    - Traces
-                  </span>
-                ) : (
-                  <></>
-                )}
+
                 <span
                   style={{
                     float: 'right',
                     marginRight: '10px'
                   }}
                 >
-                  {/* <Dropdown text="Filters" style={{ paddingRight: '5px' }}>
-                    <Dropdown.Menu>
-                      <Dropdown.Item text="Ignore Infrastructure" />
-                      <Dropdown.Item text="Ignore APM" />
-                      <Dropdown.Item icon="folder" text="icon test" />
-                    </Dropdown.Menu>
-                  </Dropdown> */}
+                  {selectedGuidType === 'APPLICATION' ? (
+                    <Popup
+                      trigger={
+                        <Icon
+                          size="large"
+                          name="sliders horizontal"
+                          style={{ cursor: 'pointer' }}
+                          color="teal"
+                          onClick={() =>
+                            openDistributedTracing(selectedGuidName)
+                          }
+                        />
+                      }
+                      basic
+                      content="Open Distributed Tracing"
+                    />
+                  ) : (
+                    ''
+                  )}
+                  <Popup
+                    trigger={
+                      <Icon
+                        size="large"
+                        name="server"
+                        style={{ cursor: 'pointer' }}
+                        color={showHostEntities ? 'green' : 'grey'}
+                        onClick={() =>
+                          this.setState({ showHostEntities: !showHostEntities })
+                        }
+                      />
+                    }
+                    basic
+                    content={
+                      showHostEntities
+                        ? 'Hide Host Entities'
+                        : 'Show Host Entities'
+                    }
+                  />
+                  <Popup
+                    trigger={
+                      <Icon
+                        size="large"
+                        name="cube"
+                        style={{ cursor: 'pointer' }}
+                        color={showAppEntities ? 'green' : 'grey'}
+                        onClick={() =>
+                          this.setState({ showAppEntities: !showAppEntities })
+                        }
+                      />
+                    }
+                    basic
+                    content={
+                      showAppEntities
+                        ? 'Hide Application Entities'
+                        : 'Show Application Entities'
+                    }
+                  />
                   <Icon
+                    size="large"
                     style={{ cursor: 'pointer' }}
                     name="close"
                     onClick={() =>
