@@ -6,7 +6,7 @@ import {
   Popup,
   Form,
   Divider,
-  Select
+  Message
 } from 'semantic-ui-react';
 import { writeUserDocument, writeAccountDocument } from '../../../lib/utils';
 import { DataConsumer } from '../../../context/data';
@@ -160,28 +160,35 @@ export default class ManageFilters extends React.Component {
             >
               <Modal.Header>Manage Filters</Modal.Header>
               <Modal.Content>
+                <Message>
+                  <Message.Header>
+                    Filtering across different event types with mismatched
+                    attribute names
+                  </Message.Header>
+                  If you have events that have different attribute naming that
+                  you need to query and filter across eg. Transaction &
+                  SystemSample which have host and hostname respectively. You
+                  may use multiple attributes in the attribute name field by
+                  comma separating them eg. "host,hostname".
+                </Message>
                 <Form>
-                  <Form.Group inline>
+                  <Form.Group>
                     <Form.Input
-                      width="3"
+                      width="6"
                       label="Attribute name"
                       value={filterName}
                       onChange={(e, d) =>
                         this.setState({ filterName: d.value })
                       }
                     />
-                    <Form.Field width="5">
-                      <label>Operator</label>
-                      <Select
-                        label="Operator"
-                        style={{ width: '50px' }}
-                        options={operators}
-                        value={operator}
-                        onChange={(e, d) =>
-                          this.setState({ operator: d.value })
-                        }
-                      />
-                    </Form.Field>
+
+                    <Form.Select
+                      width="3"
+                      label="Operator"
+                      options={operators}
+                      value={operator}
+                      onChange={(e, d) => this.setState({ operator: d.value })}
+                    />
                     <Form.Input
                       width="3"
                       label="Default value"
@@ -192,6 +199,8 @@ export default class ManageFilters extends React.Component {
                     />
 
                     <Form.Button
+                      width="2"
+                      label="&nbsp;"
                       disabled={!filterName || !filterDefault}
                       content="Add"
                       icon="plus"
@@ -211,9 +220,9 @@ export default class ManageFilters extends React.Component {
                   return (
                     <div key={i}>
                       <Form>
-                        <Form.Group inline>
+                        <Form.Group>
                           <Form.Input
-                            width="3"
+                            width="6"
                             label="Name"
                             value={f.name}
                             onChange={(e, d) =>
@@ -221,7 +230,7 @@ export default class ManageFilters extends React.Component {
                             }
                           />
                           <Form.Select
-                            width="5"
+                            width="3"
                             label="Operator"
                             value={f.operator}
                             options={operators}
@@ -237,18 +246,9 @@ export default class ManageFilters extends React.Component {
                               this.editFilter(i, 'default', d.value)
                             }
                           />
-                          {/* <Form.Field width="2">
-                            <label>Ignore case</label>
-                            <Checkbox
-                              style={{ paddingBottom: '35px' }}
-                              checked={f.ignoreCase}
-                              onClick={() =>
-                                this.editFilter(i, 'ignoreCase', !f.ignoreCase)
-                              }
-                            />
-                          </Form.Field> */}
 
                           <Form.Button
+                            label="&nbsp;"
                             content="Update"
                             onClick={() =>
                               this.filterUpdate(
@@ -259,6 +259,7 @@ export default class ManageFilters extends React.Component {
                             }
                           />
                           <Form.Button
+                            label="&nbsp;"
                             content="Delete"
                             onClick={() =>
                               this.deleteFilter(
