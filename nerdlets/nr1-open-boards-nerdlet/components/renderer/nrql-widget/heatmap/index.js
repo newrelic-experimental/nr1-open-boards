@@ -8,8 +8,10 @@ export default class HeatMapWidget extends React.Component {
 
     let xLabels = [];
     const unorderedHeatMapData = {};
+    let query = '';
 
     data.forEach(d => {
+      query = d.nrqlQuery;
       const metricName =
         ((((d || {}).metadata || {}).groups || {})[0] || {}).value || null;
 
@@ -29,6 +31,17 @@ export default class HeatMapWidget extends React.Component {
     });
 
     xLabels = [...new Set(xLabels)];
+
+    // allow additional sorting for hourOf and dateOf
+    if (query) {
+      if (query.includes('hourOf(')) {
+        xLabels = xLabels.sort((a, b) => a.split(':')[0] - b.split(':')[0]);
+      } else if (query.includes('dateOf(')) {
+        xLabels = xLabels.sort(
+          (a, b) => new Date(a).getTime() - new Date(b).getTime()
+        );
+      }
+    }
 
     const orderedHeatMapData = {};
     Object.keys(unorderedHeatMapData)
