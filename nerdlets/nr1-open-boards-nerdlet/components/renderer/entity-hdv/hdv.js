@@ -239,7 +239,7 @@ export default class EntityHdvWidget extends React.Component {
       (selectedGuidData.relationships || []).forEach(r => {
         let showHost = true;
         let showApp = true;
-        if (r.source.entity.guid !== selectedGuid) {
+        if (r.source.entity && r.source.entity.guid !== selectedGuid) {
           if (showHostEntities === false && r.source.entity.type === 'HOST') {
             showHost = false;
           }
@@ -258,7 +258,7 @@ export default class EntityHdvWidget extends React.Component {
 
         showHost = true;
         showApp = true;
-        if (r.source.entity.guid === selectedGuid && r.target.entity) {
+        if (r.target.entity && r.source.entity.guid === selectedGuid) {
           if (showHostEntities === false && r.target.entity.type === 'HOST') {
             showHost = false;
           }
