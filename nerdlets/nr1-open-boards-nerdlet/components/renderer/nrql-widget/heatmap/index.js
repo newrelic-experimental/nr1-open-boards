@@ -10,16 +10,21 @@ export default class HeatMapWidget extends React.Component {
     const unorderedHeatMapData = {};
 
     data.forEach(d => {
-      const metricName = d.metadata.groups[0].value;
-      const value = d.data[0][metricName];
-      const y = d.metadata.groups[1].value;
-      const x = d.metadata.groups[2].value;
-      xLabels.push(x);
+      const metricName =
+        ((((d || {}).metadata || {}).groups || {})[0] || {}).value || null;
 
-      if (y in unorderedHeatMapData) {
-        unorderedHeatMapData[y][x] = value;
-      } else {
-        unorderedHeatMapData[y] = { [x]: value };
+      if (metricName) {
+        const value = (((d || {}).data || {})[0] || {})[metricName] || 0;
+
+        const y = d.metadata.groups[1].value;
+        const x = d.metadata.groups[2].value;
+        xLabels.push(x);
+
+        if (y in unorderedHeatMapData) {
+          unorderedHeatMapData[y][x] = value;
+        } else {
+          unorderedHeatMapData[y] = { [x]: value };
+        }
       }
     });
 
