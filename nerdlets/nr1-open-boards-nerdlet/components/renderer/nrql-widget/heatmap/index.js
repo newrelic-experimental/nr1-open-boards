@@ -81,7 +81,13 @@ export default class HeatMapWidget extends React.Component {
             overflow: 'auto'
           }}
         >
-          <div style={{ fontSize: '13px', display: 'relative' }}>
+          <div
+            style={{
+              fontSize: '13px',
+              display: 'relative',
+              wordWrap: 'break-word'
+            }}
+          >
             <HeatMap
               xLabels={xLabels}
               yLabels={yLabels}
