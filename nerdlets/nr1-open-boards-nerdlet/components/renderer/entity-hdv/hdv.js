@@ -237,41 +237,43 @@ export default class EntityHdvWidget extends React.Component {
 
     if (selectedGuid) {
       (selectedGuidData.relationships || []).forEach(r => {
-        let showHost = true;
-        let showApp = true;
-        if (r.source.entity && r.source.entity.guid !== selectedGuid) {
-          if (showHostEntities === false && r.source.entity.type === 'HOST') {
-            showHost = false;
+        if (r.source.entity) {
+          let showHost = true;
+          let showApp = true;
+          if (r.source.entity.guid !== selectedGuid) {
+            if (showHostEntities === false && r.source.entity.type === 'HOST') {
+              showHost = false;
+            }
+
+            if (
+              showAppEntities === false &&
+              r.source.entity.type === 'APPLICATION'
+            ) {
+              showApp = false;
+            }
+
+            if (showHost && showApp) {
+              sourceHexagons.push(r.source.entity);
+            }
           }
 
-          if (
-            showAppEntities === false &&
-            r.source.entity.type === 'APPLICATION'
-          ) {
-            showApp = false;
-          }
+          showHost = true;
+          showApp = true;
+          if (r.target.entity && r.source.entity.guid === selectedGuid) {
+            if (showHostEntities === false && r.target.entity.type === 'HOST') {
+              showHost = false;
+            }
 
-          if (showHost && showApp) {
-            sourceHexagons.push(r.source.entity);
-          }
-        }
+            if (
+              showAppEntities === false &&
+              r.target.entity.type === 'APPLICATION'
+            ) {
+              showApp = false;
+            }
 
-        showHost = true;
-        showApp = true;
-        if (r.target.entity && r.source.entity.guid === selectedGuid) {
-          if (showHostEntities === false && r.target.entity.type === 'HOST') {
-            showHost = false;
-          }
-
-          if (
-            showAppEntities === false &&
-            r.target.entity.type === 'APPLICATION'
-          ) {
-            showApp = false;
-          }
-
-          if (showHost && showApp) {
-            targetHexagons.push(r.target.entity);
+            if (showHost && showApp) {
+              targetHexagons.push(r.target.entity);
+            }
           }
         }
       });
