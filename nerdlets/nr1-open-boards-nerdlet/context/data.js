@@ -15,6 +15,7 @@ import {
   getAccountCollection,
   nerdGraphQuery
 } from '../lib/utils';
+import { nerdlet } from 'nr1';
 
 const semver = require('semver');
 
@@ -55,7 +56,8 @@ export class DataProvider extends Component {
       begin_time: 0,
       end_time: 0,
       timeRange: {},
-      sinceClause: ''
+      sinceClause: '',
+      urlStateChecked: false
     };
   }
 
@@ -159,6 +161,13 @@ export class DataProvider extends Component {
   updateDataStateContext = (stateData, actions) => {
     return new Promise(resolve => {
       this.setState(stateData, () => {
+        Object.keys(stateData).forEach(key => {
+          if (key === 'selectedBoard') {
+            nerdlet.setUrlState({
+              name: stateData[key].id
+            });
+          }
+        });
         resolve();
       });
     });

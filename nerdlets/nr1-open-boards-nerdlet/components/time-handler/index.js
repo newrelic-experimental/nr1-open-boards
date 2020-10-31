@@ -1,7 +1,7 @@
 import React from 'react';
 import { DataConsumer } from '../../context/data';
 import { timeRangeToNrql } from '@newrelic/nr1-community';
-
+import { nerdlet } from 'nr1';
 // for whatever strange reason nr1 platformStatecontext always gets updates on drags
 // because of this it continues causing unnecessary re-renders
 // the timehandler component aims to alleviate that issue
@@ -59,6 +59,9 @@ export default class TimeHandler extends React.PureComponent {
       };
 
       this.setState(stateUpdate, () => {
+        nerdlet.setUrlState({
+          timeRange
+        });
         updateDataStateContext(stateUpdate);
       });
     }
