@@ -24,7 +24,7 @@ export default class ChartGrid extends React.PureComponent {
     this.updateSize(width, height);
   }
 
-  // debounce the input to avoid continous re-renders
+  // debounce the size change to avoid continous re-renders
   updateSize = _.debounce((width, height) => {
     this.setState({ width, height });
   }, 500);

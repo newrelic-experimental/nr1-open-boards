@@ -2,6 +2,7 @@ import React from 'react';
 import {
   Modal,
   Icon,
+  Label,
   Button,
   Popup,
   Form,
@@ -104,6 +105,44 @@ export default class ManageFilters extends React.Component {
     const { filters } = this.state;
     filters.splice(index, 1);
     this.filterUpdate(selectedBoard, storageLocation, updateBoard);
+  };
+
+  orderFilters = async (selectedBoard, storageLocation, updateBoard) => {
+    const { document } = selectedBoard;
+
+    const sortedFilters = document.filters.sort((a, b) => {
+      if (a.name > b.name) return 1;
+      if (a.name < b.name) return -1;
+      return 0;
+    });
+
+    document.filters = sortedFilters;
+
+    switch (storageLocation.type) {
+      case 'user': {
+        const result = await writeUserDocument(
+          'OpenBoards',
+          selectedBoard.value,
+          document
+        );
+        if (result && result.data) {
+          updateBoard(document);
+        }
+        break;
+      }
+      case 'account': {
+        const result = await writeAccountDocument(
+          storageLocation.value,
+          'OpenBoards',
+          selectedBoard.value,
+          document
+        );
+        if (result && result.data) {
+          updateBoard(document);
+        }
+        break;
+      }
+    }
   };
 
   render() {
@@ -215,7 +254,25 @@ export default class ManageFilters extends React.Component {
                   </Form.Group>
                 </Form>
                 <Divider />
-                {filters.length === 0 ? 'No filters defined.' : ''}
+                {filters.length === 0 ? (
+                  'No filters defined.'
+                ) : (
+                  <>
+                    <Label
+                      style={{ cursor: 'pointer' }}
+                      icon="sort alphabet ascending"
+                      content="Order Filters"
+                      onClick={() =>
+                        this.orderFilters(
+                          selectedBoard,
+                          storageLocation,
+                          updateBoard
+                        )
+                      }
+                    />
+                    <Divider />
+                  </>
+                )}
                 {filters.map((f, i) => {
                   return (
                     <div key={i}>
