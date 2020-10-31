@@ -3,13 +3,11 @@ no-eval: 0
 */
 
 import React from 'react';
-import { AutoSizer, NrqlQuery, NerdGraphQuery } from 'nr1';
+import { AutoSizer, NrqlQuery } from 'nr1';
 import WidgetDropDown from './drop-down';
 import WidgetChart from './chart';
 import wcm from 'wildcard-match';
-import { getAlertsDeploysQuery, getGuidsQuery, randomColor } from './utils';
-import queue from 'async/queue';
-import { chunk } from '../../../lib/helper';
+import { randomColor } from './utils';
 import { stripQueryTime } from '../../chart-grid/utils';
 // import { DataConsumer } from '../../context/data';
 

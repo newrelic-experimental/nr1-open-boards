@@ -48,7 +48,14 @@ export class DataProvider extends Component {
       createNrqlWidgetOpen: false,
       basicHtmlWidgetOpen: false,
       entityHdvWidgetOpen: false,
-      selectedWidget: null
+      selectedWidget: null,
+      platform_begin_time: 0,
+      platform_end_time: 0,
+      platform_duration: 0,
+      begin_time: 0,
+      end_time: 0,
+      timeRange: {},
+      sinceClause: ''
     };
   }
 

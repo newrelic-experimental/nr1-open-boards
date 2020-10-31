@@ -18,8 +18,9 @@ import { NrqlQuery, NerdGraphQuery } from 'nr1';
 import { chunk } from '../../lib/helper';
 import queue from 'async/queue';
 import EventTimeline from '../renderer/event-timeline';
+import MapBox from '../renderer/mapbox';
 
-export default class Grid extends React.Component {
+export default class Grid extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
@@ -461,6 +462,9 @@ export default class Grid extends React.Component {
                     end_time={end_time}
                   />
                 );
+              }
+              case 'mapbox': {
+                return <MapBox i={w.i} widget={w.widget} />;
               }
               case 'eventtimeline': {
                 return (
