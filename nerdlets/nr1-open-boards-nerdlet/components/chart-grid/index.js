@@ -3,10 +3,34 @@ import { DataConsumer } from '../../context/data';
 import { buildFilterClause } from './utils';
 import Grid from './grid';
 import BoardSelector from './board-selector';
+import _ from 'lodash';
 
 export default class ChartGrid extends React.PureComponent {
-  render() {
+  constructor(props) {
+    super(props);
+    this.state = {
+      width: 1,
+      height: 1
+    };
+  }
+
+  componentDidMount() {
     const { height, width } = this.props;
+    this.setState({ height, width });
+  }
+
+  componentDidUpdate() {
+    const { height, width } = this.props;
+    this.updateSize(width, height);
+  }
+
+  // debounce the input to avoid continous re-renders
+  updateSize = _.debounce((width, height) => {
+    this.setState({ width, height });
+  }, 500);
+
+  render() {
+    const { height, width } = this.state;
 
     return (
       <DataConsumer>
