@@ -201,7 +201,9 @@ export default class Grid extends React.PureComponent {
       entitySearchEventData[eventStream.name] = entitySearchResults;
     }
 
-    this.setState({ nrqlEventData, entitySearchEventData });
+    this.setState({ nrqlEventData, entitySearchEventData }, () =>
+      this.forceUpdate()
+    );
   };
 
   // wrap NrqlQuery so we can stitch additional data
@@ -391,11 +393,11 @@ export default class Grid extends React.PureComponent {
       end_time
     } = this.props;
     const {
-      nrqlEventData,
-      entitySearchEventData,
       accounts,
       filters,
-      dbFilters
+      dbFilters,
+      nrqlEventData,
+      entitySearchEventData
     } = this.state;
 
     return (
