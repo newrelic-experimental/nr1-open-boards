@@ -163,7 +163,7 @@ export const deriveEvents = (
       const formattedEvents = {
         metadata: {
           id: `events_${n.name}`,
-          name: n.name,
+          name: n.name.replace(/Kubernetes/g, 'K8s'),
           color: n.color || '#000000',
           viz: 'event'
         },

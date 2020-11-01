@@ -8,6 +8,9 @@ import WidgetDropDown from './drop-down';
 import WidgetChart from './chart';
 import wcm from 'wildcard-match';
 import { randomColor } from './utils';
+import { toast } from 'react-toastify';
+
+toast.configure();
 // import { stripQueryTime } from '../../chart-grid/utils';
 // import { DataConsumer } from '../../context/data';
 
@@ -179,7 +182,7 @@ export default class NrqlWidget extends React.Component {
 
         const queryData = await Promise.all(queryPromises);
         queryData.forEach((result, i) => {
-          if (!result.error) {
+          if (result && !result.error) {
             const { accountId, sourceIndex } = result;
             const chartData = ((result || {}).data || {}).chart || [];
             chartData.forEach(c => {
@@ -238,12 +241,20 @@ export default class NrqlWidget extends React.Component {
       NrqlQuery.query({
         query: `${nrqlQuery} WHERE ${time}=${time}`,
         accountId
-      }).then(value => {
-        value.accountId = accountId;
-        value.sourceIndex = sourceIndex;
-        if (color) value.color = color;
-        resolve(value);
-      });
+      })
+        .then(value => {
+          value.accountId = accountId;
+          value.sourceIndex = sourceIndex;
+          if (color) value.color = color;
+          resolve(value);
+        })
+        .catch(err => {
+          toast.error(err, {
+            autoClose: 10000,
+            containerId: 'B'
+          });
+          resolve(null);
+        });
     });
   };
 
