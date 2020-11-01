@@ -57,7 +57,8 @@ export class DataProvider extends Component {
       end_time: 0,
       timeRange: {},
       sinceClause: '',
-      urlStateChecked: false
+      urlStateChecked: false,
+      initialized: false
     };
   }
 
@@ -67,17 +68,20 @@ export class DataProvider extends Component {
     await this.getBoards('user');
     const { accounts, storageOptions } = await this.getAccounts();
 
-    this.setState({ userConfig, accounts, storageOptions }, () => {
-      if (this.state.accounts.length === 0) {
-        toast.error(
-          'Unable to load accounts, please check your nerdpack uuid.',
-          {
-            autoClose: 10000,
-            containerId: 'B'
-          }
-        );
+    this.setState(
+      { userConfig, accounts, storageOptions, initialized: true },
+      () => {
+        if (this.state.accounts.length === 0) {
+          toast.error(
+            'Unable to load accounts, please check your nerdpack uuid.',
+            {
+              autoClose: 10000,
+              containerId: 'B'
+            }
+          );
+        }
       }
-    });
+    );
   }
 
   componentDidCatch(err, errInfo) {
@@ -164,7 +168,7 @@ export class DataProvider extends Component {
         Object.keys(stateData).forEach(key => {
           if (key === 'selectedBoard') {
             nerdlet.setUrlState({
-              name: stateData[key].id
+              name: stateData[key] ? stateData[key].id : null
             });
           }
         });

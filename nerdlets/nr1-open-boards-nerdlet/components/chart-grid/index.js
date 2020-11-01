@@ -4,6 +4,7 @@ import { buildFilterClause } from './utils';
 import Grid from './grid';
 import BoardSelector from './board-selector';
 import _ from 'lodash';
+import { Dimmer, Loader } from 'semantic-ui-react';
 
 export default class ChartGrid extends React.PureComponent {
   constructor(props) {
@@ -40,12 +41,21 @@ export default class ChartGrid extends React.PureComponent {
           begin_time,
           end_time,
           timeRange,
-          sinceClause
+          sinceClause,
+          initialized
         }) => {
           if (selectedBoard) {
             const { document } = selectedBoard;
             const dbFilters = document.filters || [];
             const filterClause = buildFilterClause(filters, dbFilters);
+
+            if (initialized === false || sinceClause === '') {
+              return (
+                <Dimmer active inverted>
+                  <Loader>Loading...</Loader>
+                </Dimmer>
+              );
+            }
 
             return (
               <Grid

@@ -13,7 +13,7 @@ export default class NerdletStateHandler extends React.PureComponent {
         const selectedBoard = boards.find(b => b.id === name);
 
         if (selectedBoard) {
-          updateDataStateContext({ selectedBoard, filters });
+          updateDataStateContext({ selectedBoard, filters: filters || [] });
         }
 
         updateDataStateContext({ urlStateChecked: true });
