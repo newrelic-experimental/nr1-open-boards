@@ -8,14 +8,13 @@ import WidgetDropDown from './drop-down';
 import WidgetChart from './chart';
 import wcm from 'wildcard-match';
 import { randomColor } from './utils';
-import { stripQueryTime } from '../../chart-grid/utils';
+// import { stripQueryTime } from '../../chart-grid/utils';
 // import { DataConsumer } from '../../context/data';
 
 export default class NrqlWidget extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      init: null,
       isFetching: false,
       filterClause: '',
       sinceClause: '',
@@ -42,7 +41,6 @@ export default class NrqlWidget extends React.Component {
         widgetStr: JSON.stringify(widget),
         filterClause,
         sinceClause,
-        init: true,
         color: randomColor(),
         pollInterval,
         begin_time,
@@ -112,7 +110,6 @@ export default class NrqlWidget extends React.Component {
     end_time
   ) => {
     const stateUpdate = {
-      init: false,
       filterClause,
       sinceClause,
       pollInterval,
@@ -152,24 +149,26 @@ export default class NrqlWidget extends React.Component {
   };
 
   fetchData = widget => {
-    const { isFetching, filterClause, sinceClause, init, color } = this.state;
+    const { isFetching, filterClause, sinceClause, color } = this.state;
     if (!isFetching) {
       const queryPromises = [];
       const rawData = [];
-      const useSince = init === false ? sinceClause : '';
 
       this.setState({ isFetching: true }, async () => {
         widget.sources.forEach((s, sourceIndex) => {
           s.accounts.forEach(accountId => {
             // handle nrdb queries
             if (s.nrqlQuery) {
-              const nrqlQuery = useSince
-                ? stripQueryTime(s.nrqlQuery)
-                : s.nrqlQuery;
+              const lowerNrqlQuery = s.nrqlQuery.toLowerCase();
+              const nrqlQuery =
+                lowerNrqlQuery.includes('until') ||
+                lowerNrqlQuery.includes('since')
+                  ? s.nrqlQuery
+                  : `${s.nrqlQuery} ${sinceClause}`;
 
               queryPromises.push(
                 this.nrqlQuery(
-                  `${nrqlQuery} ${filterClause} ${useSince}`,
+                  `${nrqlQuery} ${filterClause}`,
                   accountId,
                   sourceIndex
                 )
@@ -201,18 +200,19 @@ export default class NrqlWidget extends React.Component {
           // handle nrdb queries
           if (e.nrqlQuery) {
             (e.accounts || []).forEach(accountId => {
-              const nrqlQuery = useSince
-                ? stripQueryTime(e.nrqlQuery)
-                : e.nrqlQuery;
+              const lowerNrqlQuery = e.nrqlQuery.toLowerCase();
+              const nrqlQuery =
+                lowerNrqlQuery.includes('until') ||
+                lowerNrqlQuery.includes('since')
+                  ? e.nrqlQuery
+                  : `${e.nrqlQuery} ${sinceClause}`;
 
               const ignoreFilters =
                 e.ignoreFilters && e.ignoreFilters === 'true' ? true : false;
 
               eventPromises.push(
                 this.nrqlQuery(
-                  `${nrqlQuery} ${
-                    ignoreFilters ? '' : filterClause
-                  } ${useSince}`,
+                  `${nrqlQuery} ${ignoreFilters ? '' : filterClause}`,
                   accountId,
                   sourceIndex,
                   e.color || color

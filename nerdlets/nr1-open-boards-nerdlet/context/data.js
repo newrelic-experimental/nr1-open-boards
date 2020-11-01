@@ -94,9 +94,8 @@ export class DataProvider extends Component {
       switch (type) {
         case 'user': {
           getUserCollection(collectionName).then(value => {
-            this.setState({ boards: buildBoardOptions(value) }, () =>
-              resolve()
-            );
+            const boards = buildBoardOptions(value);
+            this.setState({ boards }, () => resolve(boards));
           });
           break;
         }
@@ -105,9 +104,8 @@ export class DataProvider extends Component {
             accountId || storageLocation.value,
             collectionName
           ).then(value => {
-            this.setState({ boards: buildBoardOptions(value) }, () =>
-              resolve()
-            );
+            const boards = buildBoardOptions(value);
+            this.setState({ boards }, () => resolve(boards));
           });
           break;
         }
@@ -168,7 +166,18 @@ export class DataProvider extends Component {
         Object.keys(stateData).forEach(key => {
           if (key === 'selectedBoard') {
             nerdlet.setUrlState({
-              name: stateData[key] ? stateData[key].id : null
+              name: stateData[key] ? stateData[key].id : null,
+              filters: {}
+            });
+          } else if (key === 'storageLocation') {
+            let storageLocation = null;
+            if (stateData[key]) {
+              storageLocation = {
+                key: stateData[key].key
+              };
+            }
+            nerdlet.setUrlState({
+              storageLocation
             });
           }
         });

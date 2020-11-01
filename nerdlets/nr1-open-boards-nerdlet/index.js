@@ -11,17 +11,17 @@ export default class OpenBoardsRoot extends React.PureComponent {
   render() {
     return (
       <DataProvider>
-        <PlatformStateContext.Consumer>
-          {platformState => {
-            return <TimeHandler timeRange={platformState.timeRange} />;
-          }}
-        </PlatformStateContext.Consumer>
-
         <NerdletStateContext.Consumer>
           {nerdletState => {
             return <NerdletStateHandler nerdletState={nerdletState} />;
           }}
         </NerdletStateContext.Consumer>
+
+        <PlatformStateContext.Consumer>
+          {platformState => {
+            return <TimeHandler timeRange={platformState.timeRange} />;
+          }}
+        </PlatformStateContext.Consumer>
 
         <AutoSizer>
           {({ width, height }) => {

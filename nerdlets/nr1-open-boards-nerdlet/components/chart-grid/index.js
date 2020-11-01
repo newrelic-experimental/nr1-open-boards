@@ -42,20 +42,25 @@ export default class ChartGrid extends React.PureComponent {
           end_time,
           timeRange,
           sinceClause,
-          initialized
+          initialized,
+          urlStateChecked
         }) => {
+          if (
+            urlStateChecked === false ||
+            initialized === false ||
+            sinceClause === ''
+          ) {
+            return (
+              <Dimmer active inverted>
+                <Loader>Loading...</Loader>
+              </Dimmer>
+            );
+          }
+
           if (selectedBoard) {
             const { document } = selectedBoard;
             const dbFilters = document.filters || [];
             const filterClause = buildFilterClause(filters, dbFilters);
-
-            if (initialized === false || sinceClause === '') {
-              return (
-                <Dimmer active inverted>
-                  <Loader>Loading...</Loader>
-                </Dimmer>
-              );
-            }
 
             return (
               <Grid

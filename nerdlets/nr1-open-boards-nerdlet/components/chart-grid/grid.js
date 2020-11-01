@@ -6,7 +6,6 @@ import NrqlWidget from '../renderer/nrql-widget';
 import BasicHTML from '../renderer/html-widget';
 import {
   writeStyle,
-  stripQueryTime,
   deriveEvents,
   deriveAccounts,
   getGuidsQuery,
@@ -25,7 +24,6 @@ export default class Grid extends React.PureComponent {
     super(props);
     this.state = {
       eventStreamsStr: '',
-      init: true,
       nrqlEventData: {},
       entitySearchEventData: {},
       timeRangeStr: '',
@@ -117,7 +115,6 @@ export default class Grid extends React.PureComponent {
           dbFilters,
           begin_time,
           end_time,
-          init: false,
           accounts
         },
         () => {
@@ -139,14 +136,7 @@ export default class Grid extends React.PureComponent {
   };
 
   fetchData = async (i, eventStream) => {
-    const {
-      init,
-      sinceClause,
-      filterClause,
-      begin_time,
-      end_time
-    } = this.state;
-    const useSince = init === false ? sinceClause : '';
+    const { sinceClause, filterClause, begin_time, end_time } = this.state;
 
     const nrqlQueryPromises = [];
     const entitySearchPromises = [];
@@ -155,13 +145,15 @@ export default class Grid extends React.PureComponent {
         const ignoreFilters =
           eventStream.ignoreFilters === 'true' ? true : false;
 
-        const nrqlQuery = useSince
-          ? stripQueryTime(eventStream.query)
-          : eventStream.query;
+        const lowerNrqlQuery = eventStream.query.toLowerCase();
+        const nrqlQuery =
+          lowerNrqlQuery.includes('until') || lowerNrqlQuery.includes('since')
+            ? eventStream.query
+            : `${eventStream.query} ${sinceClause}`;
 
         nrqlQueryPromises.push(
           this.nrqlQuery(
-            `${nrqlQuery} ${ignoreFilters ? '' : filterClause} ${useSince}`,
+            `${nrqlQuery} ${ignoreFilters ? '' : filterClause}`,
             accountId,
             eventStream.color
           )

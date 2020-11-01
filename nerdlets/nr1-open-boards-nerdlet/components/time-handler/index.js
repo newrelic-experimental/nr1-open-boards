@@ -16,11 +16,11 @@ export default class TimeHandler extends React.PureComponent {
     };
   }
 
-  handleUpdate = (updateDataStateContext, props) => {
-    this.updateTime(updateDataStateContext, props);
+  handleUpdate = (updateDataStateContext, props, timeRange) => {
+    this.updateTime(updateDataStateContext, props, timeRange);
   };
 
-  updateTime = (updateDataStateContext, props) => {
+  updateTime = (updateDataStateContext, props, existingTimeRange) => {
     const { timeRange } = props;
     const { init } = this.state;
 
@@ -32,7 +32,7 @@ export default class TimeHandler extends React.PureComponent {
       let end_time = 0;
       let begin_time = 0;
 
-      if (init) {
+      if (init && !existingTimeRange) {
         end_time = Date.now();
         begin_time = end_time - 3600000;
       } else if (timeRange.duration) {
@@ -70,8 +70,8 @@ export default class TimeHandler extends React.PureComponent {
   render() {
     return (
       <DataConsumer>
-        {({ updateDataStateContext }) => {
-          this.handleUpdate(updateDataStateContext, this.props);
+        {({ updateDataStateContext, timeRange }) => {
+          this.handleUpdate(updateDataStateContext, this.props, timeRange);
           return '';
         }}
       </DataConsumer>
