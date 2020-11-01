@@ -28,6 +28,11 @@ export const buildFilterClause = (filters, dbFilters) => {
           operator = whereValue.includes('%') ? ' LIKE ' : '=';
         }
 
+        // auto adjust operatorif percent wildcard is
+        if (whereValue.includes('%')) {
+          operator = 'LIKE';
+        }
+
         const filterNames = filterName.split(',');
 
         let multiWhere = ' WHERE';
@@ -59,6 +64,11 @@ export const buildFilterClause = (filters, dbFilters) => {
           operator = dbFilters[z].operator;
         } else {
           operator = whereValue.includes('%') ? ' LIKE ' : '=';
+        }
+
+        // auto adjust operatorif percent wildcard is
+        if (whereValue.includes('%')) {
+          operator = 'LIKE';
         }
 
         const filterNames = filterName.split(',');
@@ -252,7 +262,7 @@ export const buildTagFilterQuery = (
         appendedTags += accountTagsQuery;
       } else if (t === 'name') {
         let operator = '';
-        const values = [];
+        let values = [];
 
         for (let z = 0; z < tfDbFilters.length; z++) {
           const { name } = tfDbFilters[z];
@@ -276,9 +286,14 @@ export const buildTagFilterQuery = (
           }
         }
 
+        values = values.filter(v => v !== '%');
+
         if (operator && operator !== '>' && operator !== '<') {
           let allNames = '';
           for (let x = 0; x < values.length; x++) {
+            if (values[x].includes('%')) {
+              operator = 'LIKE';
+            }
             if (x === 0) {
               allNames += ` name ${operator} '${values[x]}' `;
             } else {
@@ -294,6 +309,8 @@ export const buildTagFilterQuery = (
 
     query += appendedTags;
   }
+
+  query = query.replace(/AND \(\)/g, '');
 
   return query;
 };
