@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Icon, Button, Popup, Form, Divider } from 'semantic-ui-react';
+import { Modal, Form, Divider } from 'semantic-ui-react';
 import AceEditor from 'react-ace';
 import 'ace-builds/src-noconflict/mode-css';
 import 'ace-builds/src-noconflict/theme-tomorrow';
@@ -10,7 +10,6 @@ export default class ManageStyles extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      styleOpen: false,
       className: '',
       classValue: `{\n\n}`,
       styles: []
@@ -22,10 +21,6 @@ export default class ManageStyles extends React.Component {
       this.setState({ styles: this.props.styles });
     }
   }
-
-  handleOpen = () => this.setState({ styleOpen: true });
-
-  handleClose = () => this.setState({ styleOpen: false });
 
   filterUpdate = async (selectedBoard, storageLocation, updateBoard) => {
     const { styles } = this.state;
@@ -85,47 +80,49 @@ export default class ManageStyles extends React.Component {
     return (
       <DataConsumer>
         {({
+          openStyles,
           selectedBoard,
           storageLocation,
           updateBoard,
           updateDataStateContext
         }) => {
-          const { styles, styleOpen, className, classValue } = this.state;
+          const { styles, className, classValue } = this.state;
 
           return (
             <Modal
               dimmer="inverted"
               closeIcon
-              open={styleOpen}
+              open={openStyles}
               onUnmount={() => updateDataStateContext({ closeCharts: false })}
               onMount={() => updateDataStateContext({ closeCharts: true })}
-              onClose={this.handleClose}
+              onClose={() => updateDataStateContext({ openStyles: false })}
               size="fullscreen"
-              trigger={
-                <Popup
-                  basic
-                  content="Manage Styles"
-                  trigger={
-                    <Button
-                      onClick={this.handleOpen}
-                      style={{ height: '45px' }}
-                      className="filter-button"
-                    >
-                      <Icon.Group
-                        size="large"
-                        style={{
-                          marginTop: '5px',
-                          marginLeft: '8px',
-                          marginRight: '-10px'
-                        }}
-                      >
-                        <Icon name="css3" />
-                        <Icon corner="bottom right" name="add" />
-                      </Icon.Group>
-                    </Button>
-                  }
-                />
-              }
+              // trigger=
+              // {
+              //   <Popup
+              //     basic
+              //     content="Manage Styles"
+              //     trigger={
+              //       <Button
+              //         onClick={this.handleOpen}
+              //         style={{ height: '45px' }}
+              //         className="filter-button"
+              //       >
+              //         <Icon.Group
+              //           size="large"
+              //           style={{
+              //             marginTop: '5px',
+              //             marginLeft: '8px',
+              //             marginRight: '-10px'
+              //           }}
+              //         >
+              //           <Icon name="css3" />
+              //           <Icon corner="bottom right" name="add" />
+              //         </Icon.Group>
+              //       </Button>
+              //     }
+              //   />
+              // }
             >
               <Modal.Header>Manage Styles</Modal.Header>
 

@@ -1,14 +1,5 @@
 import React from 'react';
-import {
-  Modal,
-  Icon,
-  Label,
-  Button,
-  Popup,
-  Form,
-  Divider,
-  Message
-} from 'semantic-ui-react';
+import { Modal, Label, Form, Divider, Message } from 'semantic-ui-react';
 import { writeUserDocument, writeAccountDocument } from '../../../lib/utils';
 import { DataConsumer } from '../../../context/data';
 
@@ -27,7 +18,6 @@ export default class ManageFilters extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      filterOpen: false,
       filterName: '',
       filterDefault: '*',
       operator: null,
@@ -41,10 +31,6 @@ export default class ManageFilters extends React.Component {
       this.setState({ filters: this.props.filters });
     }
   }
-
-  handleOpen = () => this.setState({ filterOpen: true });
-
-  handleClose = () => this.setState({ filterOpen: false });
 
   filterUpdate = async (selectedBoard, storageLocation, updateBoard) => {
     const { filters } = this.state;
@@ -149,53 +135,51 @@ export default class ManageFilters extends React.Component {
     return (
       <DataConsumer>
         {({
+          openFilters,
           selectedBoard,
           storageLocation,
           updateBoard,
           updateDataStateContext
         }) => {
-          const {
-            filters,
-            filterOpen,
-            filterName,
-            filterDefault,
-            operator
-          } = this.state;
+          const { filters, filterName, filterDefault, operator } = this.state;
 
           return (
             <Modal
               dimmer="inverted"
               closeIcon
-              open={filterOpen}
+              open={openFilters}
               onUnmount={() => updateDataStateContext({ closeCharts: false })}
               onMount={() => updateDataStateContext({ closeCharts: true })}
-              onClose={this.handleClose}
+              onClose={() => updateDataStateContext({ openFilters: false })}
               size="fullscreen"
-              trigger={
-                <Popup
-                  basic
-                  content="Manage Filters"
-                  trigger={
-                    <Button
-                      onClick={this.handleOpen}
-                      style={{ height: '45px' }}
-                      className="filter-button"
-                    >
-                      <Icon.Group
-                        size="large"
-                        style={{
-                          marginTop: '5px',
-                          marginLeft: '8px',
-                          marginRight: '-10px'
-                        }}
-                      >
-                        <Icon name="filter" />
-                        <Icon corner="bottom right" name="add" />
-                      </Icon.Group>
-                    </Button>
-                  }
-                />
-              }
+              // trigger=
+              // {
+              // <Popup
+              //   basic
+              //   content="Manage Filters"
+              //   trigger={
+              //     <Button
+              //       onClick={() =>
+              //         updateDataStateContext({ openFilters: true })
+              //       }
+              //       style={{ height: '45px' }}
+              //       className="filter-button"
+              //     >
+              //       <Icon.Group
+              //         size="large"
+              //         style={{
+              //           marginTop: '5px',
+              //           marginLeft: '8px',
+              //           marginRight: '-10px'
+              //         }}
+              //       >
+              //         <Icon name="filter" />
+              //         <Icon corner="bottom right" name="add" />
+              //       </Icon.Group>
+              //     </Button>
+              //   }
+              // />
+              // }
             >
               <Modal.Header>Manage Filters</Modal.Header>
               <Modal.Content>

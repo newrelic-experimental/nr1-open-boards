@@ -24,6 +24,8 @@ toast.configure();
 const DataContext = React.createContext();
 
 const collectionName = 'OpenBoards';
+const collectionGeoMaps = 'OpenBoardsGeoMaps';
+
 const userConfig = 'OpenBoardsUserConfig';
 const iconCollection = 'ObservabilityIcons';
 
@@ -35,6 +37,7 @@ export class DataProvider extends Component {
       userConfig: {},
       selectedBoard: null,
       boards: [],
+      geomaps: [],
       storeLocation: 'user',
       storageLocation: {
         key: 'User',
@@ -58,7 +61,11 @@ export class DataProvider extends Component {
       timeRange: {},
       sinceClause: '',
       urlStateChecked: false,
-      initialized: false
+      initialized: false,
+      openFilters: false,
+      openStyles: false,
+      openEventStreams: false,
+      openDynamicHTMLWidgets: false
     };
   }
 
@@ -89,23 +96,42 @@ export class DataProvider extends Component {
   }
 
   getBoards = (type, accountId) => {
+    return new Promise(resolve => {
+      this.getCollection(collectionName, type, accountId).then(value => {
+        const boards = buildBoardOptions(value);
+        this.setState({ boards }, () => {
+          this.getGeoMaps(type, accountId);
+          resolve(boards);
+        });
+      });
+    });
+  };
+
+  getGeoMaps = (type, accountId) => {
+    return new Promise(resolve => {
+      this.getCollection(collectionGeoMaps, type, accountId).then(value => {
+        const geomaps = buildBoardOptions(value);
+        this.setState({ geomaps }, () => resolve(geomaps));
+      });
+    });
+  };
+
+  getCollection = (collection, type, accountId) => {
     const { storageLocation } = this.state;
     return new Promise(resolve => {
       switch (type) {
         case 'user': {
-          getUserCollection(collectionName).then(value => {
-            const boards = buildBoardOptions(value);
-            this.setState({ boards }, () => resolve(boards));
+          getUserCollection(collection).then(value => {
+            resolve(value);
           });
           break;
         }
         case 'account': {
           getAccountCollection(
             accountId || storageLocation.value,
-            collectionName
+            collection
           ).then(value => {
-            const boards = buildBoardOptions(value);
-            this.setState({ boards }, () => resolve(boards));
+            resolve(value);
           });
           break;
         }
@@ -214,7 +240,8 @@ export class DataProvider extends Component {
           ...this.state,
           updateDataStateContext: this.updateDataStateContext,
           updateBoard: this.updateBoard,
-          getBoards: this.getBoards
+          getBoards: this.getBoards,
+          getGeoMaps: this.getGeoMaps
         }}
       >
         <ToastContainer

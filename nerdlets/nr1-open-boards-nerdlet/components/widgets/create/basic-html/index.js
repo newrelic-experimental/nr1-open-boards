@@ -53,7 +53,7 @@ export default class BasicHTMLWidget extends React.Component {
               trigger={
                 <Popup
                   basic
-                  content="Add a basic HTML widget"
+                  content="Create basic HTML widget"
                   trigger={
                     <Button
                       onClick={() => this.handleOpen(updateDataStateContext)}

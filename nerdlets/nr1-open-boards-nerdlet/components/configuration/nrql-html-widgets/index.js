@@ -1,13 +1,5 @@
 import React from 'react';
-import {
-  Modal,
-  Icon,
-  Button,
-  Popup,
-  Form,
-  Divider,
-  Message
-} from 'semantic-ui-react';
+import { Modal, Form, Divider, Message } from 'semantic-ui-react';
 import AceEditor from 'react-ace';
 import 'ace-builds/src-noconflict/mode-html';
 import 'ace-builds/src-noconflict/theme-tomorrow';
@@ -38,7 +30,6 @@ export default class ManageHTMLWidgets extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      htmlOpen: false,
       htmlName: '',
       htmlValue: `<div>\n     Hello World\n</div>`,
       htmlWidgets: []
@@ -50,10 +41,6 @@ export default class ManageHTMLWidgets extends React.Component {
       this.setState({ htmlWidgets: this.props.htmlWidgets });
     }
   }
-
-  handleOpen = () => this.setState({ htmlOpen: true });
-
-  handleClose = () => this.setState({ htmlOpen: false });
 
   filterUpdate = async (selectedBoard, storageLocation, updateBoard) => {
     const { htmlWidgets } = this.state;
@@ -116,47 +103,50 @@ export default class ManageHTMLWidgets extends React.Component {
     return (
       <DataConsumer>
         {({
+          openDynamicHTMLWidgets,
           selectedBoard,
           storageLocation,
           updateBoard,
           updateDataStateContext
         }) => {
-          const { htmlWidgets, htmlOpen, htmlName, htmlValue } = this.state;
+          const { htmlWidgets, htmlName, htmlValue } = this.state;
 
           return (
             <Modal
               dimmer="inverted"
               closeIcon
-              open={htmlOpen}
+              open={openDynamicHTMLWidgets}
               onUnmount={() => updateDataStateContext({ closeCharts: false })}
               onMount={() => updateDataStateContext({ closeCharts: true })}
-              onClose={this.handleClose}
-              size="fullscreen"
-              trigger={
-                <Popup
-                  basic
-                  content="Manage Dynamic HTML Widgets"
-                  trigger={
-                    <Button
-                      onClick={this.handleOpen}
-                      style={{ height: '45px' }}
-                      className="filter-button"
-                    >
-                      <Icon.Group
-                        size="large"
-                        style={{
-                          marginTop: '5px',
-                          marginLeft: '8px',
-                          marginRight: '-10px'
-                        }}
-                      >
-                        <Icon name="code" />
-                        <Icon corner="bottom right" name="add" />
-                      </Icon.Group>
-                    </Button>
-                  }
-                />
+              onClose={() =>
+                updateDataStateContext({ openDynamicHTMLWidgets: false })
               }
+              size="fullscreen"
+              // trigger={
+              //   <Popup
+              //     basic
+              //     content="Manage Dynamic HTML Widgets"
+              //     trigger={
+              //       <Button
+              //         onClick={this.handleOpen}
+              //         style={{ height: '45px' }}
+              //         className="filter-button"
+              //       >
+              //         <Icon.Group
+              //           size="large"
+              //           style={{
+              //             marginTop: '5px',
+              //             marginLeft: '8px',
+              //             marginRight: '-10px'
+              //           }}
+              //         >
+              //           <Icon name="code" />
+              //           <Icon corner="bottom right" name="add" />
+              //         </Icon.Group>
+              //       </Button>
+              //     }
+              //   />
+              // }
             >
               <Modal.Header>Manage HTML Widgets</Modal.Header>
 

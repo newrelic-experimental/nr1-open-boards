@@ -1,9 +1,7 @@
 import React from 'react';
 import {
   Modal,
-  Icon,
   Button,
-  Popup,
   Form,
   Divider,
   Dropdown,
@@ -211,7 +209,6 @@ export default class ManageEventStreams extends React.Component {
       keysets: [],
       keysetEventLength: 0,
       keysetAccountsLength: 0,
-      eventStreamOpen: false,
       streamName: '',
       streamQuery: '',
       type: 'nrql',
@@ -231,10 +228,6 @@ export default class ManageEventStreams extends React.Component {
       this.setState({ eventStreams: this.props.eventStreams });
     }
   }
-
-  handleOpen = () => this.setState({ eventStreamOpen: true });
-
-  handleClose = () => this.setState({ eventStreamOpen: false });
 
   fetchKeysets = (eventTypes, accounts) => {
     const {
@@ -413,7 +406,6 @@ export default class ManageEventStreams extends React.Component {
   render() {
     const {
       eventStreams,
-      eventStreamOpen,
       streamName,
       streamQuery,
       type,
@@ -444,6 +436,7 @@ export default class ManageEventStreams extends React.Component {
     return (
       <DataConsumer>
         {({
+          openEventStreams,
           selectedBoard,
           storageLocation,
           updateBoard,
@@ -512,36 +505,38 @@ export default class ManageEventStreams extends React.Component {
             <Modal
               dimmer="inverted"
               closeIcon
-              open={eventStreamOpen}
+              open={openEventStreams}
               onUnmount={() => updateDataStateContext({ closeCharts: false })}
               onMount={() => updateDataStateContext({ closeCharts: true })}
-              onClose={this.handleClose}
-              size="fullscreen"
-              trigger={
-                <Popup
-                  basic
-                  content="Manage Event Streams"
-                  trigger={
-                    <Button
-                      onClick={this.handleOpen}
-                      style={{ height: '45px' }}
-                      className="filter-button"
-                    >
-                      <Icon.Group
-                        size="large"
-                        style={{
-                          marginTop: '5px',
-                          marginLeft: '8px',
-                          marginRight: '-10px'
-                        }}
-                      >
-                        <Icon name="barcode" />
-                        <Icon corner="bottom right" name="add" />
-                      </Icon.Group>
-                    </Button>
-                  }
-                />
+              onClose={() =>
+                updateDataStateContext({ openEventStreams: false })
               }
+              size="fullscreen"
+              // trigger={
+              //   <Popup
+              //     basic
+              //     content="Manage Event Streams"
+              //     trigger={
+              //       <Button
+              //         onClick={this.handleOpen}
+              //         style={{ height: '45px' }}
+              //         className="filter-button"
+              //       >
+              //         <Icon.Group
+              //           size="large"
+              //           style={{
+              //             marginTop: '5px',
+              //             marginLeft: '8px',
+              //             marginRight: '-10px'
+              //           }}
+              //         >
+              //           <Icon name="barcode" />
+              //           <Icon corner="bottom right" name="add" />
+              //         </Icon.Group>
+              //       </Button>
+              //     }
+              //   />
+              // }
             >
               <Modal.Header>Manage Event Streams</Modal.Header>
               <Modal.Content>
