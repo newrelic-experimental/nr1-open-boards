@@ -1,13 +1,5 @@
 import React from 'react';
-import {
-  Modal,
-  Icon,
-  Button,
-  Popup,
-  Form,
-  Divider,
-  Message
-} from 'semantic-ui-react';
+import { Modal, Label, Form, Divider, Message } from 'semantic-ui-react';
 import { writeUserDocument, writeAccountDocument } from '../../../lib/utils';
 import { DataConsumer } from '../../../context/data';
 
@@ -26,7 +18,6 @@ export default class ManageFilters extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      filterOpen: false,
       filterName: '',
       filterDefault: '*',
       operator: null,
@@ -40,10 +31,6 @@ export default class ManageFilters extends React.Component {
       this.setState({ filters: this.props.filters });
     }
   }
-
-  handleOpen = () => this.setState({ filterOpen: true });
-
-  handleClose = () => this.setState({ filterOpen: false });
 
   filterUpdate = async (selectedBoard, storageLocation, updateBoard) => {
     const { filters } = this.state;
@@ -106,57 +93,93 @@ export default class ManageFilters extends React.Component {
     this.filterUpdate(selectedBoard, storageLocation, updateBoard);
   };
 
+  orderFilters = async (selectedBoard, storageLocation, updateBoard) => {
+    const { document } = selectedBoard;
+
+    const sortedFilters = document.filters.sort((a, b) => {
+      if (a.name > b.name) return 1;
+      if (a.name < b.name) return -1;
+      return 0;
+    });
+
+    document.filters = sortedFilters;
+
+    switch (storageLocation.type) {
+      case 'user': {
+        const result = await writeUserDocument(
+          'OpenBoards',
+          selectedBoard.value,
+          document
+        );
+        if (result && result.data) {
+          updateBoard(document);
+        }
+        break;
+      }
+      case 'account': {
+        const result = await writeAccountDocument(
+          storageLocation.value,
+          'OpenBoards',
+          selectedBoard.value,
+          document
+        );
+        if (result && result.data) {
+          updateBoard(document);
+        }
+        break;
+      }
+    }
+  };
+
   render() {
     return (
       <DataConsumer>
         {({
+          openFilters,
           selectedBoard,
           storageLocation,
           updateBoard,
           updateDataStateContext
         }) => {
-          const {
-            filters,
-            filterOpen,
-            filterName,
-            filterDefault,
-            operator
-          } = this.state;
+          const { filters, filterName, filterDefault, operator } = this.state;
 
           return (
             <Modal
               dimmer="inverted"
               closeIcon
-              open={filterOpen}
+              open={openFilters}
               onUnmount={() => updateDataStateContext({ closeCharts: false })}
               onMount={() => updateDataStateContext({ closeCharts: true })}
-              onClose={this.handleClose}
+              onClose={() => updateDataStateContext({ openFilters: false })}
               size="fullscreen"
-              trigger={
-                <Popup
-                  basic
-                  content="Manage Filters"
-                  trigger={
-                    <Button
-                      onClick={this.handleOpen}
-                      style={{ height: '45px' }}
-                      className="filter-button"
-                    >
-                      <Icon.Group
-                        size="large"
-                        style={{
-                          marginTop: '5px',
-                          marginLeft: '8px',
-                          marginRight: '-10px'
-                        }}
-                      >
-                        <Icon name="filter" />
-                        <Icon corner="bottom right" name="add" />
-                      </Icon.Group>
-                    </Button>
-                  }
-                />
-              }
+              // trigger=
+              // {
+              // <Popup
+              //   basic
+              //   content="Manage Filters"
+              //   trigger={
+              //     <Button
+              //       onClick={() =>
+              //         updateDataStateContext({ openFilters: true })
+              //       }
+              //       style={{ height: '45px' }}
+              //       className="filter-button"
+              //     >
+              //       <Icon.Group
+              //         size="large"
+              //         style={{
+              //           marginTop: '5px',
+              //           marginLeft: '8px',
+              //           marginRight: '-10px'
+              //         }}
+              //       >
+              //         <Icon name="filter" />
+              //         <Icon corner="bottom right" name="add" />
+              //       </Icon.Group>
+              //     </Button>
+              //   }
+              // />
+              // }
             >
               <Modal.Header>Manage Filters</Modal.Header>
               <Modal.Content>
@@ -215,7 +238,25 @@ export default class ManageFilters extends React.Component {
                   </Form.Group>
                 </Form>
                 <Divider />
-                {filters.length === 0 ? 'No filters defined.' : ''}
+                {filters.length === 0 ? (
+                  'No filters defined.'
+                ) : (
+                  <>
+                    <Label
+                      style={{ cursor: 'pointer' }}
+                      icon="sort alphabet ascending"
+                      content="Order Filters"
+                      onClick={() =>
+                        this.orderFilters(
+                          selectedBoard,
+                          storageLocation,
+                          updateBoard
+                        )
+                      }
+                    />
+                    <Divider />
+                  </>
+                )}
                 {filters.map((f, i) => {
                   return (
                     <div key={i}>

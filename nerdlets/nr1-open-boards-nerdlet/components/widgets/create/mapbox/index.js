@@ -1,38 +1,47 @@
 import React from 'react';
-import { Modal, Icon, Button, Popup, Input } from 'semantic-ui-react';
-import { writeUserDocument, writeAccountDocument } from '../../../../lib/utils';
-import BasicHTMLModalBody from './modal-body';
+import { Modal, Button, Popup, Icon } from 'semantic-ui-react';
 import { DataConsumer } from '../../../../context/data';
+import MapboxModalBody from './modal-body';
 
-export default class BasicHTMLWidget extends React.Component {
+export default class CreateMapboxWidget extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {};
   }
 
   handleOpen = updateDataStateContext => {
-    updateDataStateContext({ basicHtmlWidgetOpen: true });
+    updateDataStateContext({ mapboxWidgetOpen: true });
   };
 
   handleClose = updateDataStateContext => {
     updateDataStateContext({
-      basicHtmlWidgetOpen: false,
+      mapboxWidgetOpen: false,
       selectedWidget: null
     });
   };
 
   render() {
+    const { selectedChart } = this.state;
+
     return (
       <DataConsumer>
         {({
-          basicHtmlWidgetOpen,
-          selectedBoard,
+          mapboxWidgetOpen,
           updateDataStateContext,
+          storageOptions,
+          selectedBoard,
           selectedWidget
         }) => {
+          const accounts = storageOptions.map(
+            ({ label, ...keepAttrs }) => keepAttrs
+          );
+          accounts.shift();
+
+          const title = `${selectedWidget ? 'Edit' : 'Create'} Mapbox Widget`;
+
           let widget = null;
           let widgetSplit = null;
-          if (selectedWidget) {
+          if (selectedWidget && !selectedChart) {
             const { document } = selectedBoard;
             widgetSplit = selectedWidget.split('_');
             widget = document.widgets[widgetSplit[1]];
@@ -42,18 +51,20 @@ export default class BasicHTMLWidget extends React.Component {
             <Modal
               dimmer="inverted"
               closeIcon
-              open={basicHtmlWidgetOpen}
+              open={mapboxWidgetOpen}
               onUnmount={() =>
                 updateDataStateContext({
+                  closeCharts: false,
                   selectedWidget: null
                 })
               }
+              onMount={() => updateDataStateContext({ closeCharts: true })}
               onClose={() => this.handleClose(updateDataStateContext)}
               size="fullscreen"
               trigger={
                 <Popup
                   basic
-                  content="Create basic HTML widget"
+                  content={title}
                   trigger={
                     <Button
                       onClick={() => this.handleOpen(updateDataStateContext)}
@@ -68,7 +79,7 @@ export default class BasicHTMLWidget extends React.Component {
                           marginRight: '-10px'
                         }}
                       >
-                        <Icon name="image" />
+                        <Icon name="map" />
                         <Icon corner="bottom right" name="add" />
                       </Icon.Group>
                     </Button>
@@ -76,10 +87,12 @@ export default class BasicHTMLWidget extends React.Component {
                 />
               }
             >
-              <Modal.Header id="basic-create-title">HTML Widget</Modal.Header>
+              <Modal.Header id="mapbox-create-title">
+                Mapbox View Widget
+              </Modal.Header>
 
               <Modal.Content>
-                <BasicHTMLModalBody
+                <MapboxModalBody
                   widget={widget}
                   widgetNo={widgetSplit ? widgetSplit[1] : null}
                 />

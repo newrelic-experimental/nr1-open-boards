@@ -19,6 +19,8 @@ import ManageStyles from '../configuration/styles';
 import ManageHTMLWidgets from '../configuration/nrql-html-widgets';
 import ImportBoard from '../boards/import';
 import CreateEventTimelineWidget from '../widgets/create/event-timeline';
+import CreateMapboxWidget from '../widgets/create/mapbox';
+import ConfigSelector from './configuration-selector';
 
 export default class MenuBar extends React.PureComponent {
   changeLocation = async (storageLocation, updateDataStateContext) => {
@@ -101,6 +103,8 @@ export default class MenuBar extends React.PureComponent {
                     <CreateNrqlWidget />
                     <CreateEntityHdvWidget />
                     <CreateEventTimelineWidget />
+                    {/* <CreateMapboxWidget /> */}
+
                     <ManageFilters
                       filters={selectedBoard.document.filters || []}
                     />
@@ -114,6 +118,8 @@ export default class MenuBar extends React.PureComponent {
                       eventStreams={selectedBoard.document.eventStreams || []}
                     />
                     <BasicHTMLWidget />
+
+                    <ConfigSelector />
                   </>
                 ) : (
                   ''

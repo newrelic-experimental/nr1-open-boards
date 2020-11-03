@@ -15,6 +15,7 @@ import {
   getAccountCollection,
   nerdGraphQuery
 } from '../lib/utils';
+import { nerdlet } from 'nr1';
 
 const semver = require('semver');
 
@@ -23,6 +24,8 @@ toast.configure();
 const DataContext = React.createContext();
 
 const collectionName = 'OpenBoards';
+const collectionGeoMaps = 'OpenBoardsGeoMaps';
+
 const userConfig = 'OpenBoardsUserConfig';
 const iconCollection = 'ObservabilityIcons';
 
@@ -34,6 +37,7 @@ export class DataProvider extends Component {
       userConfig: {},
       selectedBoard: null,
       boards: [],
+      geomaps: [],
       storeLocation: 'user',
       storageLocation: {
         key: 'User',
@@ -48,7 +52,20 @@ export class DataProvider extends Component {
       createNrqlWidgetOpen: false,
       basicHtmlWidgetOpen: false,
       entityHdvWidgetOpen: false,
-      selectedWidget: null
+      selectedWidget: null,
+      platform_begin_time: 0,
+      platform_end_time: 0,
+      platform_duration: 0,
+      begin_time: 0,
+      end_time: 0,
+      timeRange: {},
+      sinceClause: '',
+      urlStateChecked: false,
+      initialized: false,
+      openFilters: false,
+      openStyles: false,
+      openEventStreams: false,
+      openDynamicHTMLWidgets: false
     };
   }
 
@@ -58,17 +75,20 @@ export class DataProvider extends Component {
     await this.getBoards('user');
     const { accounts, storageOptions } = await this.getAccounts();
 
-    this.setState({ userConfig, accounts, storageOptions }, () => {
-      if (this.state.accounts.length === 0) {
-        toast.error(
-          'Unable to load accounts, please check your nerdpack uuid.',
-          {
-            autoClose: 10000,
-            containerId: 'B'
-          }
-        );
+    this.setState(
+      { userConfig, accounts, storageOptions, initialized: true },
+      () => {
+        if (this.state.accounts.length === 0) {
+          toast.error(
+            'Unable to load accounts, please check your nerdpack uuid.',
+            {
+              autoClose: 10000,
+              containerId: 'B'
+            }
+          );
+        }
       }
-    });
+    );
   }
 
   componentDidCatch(err, errInfo) {
@@ -76,25 +96,42 @@ export class DataProvider extends Component {
   }
 
   getBoards = (type, accountId) => {
+    return new Promise(resolve => {
+      this.getCollection(collectionName, type, accountId).then(value => {
+        const boards = buildBoardOptions(value);
+        this.setState({ boards }, () => {
+          this.getGeoMaps(type, accountId);
+          resolve(boards);
+        });
+      });
+    });
+  };
+
+  getGeoMaps = (type, accountId) => {
+    return new Promise(resolve => {
+      this.getCollection(collectionGeoMaps, type, accountId).then(value => {
+        const geomaps = buildBoardOptions(value);
+        this.setState({ geomaps }, () => resolve(geomaps));
+      });
+    });
+  };
+
+  getCollection = (collection, type, accountId) => {
     const { storageLocation } = this.state;
     return new Promise(resolve => {
       switch (type) {
         case 'user': {
-          getUserCollection(collectionName).then(value => {
-            this.setState({ boards: buildBoardOptions(value) }, () =>
-              resolve()
-            );
+          getUserCollection(collection).then(value => {
+            resolve(value);
           });
           break;
         }
         case 'account': {
           getAccountCollection(
             accountId || storageLocation.value,
-            collectionName
+            collection
           ).then(value => {
-            this.setState({ boards: buildBoardOptions(value) }, () =>
-              resolve()
-            );
+            resolve(value);
           });
           break;
         }
@@ -152,6 +189,24 @@ export class DataProvider extends Component {
   updateDataStateContext = (stateData, actions) => {
     return new Promise(resolve => {
       this.setState(stateData, () => {
+        Object.keys(stateData).forEach(key => {
+          if (key === 'selectedBoard') {
+            nerdlet.setUrlState({
+              name: stateData[key] ? stateData[key].id : null,
+              filters: {}
+            });
+          } else if (key === 'storageLocation') {
+            let storageLocation = null;
+            if (stateData[key]) {
+              storageLocation = {
+                key: stateData[key].key
+              };
+            }
+            nerdlet.setUrlState({
+              storageLocation
+            });
+          }
+        });
         resolve();
       });
     });
@@ -185,7 +240,8 @@ export class DataProvider extends Component {
           ...this.state,
           updateDataStateContext: this.updateDataStateContext,
           updateBoard: this.updateBoard,
-          getBoards: this.getBoards
+          getBoards: this.getBoards,
+          getGeoMaps: this.getGeoMaps
         }}
       >
         <ToastContainer

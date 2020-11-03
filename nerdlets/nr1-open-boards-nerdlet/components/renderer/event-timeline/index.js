@@ -3,7 +3,7 @@ import { AutoSizer } from 'nr1';
 import EventTimelineWidgetDropDown from './drop-down';
 import { Timeline } from 'react-event-timeline';
 import Event from './event';
-import { Icon } from 'semantic-ui-react';
+import { Icon, Input } from 'semantic-ui-react';
 
 const createEvents = (
   sort,
@@ -89,7 +89,8 @@ export default class EventTimeline extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      sort: 'asc'
+      sort: 'asc',
+      searchText: ''
     };
   }
 
@@ -101,7 +102,7 @@ export default class EventTimeline extends React.Component {
       entitySearchEventData,
       begin_time
     } = this.props;
-    const { sort } = this.state;
+    const { sort, searchText } = this.state;
 
     const hdrStyle = widget.headerStyle || {};
     const selectedEventSources = widget.value || [];
@@ -113,6 +114,27 @@ export default class EventTimeline extends React.Component {
       widget.limit,
       begin_time
     );
+
+    const searchedEvents = events.filter(e => {
+      if (searchText) {
+        const searchTxt = searchText.toLowerCase();
+        if (e.entityName) {
+          if (e.entityName.toLowerCase().includes(searchTxt)) {
+            return true;
+          }
+        }
+        if (e.type === 'alert') {
+          if (
+            e.label.toLowerCase().includes(searchTxt) ||
+            e.name.toLowerCase().includes(searchTxt)
+          ) {
+            return true;
+          }
+        }
+        return false;
+      }
+      return true;
+    });
 
     return (
       <div style={{ width: '100%', height: '100%' }}>
@@ -163,11 +185,9 @@ export default class EventTimeline extends React.Component {
                 <div
                   style={{
                     paddingLeft,
-                    paddingRight,
                     paddingBottom,
                     height: maxWidgetHeight,
-                    width: width - 5,
-                    overflow: 'auto'
+                    width
                   }}
                 >
                   {events.length === 0 ? (
@@ -176,11 +196,18 @@ export default class EventTimeline extends React.Component {
                     </span>
                   ) : (
                     <>
-                      <div style={{ paddingBottom: '22px' }}>
+                      <div style={{ paddingRight }}>
+                        <Input
+                          placeholder="Search Events"
+                          onChange={e =>
+                            this.setState({ searchText: e.target.value })
+                          }
+                        />
                         <Icon
                           style={{
                             cursor: 'pointer',
-                            float: 'right'
+                            float: 'right',
+                            marginTop: '5px'
                           }}
                           size="large"
                           name={
@@ -196,9 +223,14 @@ export default class EventTimeline extends React.Component {
                         />
                       </div>
                       <Timeline
-                        style={{ fontSize: '13px', fontFamily: 'monospace' }}
+                        style={{
+                          fontSize: '13px',
+                          fontFamily: 'monospace',
+                          overflow: 'auto',
+                          height: maxWidgetHeight - 35
+                        }}
                       >
-                        {events.map((e, i) => {
+                        {searchedEvents.map((e, i) => {
                           return <Event key={i} event={e} />;
                         })}
                       </Timeline>

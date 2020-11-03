@@ -4,7 +4,7 @@ no-console: 0
 import React from 'react';
 import { DataConsumer } from '../../context/data';
 import CreatableSelect from 'react-select/creatable';
-import { NrqlQuery } from 'nr1';
+import { NrqlQuery, nerdlet } from 'nr1';
 
 const customStyles = {
   menu: (provided, state) => ({
@@ -150,10 +150,12 @@ export default class Filter extends React.PureComponent {
                 onCreateOption={v => {
                   filters[filterName] = { value: v, label: v };
                   updateDataStateContext({ filters });
+                  nerdlet.setUrlState({ filters });
                 }}
                 onChange={v => {
                   filters[filterName] = v ? v : all;
                   updateDataStateContext({ filters });
+                  nerdlet.setUrlState({ filters });
                 }}
               />
             </div>
