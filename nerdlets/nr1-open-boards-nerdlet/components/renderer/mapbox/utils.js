@@ -3,9 +3,11 @@ export const docToGeoJson = rawGeomap => {
 
   const geojson = {
     type: 'FeatureCollection',
+    timestamp: new Date().getTime(),
     features: items.map((item, i) => {
       return {
         type: 'Feature',
+        index: i,
         geometry: {
           type: 'Point',
           coordinates: [
@@ -24,3 +26,51 @@ export const docToGeoJson = rawGeomap => {
 
   return geojson;
 };
+
+export const entitySummaryQuery = guids => `
+{
+  actor {
+    entities(guids: [${guids}]) {
+      guid
+      name
+      type
+      domain
+      entityType
+      ... on AlertableEntity {
+        alertSeverity
+        recentAlertViolations {
+          alertSeverity
+          agentUrl
+          closedAt
+          label
+          level
+          openedAt
+          violationId
+          violationUrl
+        }
+      }
+      ... on WorkloadEntity {
+        workloadStatus {
+          statusSource
+          statusValue
+          summary
+          description
+        }
+        relationships {
+          target {
+            entity {
+              guid
+              name
+              ... on AlertableEntityOutline {
+                alertSeverity
+              }
+              entityType
+              domain
+              type
+            }
+          }
+        }
+      }
+    }
+  }
+}`;

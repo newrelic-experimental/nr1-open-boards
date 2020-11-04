@@ -7,13 +7,25 @@ export const clusterLayer = {
     'circle-color': [
       'step',
       ['get', 'point_count'],
-      '#51bbd6',
+      '#9adced',
       100,
-      '#f1f075',
+      '#51bbd6',
       700,
-      '#f28cb1'
+      '#1fabcf',
+      1000,
+      '#0080a1'
     ],
-    'circle-radius': ['step', ['get', 'point_count'], 20, 100, 30, 750, 40]
+    'circle-radius': [
+      'step',
+      ['get', 'point_count'],
+      20,
+      100,
+      30,
+      700,
+      40,
+      1000,
+      50
+    ]
   }
 };
 
@@ -35,7 +47,20 @@ export const unclusteredPointLayer = {
   source: 'earthquakes',
   filter: ['!', ['has', 'point_count']],
   paint: {
-    'circle-color': '#11b4da',
+    // 'circle-color': '#11b4da',
+    'circle-color': [
+      'step',
+      ['get', 'alertLevel'],
+      '#a8a8a8',
+      0,
+      '#a8a8a8',
+      1,
+      '#70e65c',
+      2,
+      '#fa9a2d',
+      3,
+      '#d94545'
+    ],
     'circle-radius': 8,
     'circle-stroke-width': 2,
     'circle-stroke-color': '#fff'

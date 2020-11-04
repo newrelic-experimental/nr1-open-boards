@@ -2,23 +2,41 @@ import React from 'react';
 import { Button, Icon, Form } from 'semantic-ui-react';
 import ReactMapGL, {
   NavigationControl,
-  LinearInterpolator,
   FlyToInterpolator,
   Source,
   Layer,
   Popup
 } from 'react-map-gl';
-import { docToGeoJson } from './utils';
+import { docToGeoJson, entitySummaryQuery } from './utils';
 import {
   clusterLayer,
   clusterCountLayer,
   unclusteredPointLayer
 } from './layers';
-import { Modal, HeadingText, BlockText, LineChart, navigation } from 'nr1';
+import {
+  Modal,
+  HeadingText,
+  BlockText,
+  LineChart,
+  navigation,
+  NerdGraphQuery
+} from 'nr1';
+import { chunk } from '../../../lib/helper';
+import PopupContent from './popup-content';
+
+const alertLevels = {
+  UNCONFIGURED: 0,
+  NOT_ALERTING: 1,
+  WARNING: 2,
+  CRITICAL: 3
+};
 
 export default class Map extends React.Component {
   constructor(props) {
     super(props);
+    this.sourceRef = React.createRef();
+    this.mapRef = React.createRef();
+
     this.state = {
       interval: 30000,
       hidden: false,
@@ -34,10 +52,10 @@ export default class Map extends React.Component {
         longitude: 138.2529,
         zoom: 8
       },
-      entityData: {},
+      // entityData: {},
       showPopup: true,
       popupData: {
-        feat: {},
+        properties: {},
         lat: 0,
         lng: 0
       },
@@ -120,19 +138,84 @@ export default class Map extends React.Component {
   };
 
   fetchData = () => {
-    const { geojson, isFetching } = this.state;
-
-    console.log('fetch data');
+    const { isFetching } = this.state;
+    const geojson = { ...this.state.geojson, timestamp: new Date().getTime() };
 
     if (isFetching === false) {
-      this.setState({ isFetching: true }, () => {
-        //
+      this.setState({ isFetching: true }, async () => {
+        const guids = geojson.features
+          .map(f => f.properties)
+          .map(p => p.entities)
+          .flat()
+          .map(e => e.guid);
 
-        console.log('fetching map data', geojson);
-        this.setState({ isFetching: false });
+        const entityChunks = chunk([...new Set(guids)], 25);
+
+        const entityPromises = entityChunks.map(chunk => {
+          return new Promise(async resolve => {
+            const guidsStr = `"${chunk.join(`","`)}"`;
+            const nerdGraphResult = await NerdGraphQuery.query({
+              query: entitySummaryQuery(guidsStr)
+            });
+            resolve(nerdGraphResult);
+          });
+        });
+
+        // const entityData = {};
+        await Promise.all(entityPromises).then(values => {
+          values.forEach(v => {
+            const entities =
+              (((v || {}).data || {}).actor || {}).entities || [];
+            entities.forEach(e => {
+              // entityData[e.guid] = e;
+              geojson.features.forEach((f, featIndex) => {
+                if (
+                  geojson.features[featIndex].properties.alertLevel ===
+                  undefined
+                ) {
+                  geojson.features[featIndex].properties.alertLevel = 0;
+                  geojson.features[featIndex].properties.alertHighest = 0;
+                }
+
+                (f.properties.entities || []).forEach((entity, entityIndex) => {
+                  if (e.guid === entity.guid) {
+                    const alertLevel = alertLevels[e.alertSeverity] || 0;
+
+                    if (
+                      alertLevel >
+                      geojson.features[featIndex].properties.alertLevel
+                    ) {
+                      geojson.features[
+                        featIndex
+                      ].properties.alertLevel = alertLevel;
+
+                      geojson.features[featIndex].properties.alertHighest =
+                        e.alertSeverity;
+                    }
+
+                    geojson.features[featIndex].properties.entities[
+                      entityIndex
+                    ] = {
+                      ...e,
+                      ...entity
+                    };
+                  }
+                });
+              });
+            });
+          });
+        });
+
+        this.setState(
+          {
+            isFetching: false,
+            geojson
+          },
+          () => console.log('map decorated')
+        );
       });
     } else {
-      console.log('map already fetching');
+      console.log('map already fetching, waiting for next interval');
     }
   };
 
@@ -163,14 +246,6 @@ export default class Map extends React.Component {
     this.setState({ viewport });
   };
 
-  createMarkup = value => {
-    return { __html: value };
-  };
-
-  getAlertStatus = item => {
-    return 'blue';
-  };
-
   renderIcon = item => {
     const alertStatus = this.getAlertStatus(item);
 
@@ -185,31 +260,34 @@ export default class Map extends React.Component {
     return <Icon name="map marker alternate" color={alertStatus} />;
   };
 
-  mapClick = map => {
-    console.log(map);
-    const filteredFeatures = map.features.filter(
+  mapClick = (map, isHover) => {
+    const filteredFeatures = (map.features || []).filter(
       f => f.layer.id === 'unclustered-point'
     );
 
     if (filteredFeatures.length > 0) {
       const feat = filteredFeatures[0];
       if (feat.properties && feat.properties.location) {
-        const location = JSON.parse(feat.properties.location);
         const key = `${feat.properties.index}:::${feat.properties.name}`;
+        const { geojson } = this.state;
+        const properties = geojson.features[feat.properties.index].properties;
 
         this.setState({
           searchValue: key,
           selectedLocation: feat.properties.index,
           showPopup: true,
           popupData: {
-            feat: feat.properties,
-            lat: parseFloat(location.lat),
-            lng: parseFloat(location.lng)
+            properties,
+            lat: parseFloat(properties.location.lat),
+            lng: parseFloat(properties.location.lng)
           }
         });
       }
     } else {
-      this.setState({ showPopup: false, feat: {}, lat: 0, lng: 0 });
+      const stateUpdate = { feat: {}, lat: 0, lng: 0 };
+      if (!isHover && !this.state.showPopup) {
+        this.setState({ showPopup: false, ...stateUpdate });
+      }
     }
   };
 
@@ -296,7 +374,7 @@ export default class Map extends React.Component {
                     searchValue: d.value,
                     showPopup: true,
                     popupData: {
-                      feat: item,
+                      properties: item,
                       lat: parseFloat(location.lat),
                       lng: parseFloat(location.lng)
                     }
@@ -316,7 +394,7 @@ export default class Map extends React.Component {
                       selectedLocation: null,
                       searchValue: null,
                       showPopup: false,
-                      popupData: { feat: {}, lng: 0, lat: 0 }
+                      popupData: { properties: {}, lng: 0, lat: 0 }
                     },
                     () =>
                       this.moveViewPort(
@@ -336,6 +414,8 @@ export default class Map extends React.Component {
           onViewportChange={viewport => this.setState({ viewport })}
           mapboxApiAccessToken={widget.apiToken}
           onClick={this.mapClick}
+          onHover={map => this.mapClick(map, true)}
+          ref={this.mapRef}
         >
           <div style={{ position: 'absolute', right: 0 }}>
             <NavigationControl />
@@ -350,12 +430,7 @@ export default class Map extends React.Component {
               onClose={() => this.setState({ showPopup: false })}
               anchor="top"
             >
-              <div>
-                You are here
-                <Button onClick={() => this.setState({ hidden: true })}>
-                  Open Modal
-                </Button>
-              </div>
+              <PopupContent popupData={popupData} />
             </Popup>
           )}
 
@@ -365,7 +440,7 @@ export default class Map extends React.Component {
             cluster
             clusterMaxZoom={14}
             clusterRadius={50}
-            ref={this._sourceRef}
+            ref={this.sourceRef}
           >
             <Layer {...clusterLayer} />
             <Layer {...clusterCountLayer} />
