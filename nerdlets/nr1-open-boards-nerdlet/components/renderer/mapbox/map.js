@@ -62,13 +62,16 @@ export default class Map extends React.Component {
 
     const ms = parseFloat(widget.ms || 30000);
 
-    this.setState({
-      viewport,
-      previousViewport: viewport,
-      rawGeomap: document,
-      geojson: docToGeoJson(document),
-      interval: ms
-    });
+    this.setState(
+      {
+        viewport,
+        previousViewport: viewport,
+        rawGeomap: document,
+        geojson: docToGeoJson(document),
+        interval: ms
+      },
+      () => this.doInterval()
+    );
   }
 
   componentDidUpdate() {
@@ -88,15 +91,7 @@ export default class Map extends React.Component {
     const ms = parseFloat(widget.ms || 30000);
     if (ms !== this.state.interval) {
       this.setState({ interval: ms }, () => {
-        if (this.mapPoll) {
-          clearInterval(this.mapPoll);
-        }
-
-        this.fetchData();
-
-        this.mapPoll = setInterval(() => {
-          this.fetchData();
-        }, ms);
+        this.doInterval();
       });
     }
   };
@@ -107,19 +102,21 @@ export default class Map extends React.Component {
     if (JSON.stringify(rawGeomap) !== JSON.stringify(document)) {
       this.setState(
         { rawGeomap: document, geojson: docToGeoJson(document) },
-        () => {
-          if (this.mapPoll) {
-            clearInterval(this.mapPoll);
-          }
-
-          this.fetchData();
-
-          this.mapPoll = setInterval(() => {
-            this.fetchData();
-          }, this.state.interval);
-        }
+        () => this.doInterval()
       );
     }
+  };
+
+  doInterval = () => {
+    if (this.mapPoll) {
+      clearInterval(this.mapPoll);
+    }
+
+    this.fetchData();
+
+    this.mapPoll = setInterval(() => {
+      this.fetchData();
+    }, this.state.interval);
   };
 
   fetchData = () => {
@@ -130,7 +127,8 @@ export default class Map extends React.Component {
     if (isFetching === false) {
       this.setState({ isFetching: true }, () => {
         //
-        console.log('fetching map data');
+
+        console.log('fetching map data', geojson);
         this.setState({ isFetching: false });
       });
     } else {
