@@ -45,7 +45,11 @@ export default class ImportBoard extends React.PureComponent {
 
     switch (storageLocation.type) {
       case 'user': {
-        await writeUserDocument('OpenBoards', boardName, {});
+        await writeUserDocument(
+          'OpenBoards',
+          boardName,
+          selectedBoard.document
+        );
         boards = await getUserCollection('OpenBoards');
         storageLocation = {
           key: 'User',
@@ -60,7 +64,7 @@ export default class ImportBoard extends React.PureComponent {
           storageLocation.value,
           'OpenBoards',
           boardName,
-          {}
+          selectedBoard.document
         );
         boards = await getAccountCollection(
           storageLocation.value,

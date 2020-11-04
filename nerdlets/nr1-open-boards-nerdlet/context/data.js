@@ -65,7 +65,8 @@ export class DataProvider extends Component {
       openFilters: false,
       openStyles: false,
       openEventStreams: false,
-      openDynamicHTMLWidgets: false
+      openDynamicHTMLWidgets: false,
+      openGeoMaps: false
     };
   }
 

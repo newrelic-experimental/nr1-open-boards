@@ -8,8 +8,12 @@ export default class MapboxModalBody extends React.PureComponent {
     super(props);
     this.state = {
       name: '',
-      value: `domain IN ('INFRA', 'APM')`,
-      limit: 0,
+      value: '',
+      apiToken: '',
+      latitude: 0,
+      longitude: 0,
+      zoom: 8,
+      ms: 0,
       x: 0,
       y: 0,
       w: 7,
@@ -25,8 +29,11 @@ export default class MapboxModalBody extends React.PureComponent {
       this.setState({
         name: widget.name,
         value: widget.value,
-        limit: widget.limit || 0,
-        tagFilters: widget.tagFilters || [],
+        ms: widget.ms || 0,
+        apiToken: widget.apiToken || '',
+        latitude: widget.latitude || 0,
+        longitude: widget.longitude || 0,
+        zoom: widget.zoom || 8,
         x: widget.x,
         y: widget.y,
         w: widget.w,
@@ -36,12 +43,12 @@ export default class MapboxModalBody extends React.PureComponent {
   }
 
   handleOpen = updateDataStateContext => {
-    updateDataStateContext({ entityHdvWidgetOpen: true });
+    updateDataStateContext({ mapboxWidgetOpen: true });
   };
 
   handleClose = updateDataStateContext => {
     updateDataStateContext({
-      entityHdvWidgetOpen: false,
+      mapboxWidgetOpen: false,
       selectedWidget: null
     });
   };
@@ -53,17 +60,32 @@ export default class MapboxModalBody extends React.PureComponent {
     updateDataStateContext,
     widgetNo
   ) => {
-    const { name, value, limit, tagFilters, x, y, w, h } = this.state;
+    const {
+      name,
+      value,
+      ms,
+      apiToken,
+      latitude,
+      longitude,
+      zoom,
+      x,
+      y,
+      w,
+      h
+    } = this.state;
     const widget = {
       name,
       value,
-      limit,
-      tagFilters,
+      ms,
+      apiToken,
+      latitude,
+      longitude,
+      zoom,
       x,
       y,
       w,
       h,
-      type: 'entityhdv'
+      type: 'mapbox'
     };
 
     const { document } = selectedBoard;
@@ -112,12 +134,7 @@ export default class MapboxModalBody extends React.PureComponent {
       return 'Loading widget...';
     }
 
-    const { name, value, limit, tagFilters } = this.state;
-
-    const filterOptions = [
-      { key: 'accountId', text: 'accountId', value: 'accountId' },
-      { key: 'name', text: 'name', value: 'name' }
-    ];
+    const { name, value, ms, apiToken, latitude, longitude, zoom } = this.state;
 
     return (
       <DataConsumer>
@@ -125,69 +142,91 @@ export default class MapboxModalBody extends React.PureComponent {
           updateBoard,
           storageLocation,
           selectedBoard,
-          updateDataStateContext
+          updateDataStateContext,
+          geomaps
         }) => {
+          const geomapsClean = geomaps.map(g => {
+            const geomap = { ...g };
+            delete geomap.label;
+            return geomap;
+          });
+
           return (
             <>
               <Form>
                 <Form.Group>
                   <Form.Input
-                    width="8"
-                    label="Widget name"
+                    width="6"
+                    label="Widget Name"
                     value={name}
                     onChange={(e, d) => this.setState({ name: d.value })}
                   />
-                  <Form.Input
-                    width="8"
-                    label="Entity limit (0 for max)"
-                    value={limit}
+                  <Form.Select
+                    width="6"
+                    options={geomapsClean}
+                    value={value}
                     onChange={(e, d) =>
                       this.setState({
-                        limit: Number.isInteger(parseInt(d.value)) ? d.value : 0
+                        value: d.value
+                      })
+                    }
+                    label="Select Geo Map"
+                    placeholder=""
+                  />
+                  <Form.Input
+                    width="6"
+                    label="Refresh Interval (ms)"
+                    value={ms}
+                    onChange={(e, d) =>
+                      this.setState({
+                        ms: !isNaN(d.value) || d.value === '' ? d.value : 0
                       })
                     }
                   />
                 </Form.Group>
-                <Form.Input
-                  width="16"
-                  label="Entity search query"
-                  value={value}
-                  onChange={(e, d) => this.setState({ value: d.value })}
-                />
-                <Form.Dropdown
-                  width="16"
-                  label="Tag Filters"
-                  placeholder="Tags"
-                  selection
-                  multiple
-                  onChange={(e, d) => this.setState({ tagFilters: d.value })}
-                  value={tagFilters}
-                  options={filterOptions}
-                />
+                <Form.Group>
+                  <Form.Input
+                    width="16"
+                    label="Mapbox API Token"
+                    value={apiToken}
+                    onChange={(e, d) => this.setState({ apiToken: d.value })}
+                  />
+                </Form.Group>
+                <Form.Group>
+                  <Form.Input
+                    width="6"
+                    label="Latitude"
+                    value={latitude}
+                    onChange={(e, d) =>
+                      this.setState({
+                        latitude:
+                          !isNaN(d.value) || d.value === '' ? d.value : 0
+                      })
+                    }
+                  />
+                  <Form.Input
+                    width="6"
+                    label="Longitude"
+                    value={longitude}
+                    onChange={(e, d) =>
+                      this.setState({
+                        longitude:
+                          !isNaN(d.value) || d.value === '' ? d.value : 0
+                      })
+                    }
+                  />
+                  <Form.Input
+                    width="6"
+                    label="Zoom"
+                    value={zoom}
+                    onChange={(e, d) =>
+                      this.setState({
+                        zoom: !isNaN(d.value) || d.value === '' ? d.value : 0
+                      })
+                    }
+                  />
+                </Form.Group>
               </Form>
-              <Divider />
-              <div>
-                <Message>
-                  Operators available: =, AND, IN, LIKE Entity queries use the
-                  same syntax of a WHERE clause in NRQL queries. <br /> <br />
-                  Examples:
-                  <Message.List>
-                    <Message.Item>name = 'MyApp (Staging)'</Message.Item>
-                    <Message.Item>
-                      name LIKE 'MyApp' AND type IN ('APPLICATION')
-                    </Message.Item>
-                    <Message.Item>
-                      reporting = 'false' AND type IN ('HOST')
-                    </Message.Item>
-                    <Message.Item>domain IN ('INFRA', 'APM')</Message.Item>
-                    <Message.Item>
-                      domain IN ('APM') AND reporting = 'true' AND
-                      tags.accountId IN ('1234567','8765432')
-                    </Message.Item>
-                  </Message.List>
-                </Message>
-              </div>
-              <br />
               <br />
               <Button
                 style={{ float: 'right' }}

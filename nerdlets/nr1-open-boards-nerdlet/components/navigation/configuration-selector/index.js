@@ -40,7 +40,8 @@ export default class ConfigSelector extends React.PureComponent {
       { value: 'openFilters', label: 'Filters' },
       { value: 'openStyles', label: 'CSS Styles' },
       { value: 'openEventStreams', label: 'Event Streams' },
-      { value: 'openDynamicHTMLWidgets', label: 'Dynamic HTML Widgets' }
+      { value: 'openDynamicHTMLWidgets', label: 'Dynamic HTML Widgets' },
+      { value: 'openGeoMaps', label: 'Geo Maps' }
     ];
 
     return (
@@ -60,7 +61,6 @@ export default class ConfigSelector extends React.PureComponent {
                 onChange={v =>
                   this.handleSelect(v, options, updateDataStateContext)
                 }
-                placeholder=""
                 classNamePrefix="react-select"
               />
             </div>
