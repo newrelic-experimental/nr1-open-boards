@@ -10,6 +10,7 @@ export default class MapboxModalBody extends React.PureComponent {
       name: '',
       value: '',
       apiToken: '',
+      defaultAccount: 0,
       latitude: 0,
       longitude: 0,
       zoom: 8,
@@ -31,6 +32,7 @@ export default class MapboxModalBody extends React.PureComponent {
         value: widget.value,
         ms: widget.ms || 0,
         apiToken: widget.apiToken || '',
+        defaultAccount: widget.defaultAccount || 0,
         latitude: widget.latitude || 0,
         longitude: widget.longitude || 0,
         zoom: widget.zoom || 8,
@@ -65,6 +67,7 @@ export default class MapboxModalBody extends React.PureComponent {
       value,
       ms,
       apiToken,
+      defaultAccount,
       latitude,
       longitude,
       zoom,
@@ -78,6 +81,7 @@ export default class MapboxModalBody extends React.PureComponent {
       value,
       ms,
       apiToken,
+      defaultAccount,
       latitude,
       longitude,
       zoom,
@@ -134,7 +138,16 @@ export default class MapboxModalBody extends React.PureComponent {
       return 'Loading widget...';
     }
 
-    const { name, value, ms, apiToken, latitude, longitude, zoom } = this.state;
+    const {
+      name,
+      value,
+      ms,
+      apiToken,
+      defaultAccount,
+      latitude,
+      longitude,
+      zoom
+    } = this.state;
 
     return (
       <DataConsumer>
@@ -143,13 +156,19 @@ export default class MapboxModalBody extends React.PureComponent {
           storageLocation,
           selectedBoard,
           updateDataStateContext,
-          geomaps
+          geomaps,
+          storageOptions
         }) => {
           const geomapsClean = geomaps.map(g => {
             const geomap = { ...g };
             delete geomap.label;
             return geomap;
           });
+
+          const accounts = storageOptions.map(
+            ({ label, ...keepAttrs }) => keepAttrs
+          );
+          accounts.shift();
 
           return (
             <>
@@ -185,8 +204,20 @@ export default class MapboxModalBody extends React.PureComponent {
                   />
                 </Form.Group>
                 <Form.Group>
+                  <Form.Select
+                    width="5"
+                    options={accounts}
+                    value={defaultAccount}
+                    onChange={(e, d) =>
+                      this.setState({
+                        defaultAccount: d.value
+                      })
+                    }
+                    label="Default Account"
+                    placeholder=""
+                  />
                   <Form.Input
-                    width="16"
+                    width="11"
                     label="Mapbox API Token"
                     value={apiToken}
                     onChange={(e, d) => this.setState({ apiToken: d.value })}

@@ -37,7 +37,7 @@ export default class GeoMapsConfig extends React.Component {
 
     let geomaps = [];
 
-    const geomap = JSON.parse(geomapData) || JSON.parse(newGeoMapJson);
+    const geomap = JSON.parse(geomapData || newGeoMapJson);
     const geomapName = geomapData ? selectedGeomap : newGeoMapName;
 
     switch (storageLocation.type) {
@@ -195,7 +195,7 @@ export default class GeoMapsConfig extends React.Component {
                     />
                     <Form.Field width="16">
                       <TextArea
-                        name="importGeoMapJsong"
+                        name="importGeoMapJson"
                         style={{ width: '100%', height: '300px' }}
                         value={newGeoMapJson}
                         onChange={e =>

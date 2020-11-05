@@ -74,3 +74,28 @@ export const entitySummaryQuery = guids => `
     }
   }
 }`;
+
+export const recentAlertsQuery = guids => `{
+  actor {
+    entities(guids: [${guids}]) {
+      name
+      guid
+      domain
+      type
+      entityType
+      ... on AlertableEntity {
+        alertSeverity
+        recentAlertViolations(count: 10) {
+          violationUrl
+          violationId
+          level
+          openedAt
+          label
+          closedAt
+          agentUrl
+          alertSeverity
+        }
+      }
+    }
+  }
+}`;

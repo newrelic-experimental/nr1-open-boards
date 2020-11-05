@@ -23,6 +23,7 @@ import {
 } from 'nr1';
 import { chunk } from '../../../lib/helper';
 import PopupContent from './popup-content';
+import ModalContent from './modal-content';
 
 const alertLevels = {
   UNCONFIGURED: 0,
@@ -291,6 +292,10 @@ export default class Map extends React.Component {
     }
   };
 
+  updateState = state => {
+    this.setState(state);
+  };
+
   render() {
     const {
       selectedGeomap,
@@ -328,29 +333,11 @@ export default class Map extends React.Component {
           hidden={!this.state.hidden}
           onClose={() => this.setState({ hidden: false })}
         >
-          <div>
-            <LineChart
-              accountId={1}
-              query="SELECT count(*) FROM Transaction TIMESERIES"
-            />
-            <HeadingText type={HeadingText.TYPE.HEADING_1}>Modal</HeadingText>
-            <BlockText type={BlockText.TYPE.PARAGRAPH}>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua.
-              Dictumst quisque sagittis purus sit amet.
-            </BlockText>
-            <Button
-              onClick={() => {
-                this.setState({ hidden: false }, () => {
-                  navigation.openStackedEntity(
-                    'MjMzMDkzM3xOUjF8V09SS0xPQUR8MjU3MDk'
-                  );
-                });
-              }}
-            >
-              Close
-            </Button>
-          </div>
+          <ModalContent
+            widget={widget}
+            updateState={this.updateState}
+            popupData={popupData}
+          />
         </Modal>
 
         <div style={{ paddingRight: '5px' }}>
@@ -374,7 +361,9 @@ export default class Map extends React.Component {
                     searchValue: d.value,
                     showPopup: true,
                     popupData: {
-                      properties: item,
+                      properties: {
+                        ...geojson.features[keySplit[0]].properties
+                      },
                       lat: parseFloat(location.lat),
                       lng: parseFloat(location.lng)
                     }
@@ -430,7 +419,10 @@ export default class Map extends React.Component {
               onClose={() => this.setState({ showPopup: false })}
               anchor="top"
             >
-              <PopupContent popupData={popupData} />
+              <PopupContent
+                updateState={this.updateState}
+                popupData={popupData}
+              />
             </Popup>
           )}
 

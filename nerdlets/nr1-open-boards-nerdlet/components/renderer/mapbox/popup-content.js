@@ -1,42 +1,46 @@
 import React from 'react';
-import { Button, Icon, Form } from 'semantic-ui-react';
+import { Label } from 'semantic-ui-react';
 
 export default class PopupContent extends React.Component {
   render() {
-    const { popupData } = this.props;
+    const { popupData, updateState } = this.props;
     const { properties } = popupData;
 
     if (properties) {
-      let alertColor = '#a8a8a8';
+      let alertColor = 'grey';
 
       switch (properties.alertHighest) {
         case 'NOT_ALERTING': {
-          alertColor = '#70e65c';
+          alertColor = 'green';
           break;
         }
         case 'WARNING': {
-          alertColor = '#fa9a2d';
+          alertColor = 'orange';
           break;
         }
         case 'CRITICAL': {
-          alertColor = '#d94545';
+          alertColor = 'red';
           break;
         }
       }
 
       return (
         <div style={{ fontSize: '14px', display: 'inline' }}>
-          <div>
-            <span
-              style={{
-                color: alertColor,
-                fontSize: '20px'
-              }}
-            >
-              ●
-            </span>
-            &nbsp;
-            {properties.name}
+          <div style={{ paddingTop: '5px' }}>
+            <Label
+              style={{ width: '100%', cursor: 'pointer' }}
+              color={alertColor}
+              icon="circle"
+              content={properties.name}
+              // detail={properties.alertHighest}
+              onClick={() => updateState({ hidden: true })}
+            />
+            {/* <br />
+            <Label
+              icon="boxes"
+              content="Entities"
+              detail={(properties.entities || []).length}
+            /> */}
           </div>
         </div>
       );
