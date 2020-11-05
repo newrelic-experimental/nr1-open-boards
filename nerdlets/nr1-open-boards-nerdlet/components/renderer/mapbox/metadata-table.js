@@ -36,8 +36,9 @@ export default class MetadataTable extends React.Component {
     Object.keys(properties).forEach(key => {
       if (!excludeKeys.includes(key)) {
         if (key === 'location') {
-          metadata.push({ name: 'lat', value: properties[key].lat });
-          metadata.push({ name: 'lng', value: properties[key].lng });
+          Object.keys(properties[key]).forEach(l => {
+            metadata.push({ name: l, value: properties[key][l] });
+          });
         } else {
           const value = isValidJson(properties[key])
             ? JSON.stringify(properties[key])
