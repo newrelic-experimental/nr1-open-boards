@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Icon, Form } from 'semantic-ui-react';
+import { Icon, Form } from 'semantic-ui-react';
 import ReactMapGL, {
   NavigationControl,
   FlyToInterpolator,
@@ -13,14 +13,7 @@ import {
   clusterCountLayer,
   unclusteredPointLayer
 } from './layers';
-import {
-  Modal,
-  HeadingText,
-  BlockText,
-  LineChart,
-  navigation,
-  NerdGraphQuery
-} from 'nr1';
+import { Modal, NerdGraphQuery } from 'nr1';
 import { chunk } from '../../../lib/helper';
 import PopupContent from './popup-content';
 import ModalContent from './modal-content';

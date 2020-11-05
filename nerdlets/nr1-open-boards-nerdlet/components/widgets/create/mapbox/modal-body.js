@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Divider, Message, Form } from 'semantic-ui-react';
+import { Button, Form } from 'semantic-ui-react';
 import { writeUserDocument, writeAccountDocument } from '../../../../lib/utils';
 import { DataConsumer } from '../../../../context/data';
 

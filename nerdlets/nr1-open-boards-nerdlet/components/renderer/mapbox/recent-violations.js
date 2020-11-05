@@ -1,36 +1,8 @@
 import React from 'react';
-import { Icon, navigation, NerdGraphQuery } from 'nr1';
-import { Timeline } from '@newrelic/nr1-community';
+import { NerdGraphQuery } from 'nr1';
 import { chunk } from '../../../lib/helper';
 import { recentAlertsQuery } from './utils';
-import { kebabCase, lowerCase } from 'lodash';
 import { List } from 'semantic-ui-react';
-
-const iconType = alertSeverity => {
-  switch (alertSeverity) {
-    case 'CRITICAL':
-      return Icon.TYPE.HARDWARE_AND_SOFTWARE__SOFTWARE__APPLICATION__S_ERROR;
-    case 'WARNING':
-      return Icon.TYPE.HARDWARE_AND_SOFTWARE__SOFTWARE__APPLICATION__S_WARNING;
-    case 'NOT_ALERTING':
-      return Icon.TYPE.HARDWARE_AND_SOFTWARE__SOFTWARE__APPLICATION__A_CHECKED;
-    case 'NOT_CONFIGURED':
-      return Icon.TYPE.HARDWARE_AND_SOFTWARE__SOFTWARE__APPLICATION__S_OK;
-  }
-};
-
-const iconColor = alertSeverity => {
-  switch (alertSeverity) {
-    case 'CRITICAL':
-      return '#BF0016';
-    case 'WARNING':
-      return '#9C5400';
-    case 'NOT_ALERTING':
-      return '#3CA653';
-    case 'NOT_CONFIGURED':
-      return '#464e4e';
-  }
-};
 
 export default class RecentViolations extends React.Component {
   constructor(props) {

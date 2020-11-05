@@ -1,15 +1,6 @@
 import React from 'react';
-import {
-  Button,
-  Step,
-  Breadcrumb,
-  Divider,
-  Menu,
-  Icon,
-  Header,
-  Image
-} from 'semantic-ui-react';
-import { LineChart, HeadingText, navigation } from 'nr1';
+import { Breadcrumb, Divider, Menu, Icon } from 'semantic-ui-react';
+import { LineChart, HeadingText } from 'nr1';
 import { DataConsumer } from '../../../context/data';
 import EntityTable from './entity-table';
 import MetadataTable from './metadata-table';
