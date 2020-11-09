@@ -48,7 +48,7 @@ export class DataProvider extends Component {
       storageOptions: [],
       accounts: [],
       filters: {},
-      locked: false,
+      locked: true,
       createNrqlWidgetOpen: false,
       basicHtmlWidgetOpen: false,
       entityHdvWidgetOpen: false,
