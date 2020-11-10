@@ -88,7 +88,7 @@ export default class CreateMapboxWidget extends React.PureComponent {
               }
             >
               <Modal.Header id="mapbox-create-title">
-                Mapbox View Widget
+                Mapbox Widget
               </Modal.Header>
 
               <Modal.Content>

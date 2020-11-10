@@ -21,6 +21,7 @@ import ImportBoard from '../boards/import';
 import CreateEventTimelineWidget from '../widgets/create/event-timeline';
 import CreateMapboxWidget from '../widgets/create/mapbox';
 import ConfigSelector from './configuration-selector';
+import GeoMapsConfig from '../configuration/geomaps';
 
 export default class MenuBar extends React.PureComponent {
   changeLocation = async (storageLocation, updateDataStateContext) => {
@@ -103,7 +104,7 @@ export default class MenuBar extends React.PureComponent {
                     <CreateNrqlWidget />
                     <CreateEntityHdvWidget />
                     <CreateEventTimelineWidget />
-                    {/* <CreateMapboxWidget /> */}
+                    <CreateMapboxWidget />
 
                     <ManageFilters
                       filters={selectedBoard.document.filters || []}
@@ -118,6 +119,8 @@ export default class MenuBar extends React.PureComponent {
                       eventStreams={selectedBoard.document.eventStreams || []}
                     />
                     <BasicHTMLWidget />
+
+                    <GeoMapsConfig />
 
                     <ConfigSelector />
                   </>
