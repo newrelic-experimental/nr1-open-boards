@@ -11,7 +11,7 @@ export default class MapBox extends React.Component {
 
     return (
       <DataConsumer>
-        {({ geomaps, updateDataStateContext, locked }) => {
+        {({ geomaps, updateDataStateContext, locked, filterClause }) => {
           const selectedGeomap = geomaps.find(g => g.key === widget.value);
 
           return (
@@ -65,6 +65,7 @@ export default class MapBox extends React.Component {
                         }}
                       >
                         <Map
+                          filterClause={filterClause}
                           updateDataStateContext={updateDataStateContext}
                           locked={locked}
                           width={width}

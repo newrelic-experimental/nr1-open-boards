@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Form } from 'semantic-ui-react';
+import { Button, Form, Dropdown } from 'semantic-ui-react';
 import { writeUserDocument, writeAccountDocument } from '../../../../lib/utils';
 import { DataConsumer } from '../../../../context/data';
 
@@ -13,6 +13,7 @@ export default class MapboxModalBody extends React.PureComponent {
       defaultAccount: 0,
       latitude: 0,
       longitude: 0,
+      ignoreFilters: null,
       zoom: 8,
       ms: 0,
       x: 0,
@@ -36,6 +37,7 @@ export default class MapboxModalBody extends React.PureComponent {
         latitude: widget.latitude || 0,
         longitude: widget.longitude || 0,
         zoom: widget.zoom || 8,
+        ignoreFilters: widget.ignoreFilters,
         x: widget.x,
         y: widget.y,
         w: widget.w,
@@ -70,6 +72,7 @@ export default class MapboxModalBody extends React.PureComponent {
       defaultAccount,
       latitude,
       longitude,
+      ignoreFilters,
       zoom,
       x,
       y,
@@ -85,6 +88,7 @@ export default class MapboxModalBody extends React.PureComponent {
       latitude,
       longitude,
       zoom,
+      ignoreFilters,
       x,
       y,
       w,
@@ -146,7 +150,8 @@ export default class MapboxModalBody extends React.PureComponent {
       defaultAccount,
       latitude,
       longitude,
-      zoom
+      zoom,
+      ignoreFilters
     } = this.state;
 
     return (
@@ -175,13 +180,13 @@ export default class MapboxModalBody extends React.PureComponent {
               <Form>
                 <Form.Group>
                   <Form.Input
-                    width="6"
+                    width="4"
                     label="Widget Name"
                     value={name}
                     onChange={(e, d) => this.setState({ name: d.value })}
                   />
                   <Form.Select
-                    width="6"
+                    width="4"
                     options={geomapsClean}
                     value={value}
                     onChange={(e, d) =>
@@ -193,7 +198,7 @@ export default class MapboxModalBody extends React.PureComponent {
                     placeholder=""
                   />
                   <Form.Input
-                    width="6"
+                    width="4"
                     label="Refresh Interval (ms)"
                     value={ms}
                     onChange={(e, d) =>
@@ -202,6 +207,23 @@ export default class MapboxModalBody extends React.PureComponent {
                       })
                     }
                   />
+                  <Form.Field width="4">
+                    <label>Ignore Filters</label>
+                    <Dropdown
+                      placeholder="Default false"
+                      selection
+                      onChange={(e, d) =>
+                        d.value === 'false'
+                          ? this.setState({ ignoreFilters: '' })
+                          : this.setState({ ignoreFilters: d.value })
+                      }
+                      value={ignoreFilters}
+                      options={[
+                        { key: 'false', value: 'false', text: 'false' },
+                        { key: 'true', value: 'true', text: 'true' }
+                      ]}
+                    />
+                  </Form.Field>
                 </Form.Group>
                 <Form.Group>
                   <Form.Select

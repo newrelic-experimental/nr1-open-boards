@@ -205,10 +205,12 @@ export default class Map extends React.Component {
             isFetching: false,
             geojson
           },
+          // eslint-disable-next-line
           () => console.log('map decorated')
         );
       });
     } else {
+      // eslint-disable-next-line
       console.log('map already fetching, waiting for next interval');
     }
   };
@@ -294,7 +296,8 @@ export default class Map extends React.Component {
       selectedGeomap,
       widget,
       updateDataStateContext,
-      locked
+      locked,
+      filterClause
     } = this.props;
     const document = (selectedGeomap || {}).document || {};
     const items = document.items || [];
@@ -327,6 +330,7 @@ export default class Map extends React.Component {
           onClose={() => this.setState({ hidden: false })}
         >
           <ModalContent
+            filter={filterClause}
             widget={widget}
             updateState={this.updateState}
             popupData={popupData}

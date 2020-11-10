@@ -13,7 +13,7 @@ export default class ModalContent extends React.Component {
 
   render() {
     const { activeItem } = this.state;
-    const { popupData, updateState, widget } = this.props;
+    const { popupData, updateState, widget, filterClause } = this.props;
     const { properties } = popupData;
 
     if (properties) {
@@ -50,6 +50,8 @@ export default class ModalContent extends React.Component {
         <DataConsumer>
           {({ storageLocation }) => {
             let accountId = 0;
+            const ignoreFilters =
+              widget.ignoreFilters !== undefined ? widget.ignoreFilters : true;
 
             if (properties.queryAccountId) {
               accountId = properties.queryAccountId;
@@ -99,7 +101,9 @@ export default class ModalContent extends React.Component {
                       <LineChart
                         fullWidth
                         accountId={accountId}
-                        query={chartQuery}
+                        query={`${chartQuery} ${
+                          ignoreFilters ? '' : filterClause || ''
+                        }`}
                       />
                     </div>
                   ) : (

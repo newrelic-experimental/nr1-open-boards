@@ -458,7 +458,13 @@ export default class Grid extends React.PureComponent {
                 );
               }
               case 'mapbox': {
-                return <MapBox i={w.i} widget={w.widget} />;
+                return (
+                  <MapBox
+                    i={w.i}
+                    widget={w.widget}
+                    filterClause={filterClause}
+                  />
+                );
               }
               case 'eventtimeline': {
                 return (

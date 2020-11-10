@@ -17,6 +17,9 @@
   "cse-nr1": {
     "id": "681e2086-75c3-4e9b-9da9-16c10bccfe45"
   },
+  "pet-nr1":{
+    "id":  "1910106b-1029-406c-90d1-68e492e4ead1"
+  },
   "dependencies": {
     "@newrelic/nr1-community": "^1.2.0",
     "ace-builds": "^1.4.12",
