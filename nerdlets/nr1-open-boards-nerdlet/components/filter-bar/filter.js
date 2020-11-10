@@ -96,7 +96,7 @@ export default class Filter extends React.PureComponent {
         })
         .filter(a => a && !a.includes("'") && !a.includes('"'));
 
-      autoComplete = [...new Set(autoComplete)];
+      autoComplete = [...new Set(autoComplete.sort())];
 
       this.setState({
         eventTypesStr,

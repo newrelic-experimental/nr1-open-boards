@@ -75,6 +75,7 @@ export default class CreateBoard extends React.PureComponent {
 
     await updateDataStateContext({
       boards: buildBoardOptions(boards),
+      locked: false,
       storageLocation,
       selectedBoard
     });

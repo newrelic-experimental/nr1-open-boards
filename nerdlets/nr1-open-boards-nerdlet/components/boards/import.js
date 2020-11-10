@@ -76,6 +76,7 @@ export default class ImportBoard extends React.PureComponent {
 
     await updateDataStateContext({
       boards: buildBoardOptions(boards),
+      locked: false,
       selectedBoard
     });
     this.handleClose();
