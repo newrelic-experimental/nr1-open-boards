@@ -1,5 +1,13 @@
 import React from 'react';
-import { Modal, Button, Form, TextArea, Label, Menu } from 'semantic-ui-react';
+import {
+  Modal,
+  Button,
+  Form,
+  TextArea,
+  Label,
+  Menu,
+  Message
+} from 'semantic-ui-react';
 import { DataConsumer } from '../../../context/data';
 import {
   writeUserDocument,
@@ -180,6 +188,22 @@ export default class GeoMapsConfig extends React.Component {
                     onClick={() => this.setState({ menuItem: 'existing' })}
                   />
                 </Menu>
+
+                <Message>
+                  <Message.Header>GeoOps JSON configuration</Message.Header>
+                  <Message.Item
+                    style={{ cursor: 'pointer' }}
+                    onClick={() =>
+                      window.open(
+                        'https://github.com/newrelic/nr1-workload-geoops/tree/main/examples',
+                        '_blank'
+                      )
+                    }
+                  >
+                    The GeoOps configuration file uses the same format as the
+                    GeoOps application, click to view examples.
+                  </Message.Item>
+                </Message>
 
                 <div style={{ display: menuItem === 'new' ? '' : 'none' }}>
                   <Form>
