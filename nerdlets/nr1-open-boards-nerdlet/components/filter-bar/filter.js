@@ -4,21 +4,22 @@ no-console: 0
 import React from 'react';
 import { DataConsumer } from '../../context/data';
 import CreatableSelect from 'react-select/creatable';
-import { NrqlQuery, nerdlet } from 'nr1';
+import { NrqlQuery } from 'nr1';
 
 const customStyles = {
+  // eslint-disable-next-line
   menu: (provided, state) => ({
     ...provided,
     borderRadius: '0px'
   }),
-
+  // eslint-disable-next-line
   control: (provided, { selectProps: { width } }) => ({
     ...provided,
     borderRadius: '0px',
     fontSize: '13px',
     color: '#2a3434'
   }),
-
+  // eslint-disable-next-line
   valueContainer: (provided, state) => {
     // const opacity = state.isDisabled ? 0.5 : 1;
     // const transition = 'opacity 300ms';
@@ -150,12 +151,10 @@ export default class Filter extends React.PureComponent {
                 onCreateOption={v => {
                   filters[filterName] = { value: v, label: v };
                   updateDataStateContext({ filters });
-                  nerdlet.setUrlState({ filters });
                 }}
                 onChange={v => {
                   filters[filterName] = v ? v : all;
                   updateDataStateContext({ filters });
-                  nerdlet.setUrlState({ filters });
                 }}
               />
             </div>

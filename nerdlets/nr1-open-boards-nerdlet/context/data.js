@@ -193,8 +193,7 @@ export class DataProvider extends Component {
         Object.keys(stateData).forEach(key => {
           if (key === 'selectedBoard') {
             nerdlet.setUrlState({
-              name: stateData[key] ? stateData[key].id : null,
-              filters: {}
+              name: stateData[key] ? stateData[key].id : null
             });
           } else if (key === 'storageLocation') {
             let storageLocation = null;
@@ -205,6 +204,10 @@ export class DataProvider extends Component {
             }
             nerdlet.setUrlState({
               storageLocation
+            });
+          } else if (key === 'filters') {
+            nerdlet.setUrlState({
+              filters: stateData[key]
             });
           }
         });
