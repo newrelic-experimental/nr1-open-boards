@@ -25,6 +25,14 @@ const alertLevels = {
   CRITICAL: 3
 };
 
+const updateSeverity = (alertValue, geojson, featIndex) => {
+  const alertSeverity = alertLevels[alertValue] || 0;
+  if (alertSeverity > geojson.features[featIndex].properties.alertLevel) {
+    geojson.features[featIndex].properties.alertLevel = alertSeverity;
+    geojson.features[featIndex].properties.alertHighest = alertValue;
+  }
+};
+
 export default class Map extends React.Component {
   constructor(props) {
     super(props);
@@ -173,19 +181,14 @@ export default class Map extends React.Component {
 
                 (f.properties.entities || []).forEach((entity, entityIndex) => {
                   if (e.guid === entity.guid) {
-                    const alertLevel = alertLevels[e.alertSeverity] || 0;
+                    updateSeverity(e.alertSeverity, geojson, featIndex);
 
-                    if (
-                      alertLevel >
-                      geojson.features[featIndex].properties.alertLevel
-                    ) {
-                      geojson.features[
-                        featIndex
-                      ].properties.alertLevel = alertLevel;
-
-                      geojson.features[featIndex].properties.alertHighest =
-                        e.alertSeverity;
-                    }
+                    (e.relationships || []).forEach(r => {
+                      const alertValue =
+                        (((r || {}).target || {}).entity || {}).alertSeverity ||
+                        null;
+                      updateSeverity(alertValue, geojson, featIndex);
+                    });
 
                     geojson.features[featIndex].properties.entities[
                       entityIndex
