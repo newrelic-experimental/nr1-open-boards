@@ -104,7 +104,7 @@ export default class MenuBar extends React.PureComponent {
 
                 <div className="flex-push" />
 
-                {selectedBoard ? (
+                {selectedBoard && !selectedBoard.document.permalocked ? (
                   <>
                     <CreateNrqlWidget />
                     <CreateEntityHdvWidget />
