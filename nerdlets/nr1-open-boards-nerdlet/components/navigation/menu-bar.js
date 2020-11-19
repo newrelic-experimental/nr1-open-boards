@@ -16,6 +16,7 @@ import CreateEntityHdvWidget from '../widgets/create/entity-hdv';
 import ManageEventStreams from '../configuration/event-streams';
 import ManageFilters from '../configuration/filters';
 import ManageStyles from '../configuration/styles';
+import ManagePermalock from '../configuration/permalock';
 import ManageHTMLWidgets from '../configuration/nrql-html-widgets';
 import ImportBoard from '../boards/import';
 import CreateEventTimelineWidget from '../widgets/create/event-timeline';
@@ -95,7 +96,11 @@ export default class MenuBar extends React.PureComponent {
 
                 {selectedBoard ? <ExportBoard /> : ''}
 
-                {selectedBoard ? <LockBoard /> : ''}
+                {selectedBoard && !selectedBoard.document.permalocked ? (
+                  <LockBoard />
+                ) : (
+                  ''
+                )}
 
                 <div className="flex-push" />
 
@@ -117,6 +122,10 @@ export default class MenuBar extends React.PureComponent {
                     />
                     <ManageEventStreams
                       eventStreams={selectedBoard.document.eventStreams || []}
+                    />
+
+                    <ManagePermalock
+                      permalocked={selectedBoard.document.permalocked || false}
                     />
                     <BasicHTMLWidget />
 

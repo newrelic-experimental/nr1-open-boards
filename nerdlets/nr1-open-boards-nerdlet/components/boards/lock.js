@@ -8,28 +8,26 @@ export default class LockBoard extends React.PureComponent {
   }
 
   save = async (locked, updateDataStateContext) => {
-    await updateDataStateContext({ locked : locked })
-  }
+    await updateDataStateContext({ locked: locked });
+  };
 
   render() {
     return (
       <DataConsumer>
-        {({ locked, updateDataStateContext }) => 
-          (
-            <Button
-              className="filter-button"
+        {({ locked, updateDataStateContext }) => (
+          <Button
+            className="filter-button"
+            size="large"
+            onClick={() => this.save(!locked, updateDataStateContext)}
+          >
+            <Icon
               size="large"
-              onClick={() => this.save(!locked, updateDataStateContext)}
-            >
-              <Icon
-                size="large"
-                fitted
-                name={ locked ? "lock" : "lock open"}
-                color={ locked ? "green" : "red"}
-              />
-            </Button>
-          )
-        }
+              fitted
+              name={locked ? 'lock' : 'lock open'}
+              color={locked ? 'green' : 'red'}
+            />
+          </Button>
+        )}
       </DataConsumer>
     );
   }
