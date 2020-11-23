@@ -41,7 +41,8 @@ export default class ConfigSelector extends React.PureComponent {
       { value: 'openStyles', label: 'CSS Styles' },
       { value: 'openEventStreams', label: 'Event Streams' },
       { value: 'openDynamicHTMLWidgets', label: 'Dynamic HTML Widgets' },
-      { value: 'openGeoMaps', label: 'Geo Maps' }
+      { value: 'openGeoMaps', label: 'Geo Maps' },
+      { value: 'openPermalock', label: 'Permalock' }
     ];
 
     return (
