@@ -65,7 +65,7 @@ export default class OpenHtml extends React.Component {
       replacements.forEach(r => {
         let newValue = r;
 
-        const valueAccountReplacements = r.match(/Q\d+:\w+:\S+/g) || [];
+        const valueAccountReplacements = r.match(/Q\d+:\w+:\w+/g) || [];
         valueAccountReplacements.forEach(v => {
           const values = v.split(':');
           const queryNo = values[0];
@@ -75,7 +75,7 @@ export default class OpenHtml extends React.Component {
           newValue = newValue.replace(v, value);
         });
 
-        const valueSingleReplacements = r.match(/Q\d+:\S+/g) || [];
+        const valueSingleReplacements = r.match(/Q\d+:\w+/g) || [];
         valueSingleReplacements.forEach(v => {
           const values = v.split(':');
           const queryNo = values[0];
