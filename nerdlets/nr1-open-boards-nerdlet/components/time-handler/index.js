@@ -70,8 +70,10 @@ export default class TimeHandler extends React.PureComponent {
   render() {
     return (
       <DataConsumer>
-        {({ updateDataStateContext, timeRange }) => {
-          this.handleUpdate(updateDataStateContext, this.props, timeRange);
+        {({ updateDataStateContext, timeRange, urlStateChecked }) => {
+          if (urlStateChecked) {
+            this.handleUpdate(updateDataStateContext, this.props, timeRange);
+          }
           return '';
         }}
       </DataConsumer>

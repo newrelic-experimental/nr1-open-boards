@@ -58,7 +58,7 @@ export class DataProvider extends Component {
       platform_duration: 0,
       begin_time: 0,
       end_time: 0,
-      timeRange: {},
+      timeRange: null,
       sinceClause: '',
       urlStateChecked: false,
       initialized: false,
