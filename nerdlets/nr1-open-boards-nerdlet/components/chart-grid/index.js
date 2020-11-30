@@ -1,6 +1,6 @@
 import React from 'react';
 import { DataConsumer } from '../../context/data';
-import { buildFilterClause } from './utils';
+import { buildFilterClause } from '../../lib/utils';
 import Grid from './grid';
 import BoardSelector from './board-selector';
 import _ from 'lodash';

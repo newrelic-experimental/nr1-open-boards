@@ -4,7 +4,7 @@ no-console: 0
 import React from 'react';
 import { DataConsumer } from '../../context/data';
 import Filter from './filter';
-import { buildFilterClause } from '../chart-grid/utils';
+import { buildFilterClause } from '../../lib/utils';
 
 const getFilterData = widgets => {
   let eventTypes = '';
