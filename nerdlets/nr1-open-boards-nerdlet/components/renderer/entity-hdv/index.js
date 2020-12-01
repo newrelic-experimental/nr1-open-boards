@@ -334,7 +334,7 @@ export default class EntityHdv extends React.Component {
                   {showSummary && widget.summarize === 'true' ? (
                     <EntityHdvSummary
                       width={width}
-                      height={maxWidgetHeight}
+                      height={maxWidgetHeight - 5}
                       summarizedHealthStatus={summarizedHealthStatus}
                       toggleSummary={this.toggleSummary}
                       isFetching={isFetching}
