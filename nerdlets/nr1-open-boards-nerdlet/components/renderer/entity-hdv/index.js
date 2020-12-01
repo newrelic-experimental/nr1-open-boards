@@ -5,6 +5,7 @@ import gql from 'graphql-tag';
 import EntityHdvWidget from './hdv';
 import { chunk } from '../../../lib/helper';
 import queue from 'async/queue';
+import EntityHdvSummary from './summary';
 
 const entityQuery = (query, cursor) => {
   return gql`{
@@ -72,12 +73,36 @@ const relationshipQuery = (guids, end_time) => {
   }`;
 };
 
+const alertLevels = {
+  UNCONFIGURED: 0,
+  NOT_ALERTING: 1,
+  WARNING: 2,
+  CRITICAL: 3
+};
+
+const deriveHealthStatus = data => {
+  let currentSeverity = 0;
+  let currentStatus = 'UNCONFIGURED';
+  data.forEach(entity => {
+    const alertSeverity = alertLevels[entity.alertSeverity] || 0;
+
+    if (alertSeverity > currentSeverity) {
+      currentSeverity = alertSeverity;
+      currentStatus = entity.alertSeverity;
+    }
+  });
+
+  return currentStatus;
+};
+
 export default class EntityHdv extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       data: [],
+      summarizedHealthStatus: 'UNCONFIGURED',
       relationshipData: {},
+      showSummary: true,
       isFetching: false,
       error: false,
       tagFilterQuery: '',
@@ -128,12 +153,18 @@ export default class EntityHdv extends React.Component {
     }
   }
 
+  toggleSummary = () => {
+    const { showSummary } = this.state;
+    this.setState({ showSummary: !showSummary });
+  };
+
   updateFilter = (widget, tagFilterQuery, end_time) => {
     const stateUpdate = {
       init: false,
       query: widget.value,
       tagFilterQuery,
-      end_time
+      end_time,
+      showSummary: true
     };
     this.setState(stateUpdate, () => {
       const { pollInterval } = this.state;
@@ -160,6 +191,7 @@ export default class EntityHdv extends React.Component {
           this.setState({ data }, async () => {
             const entityGuids = data.map(e => e.guid);
             const entityChunks = chunk(entityGuids, 25);
+            const summarizedHealthStatus = deriveHealthStatus(data);
 
             const entityPromises = entityChunks.map(chunk => {
               return new Promise(async resolve => {
@@ -184,7 +216,11 @@ export default class EntityHdv extends React.Component {
               relationshipData[r.guid] = { ...r };
             });
 
-            this.setState({ relationshipData, isFetching: false });
+            this.setState({
+              relationshipData,
+              summarizedHealthStatus,
+              isFetching: false
+            });
           });
         });
       });
@@ -231,7 +267,13 @@ export default class EntityHdv extends React.Component {
   };
 
   render() {
-    const { data, isFetching, relationshipData } = this.state;
+    const {
+      data,
+      isFetching,
+      relationshipData,
+      showSummary,
+      summarizedHealthStatus
+    } = this.state;
     const { widget, i } = this.props;
     const hdrStyle = widget.headerStyle || {};
 
@@ -289,14 +331,26 @@ export default class EntityHdv extends React.Component {
                     overflowX: 'hidden'
                   }}
                 >
-                  <EntityHdvWidget
-                    data={data}
-                    width={width}
-                    height={maxWidgetHeight}
-                    limit={widget.limit}
-                    isFetching={isFetching}
-                    relationshipData={relationshipData}
-                  />
+                  {showSummary && widget.summarize === 'true' ? (
+                    <EntityHdvSummary
+                      width={width}
+                      height={maxWidgetHeight}
+                      summarizedHealthStatus={summarizedHealthStatus}
+                      toggleSummary={this.toggleSummary}
+                      isFetching={isFetching}
+                    />
+                  ) : (
+                    <EntityHdvWidget
+                      summarize={widget.summarize}
+                      toggleSummary={this.toggleSummary}
+                      data={data}
+                      width={width}
+                      height={maxWidgetHeight}
+                      limit={widget.limit}
+                      isFetching={isFetching}
+                      relationshipData={relationshipData}
+                    />
+                  )}
                 </div>
               </div>
             );

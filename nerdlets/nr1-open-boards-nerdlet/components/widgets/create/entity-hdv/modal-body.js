@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Divider, Message, Form } from 'semantic-ui-react';
+import { Button, Divider, Message, Form, Dropdown } from 'semantic-ui-react';
 import { writeUserDocument, writeAccountDocument } from '../../../../lib/utils';
 import { DataConsumer } from '../../../../context/data';
 
@@ -10,6 +10,7 @@ export default class EntityHdvModalBody extends React.PureComponent {
       name: '',
       value: `domain IN ('INFRA', 'APM')`,
       limit: 0,
+      summarize: '',
       x: 0,
       y: 0,
       w: 7,
@@ -27,6 +28,7 @@ export default class EntityHdvModalBody extends React.PureComponent {
         value: widget.value,
         limit: widget.limit || 0,
         tagFilters: widget.tagFilters || [],
+        summarize: widget.summarize || '',
         x: widget.x,
         y: widget.y,
         w: widget.w,
@@ -53,11 +55,22 @@ export default class EntityHdvModalBody extends React.PureComponent {
     updateDataStateContext,
     widgetNo
   ) => {
-    const { name, value, limit, tagFilters, x, y, w, h } = this.state;
+    const {
+      name,
+      value,
+      limit,
+      summarize,
+      tagFilters,
+      x,
+      y,
+      w,
+      h
+    } = this.state;
     const widget = {
       name,
       value,
       limit,
+      summarize,
       tagFilters,
       x,
       y,
@@ -112,7 +125,7 @@ export default class EntityHdvModalBody extends React.PureComponent {
       return 'Loading widget...';
     }
 
-    const { name, value, limit, tagFilters } = this.state;
+    const { name, value, limit, summarize, tagFilters } = this.state;
 
     const filterOptions = [
       { key: 'accountId', text: 'accountId', value: 'accountId' },
@@ -138,7 +151,7 @@ export default class EntityHdvModalBody extends React.PureComponent {
                     onChange={(e, d) => this.setState({ name: d.value })}
                   />
                   <Form.Input
-                    width="8"
+                    width="4"
                     label="Entity limit (0 for max)"
                     value={limit}
                     onChange={(e, d) =>
@@ -147,6 +160,23 @@ export default class EntityHdvModalBody extends React.PureComponent {
                       })
                     }
                   />
+                  <Form.Field width="4">
+                    <label>Summarize</label>
+                    <Dropdown
+                      placeholder="Default false"
+                      selection
+                      onChange={(e, d) =>
+                        d.value === 'false'
+                          ? this.setState({ summarize: '' })
+                          : this.setState({ summarize: d.value })
+                      }
+                      value={summarize}
+                      options={[
+                        { key: 'false', value: 'false', text: 'false' },
+                        { key: 'true', value: 'true', text: 'true' }
+                      ]}
+                    />
+                  </Form.Field>
                 </Form.Group>
                 <Form.Input
                   width="16"

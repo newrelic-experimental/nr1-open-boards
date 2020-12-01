@@ -93,7 +93,9 @@ export default class EntityHdvWidget extends React.Component {
       width,
       height,
       relationshipData,
-      isFetching
+      isFetching,
+      summarize,
+      toggleSummary
     } = this.props;
 
     const {
@@ -109,19 +111,19 @@ export default class EntityHdvWidget extends React.Component {
       let fill = '';
       switch (hexagon.alertSeverity) {
         case 'CRITICAL': {
-          fill = 'red';
+          fill = '#BF0016';
           break;
         }
         case 'WARNING': {
-          fill = 'orange';
+          fill = '#9C5400';
           break;
         }
         case 'NOT_ALERTING': {
-          fill = 'green';
+          fill = '#3CA653';
           break;
         }
         case 'NOT_CONFIGURED': {
-          fill = 'grey';
+          fill = '#464e4e';
           break;
         }
       }
@@ -295,6 +297,21 @@ export default class EntityHdvWidget extends React.Component {
 
     return (
       <div>
+        {summarize === 'true' ? (
+          <div
+            style={{
+              cursor: 'pointer',
+              textAlign: 'center',
+              paddingBottom: '3px'
+            }}
+            onClick={toggleSummary}
+          >
+            Summarize
+            <Icon name="bars" />
+          </div>
+        ) : (
+          ''
+        )}
         {hexagons.length > 0 ? (
           <div style={{ height, width: width - 5, overflowY: 'none' }}>
             <HexagonGrid
