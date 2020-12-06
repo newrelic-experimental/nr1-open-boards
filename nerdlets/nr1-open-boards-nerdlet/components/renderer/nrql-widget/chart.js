@@ -12,6 +12,7 @@ import { nrqlToNrTable, nrqlToNrBillboard } from './transformers/newrelic';
 import { DataConsumer } from '../../../context/data';
 import OpenHtml from './html';
 import HeatMapWidget from './heatmap';
+import SvgRadarChart from './radar-chart';
 
 export default class WidgetChart extends React.Component {
   render() {
@@ -146,6 +147,16 @@ export default class WidgetChart extends React.Component {
               case 'open:react-heatmap-grid': {
                 return (
                   <HeatMapWidget
+                    width={width}
+                    height={height}
+                    widget={widget}
+                    data={rawData}
+                  />
+                );
+              }
+              case 'open:svg-radar-chart': {
+                return (
+                  <SvgRadarChart
                     width={width}
                     height={height}
                     widget={widget}

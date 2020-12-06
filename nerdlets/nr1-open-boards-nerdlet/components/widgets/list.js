@@ -54,5 +54,20 @@ export const nrqlCharts = [
     examples: [
       `FROM Transaction SELECT count(*) FACET appName, hourOf(timestamp) ORDER BY timestamp LIMIT MAX`
     ]
+  },
+  {
+    type: 'open',
+    name: 'svg-radar-chart',
+    nrqlDisallow: ['TIMESERIES'],
+    messages: [
+      `At least 3 queries should be used for best visual.`,
+      `Values, SLOs, SLAs should be normalized between a range of 0.0 to 1.0.`,
+      `Set your SLO & SLA by adding the following into your NRQL query: ", 0.5 as 'SLO', 0.8 as 'SLA'".`
+    ],
+    examples: [
+      `FROM SystemSample SELECT average(cpuPercent) / 100, 0.5 as 'SLO', 0.8 as 'SLA'`,
+      `FROM SystemSample SELECT average(memoryUsedPercent) /100, 0.5 as 'SLO', 0.8 as 'SLA'`,
+      `FROM StorageSample SELECT latest(diskUsedPercent) / 100 as 'disk', 0.5 as 'SLO', 0.8 as 'SLA'`
+    ]
   }
 ];
