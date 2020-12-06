@@ -63,7 +63,13 @@ export default class MapboxWidgetDropDown extends React.Component {
               open={!locked && this.state.isOpen}
               onClose={this.handleClose}
               onOpen={this.handleOpen}
-              trigger={<Icon name="caret down" color="grey" size="large" />}
+              trigger={
+                locked ? (
+                  <Icon name="lock" color="green" size="small" />
+                ) : (
+                  <Icon name="caret down" color="grey" size="large" />
+                )
+              }
               content={
                 <div>
                   <div
