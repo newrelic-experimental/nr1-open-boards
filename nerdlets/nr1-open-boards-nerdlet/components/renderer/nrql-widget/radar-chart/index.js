@@ -16,17 +16,24 @@ export default class SvgRadarChart extends React.Component {
   render() {
     const { width, height, data } = this.props;
 
-    const summarizedData = (data || []).map(d => {
-      const key = d.metadata.groups[0].value;
-      const value = d.data[0][key];
+    const summarizedData = (data || [])
+      .map(d => {
+        const key = d.metadata.groups[0].value;
+        const value = d.data[0][key];
 
-      return {
-        group: key !== 'SLO' && key !== 'SLA' ? key : getKey(data, d.nrqlQuery),
-        key,
-        value,
-        query: d.nrqlQuery
-      };
-    });
+        if (key !== undefined && value !== undefined) {
+          return {
+            group:
+              key !== 'SLO' && key !== 'SLA' ? key : getKey(data, d.nrqlQuery),
+            key,
+            value,
+            query: d.nrqlQuery
+          };
+        } else {
+          return null;
+        }
+      })
+      .filter(d => d && d.group);
 
     const radarCaptions = {};
     const actuals = {};
