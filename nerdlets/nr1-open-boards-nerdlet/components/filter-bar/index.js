@@ -2,9 +2,10 @@
 no-console: 0
 */
 import React from 'react';
+import { Label } from 'semantic-ui-react';
 import { DataConsumer } from '../../context/data';
 import Filter from './filter';
-import { buildFilterClause } from '../chart-grid/utils';
+import { buildFilterClause, requiredFiltersSet } from '../chart-grid/utils';
 
 const getFilterData = widgets => {
   let eventTypes = '';
@@ -37,9 +38,12 @@ export default class FilterBar extends React.PureComponent {
         {({ selectedBoard, filters }) => {
           if (selectedBoard) {
             const dashboardFilters = selectedBoard.document.filters || [];
+            const requiredFilters = dashboardFilters.filter(f => f.required);
+            const optionalFilters = dashboardFilters.filter(f => !f.required);
             const widgets = selectedBoard.document.widgets || [];
             const { eventTypes, accounts } = getFilterData(widgets);
             const whereClause = buildFilterClause(filters, dashboardFilters);
+            const requiredSet = requiredFiltersSet(filters, dashboardFilters);
 
             return (
               <div
@@ -59,7 +63,26 @@ export default class FilterBar extends React.PureComponent {
                     flexDirection: 'row'
                   }}
                 >
-                  {dashboardFilters.map((f, i) => (
+                  {requiredFilters.length ? (
+                    <Label color={requiredSet ? 'green' : 'red'}>
+                      Required
+                    </Label>
+                  ) : null}
+                  {requiredFilters.map((f, i) => (
+                    <Filter
+                      key={i}
+                      filter={f}
+                      filters={filters}
+                      eventTypes={eventTypes}
+                      accounts={accounts}
+                      whereClause={whereClause}
+                    />
+                  ))}
+
+                  {optionalFilters.length ? (
+                    <Label color="grey">Optional</Label>
+                  ) : null}
+                  {optionalFilters.map((f, i) => (
                     <Filter
                       key={i}
                       filter={f}

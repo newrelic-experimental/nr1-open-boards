@@ -1,5 +1,30 @@
 import gql from 'graphql-tag';
 
+export const requiredFiltersSet = (filters, dbFilters) => {
+  const requiredFilters = dbFilters.filter(f => f.required);
+
+  if (!requiredFilters.length) {
+    return true;
+  }
+
+  if (requiredFilters.length > filters.length) {
+    return false;
+  }
+
+  let allSet = true;
+  requiredFilters.forEach(rf => {
+    let isSet = false;
+    Object.keys(filters).forEach(f => {
+      if (isSet) return;
+      const filterName = f.replace('filter_', '');
+      isSet = (rf.name === filterName) & (filters[f].value !== '*');
+    });
+    allSet = allSet & isSet;
+  });
+
+  return allSet;
+};
+
 export const buildFilterClause = (filters, dbFilters) => {
   if (Object.keys(filters).length > 0) {
     let value = '';
