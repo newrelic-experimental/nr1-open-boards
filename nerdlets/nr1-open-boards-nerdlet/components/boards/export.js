@@ -13,6 +13,11 @@ export default class ExportBoard extends React.PureComponent {
   handleOpen = () => this.setState({ exportOpen: true });
   handleClose = () => this.setState({ exportOpen: false });
 
+  convertBoard = document => {
+    document.permalocked = false;
+    return JSON.stringify(document, null, 2);
+  };
+
   render() {
     const { exportOpen } = this.state;
     return (

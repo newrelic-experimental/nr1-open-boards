@@ -1,6 +1,10 @@
 import React from 'react';
 import GridLayout from 'react-grid-layout';
-import { writeUserDocument, writeAccountDocument } from '../../lib/utils';
+import {
+  buildTagFilterQuery,
+  writeUserDocument,
+  writeAccountDocument
+} from '../../lib/utils';
 import { DataConsumer } from '../../context/data';
 import NrqlWidget from '../renderer/nrql-widget';
 import BasicHTML from '../renderer/html-widget';
@@ -9,8 +13,7 @@ import {
   deriveEvents,
   deriveAccounts,
   getGuidsQuery,
-  getAlertsDeploysQuery,
-  buildTagFilterQuery
+  getAlertsDeploysQuery
 } from './utils';
 import EntityHdv from '../renderer/entity-hdv';
 import { NrqlQuery, NerdGraphQuery } from 'nr1';
