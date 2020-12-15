@@ -26,22 +26,13 @@ export default class PopupContent extends React.Component {
 
       return (
         <div style={{ fontSize: '14px', display: 'inline' }}>
-          <div style={{ paddingTop: '5px' }}>
             <Label
               style={{ width: '100%', cursor: 'pointer' }}
               color={alertColor}
               icon="circle"
               content={properties.name}
-              // detail={properties.alertHighest}
               onClick={() => updateState({ hidden: true })}
             />
-            {/* <br />
-            <Label
-              icon="boxes"
-              content="Entities"
-              detail={(properties.entities || []).length}
-            /> */}
-          </div>
         </div>
       );
     }
