@@ -202,8 +202,6 @@ export default class MapboxModalBody extends React.PureComponent {
           );
           accounts.shift();
 
-          console.log({ accounts });
-
           const themes = availableThemes.map( text => ({text, key: text, value: text}));
 
           return (
