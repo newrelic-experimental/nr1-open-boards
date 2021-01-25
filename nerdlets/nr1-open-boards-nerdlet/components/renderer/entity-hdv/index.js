@@ -7,6 +7,16 @@ import { chunk } from '../../../lib/helper';
 import queue from 'async/queue';
 import EntityHdvSummary from './summary';
 
+import styled, { keyframes } from 'styled-components';
+import { fadeIn, bounce } from 'react-animations';
+
+const fadeInAnimation = keyframes`${fadeIn}`;
+
+const FadeyDiv = styled.div`
+  animation: 5s ${fadeInAnimation};
+`;
+
+
 const entityQuery = (query, cursor) => {
   return gql`{
     actor {
@@ -278,85 +288,89 @@ export default class EntityHdv extends React.Component {
     const hdrStyle = widget.headerStyle || {};
 
     return (
-      <div style={{ width: '100%', height: '100%' }}>
-        <AutoSizer>
-          {({ width, height }) => {
-            const headerHeight = hdrStyle.height
-              ? hdrStyle.height.replace(/\D/g, '')
-              : 30;
+        <div style={{ width: '100%', height: '100%' }}>
+          <AutoSizer>
+            {({ width, height }) => {
+              const headerHeight = hdrStyle.height
+                ? hdrStyle.height.replace(/\D/g, '')
+                : 30;
 
-            const maxWidgetHeight = height - headerHeight;
-            const paddingTop = '5px';
-            const paddingLeft = '9px';
-            const paddingRight = '5px';
-            const paddingBottom = '5px';
+              const maxWidgetHeight = height - headerHeight;
+              const paddingTop = '5px';
+              const paddingLeft = '9px';
+              const paddingRight = '5px';
+              const paddingBottom = '5px';
 
-            hdrStyle.fontSize = hdrStyle.fontSize || '14px';
-            hdrStyle.fontWeight = hdrStyle.fontWeight || 'bold';
-            // hdrStyle.fontFamily = hdrStyle.fontFamily || 'Fira Code';
-            hdrStyle.paddingLeft = hdrStyle.paddingLeft || '9px';
-            hdrStyle.paddingLeft = hdrStyle.paddingRight || '5px';
-            hdrStyle.float = hdrStyle.float || 'left';
-            hdrStyle.verticalAlign = hdrStyle.verticalAlign || 'middle';
+              hdrStyle.fontSize = hdrStyle.fontSize || '14px';
+              hdrStyle.fontWeight = hdrStyle.fontWeight || 'bold';
+              // hdrStyle.fontFamily = hdrStyle.fontFamily || 'Fira Code';
+              hdrStyle.paddingLeft = hdrStyle.paddingLeft || '9px';
+              hdrStyle.paddingLeft = hdrStyle.paddingRight || '5px';
+              hdrStyle.float = hdrStyle.float || 'left';
+              hdrStyle.verticalAlign = hdrStyle.verticalAlign || 'middle';
 
-            return (
-              <div style={{ paddingTop }}>
-                <div style={{ height: `${headerHeight}px` }}>
-                  <div
-                    style={{
-                      ...hdrStyle
-                    }}
-                  >
-                    {widget.name || 'some widget'}
+              return (
+                <div style={{ paddingTop }}>
+                  <div style={{ height: `${headerHeight}px` }}>
+                    <div
+                      style={{
+                        ...hdrStyle
+                      }}
+                    >
+                      {widget.name || 'some widget'}
+                    </div>
+
+                    <div
+                      style={{
+                        float: 'right',
+                        maxHeight: `${headerHeight}px`
+                      }}
+                    >
+                      <EntityHdvWidgetDropDown
+                        i={i}
+                        height={`${headerHeight}px`}
+                      />
+                    </div>
                   </div>
 
-                  <div
-                    style={{
-                      float: 'right',
-                      maxHeight: `${headerHeight}px`
-                    }}
-                  >
-                    <EntityHdvWidgetDropDown
-                      i={i}
-                      height={`${headerHeight}px`}
-                    />
-                  </div>
+                  <FadeyDiv>
+                    <div
+                      style={{
+                        paddingLeft,
+                        paddingRight,
+                        paddingBottom,
+                        overflowX: 'hidden'
+                      }}
+                    >
+                      {showSummary && widget.summarize === 'true' ? (
+                        <EntityHdvSummary
+                          width={width}
+                          height={maxWidgetHeight - 5}
+                          summarizedHealthStatus={summarizedHealthStatus}
+                          toggleSummary={this.toggleSummary}
+                          isFetching={isFetching}
+                          summaryLabel={widget.summaryLabel}
+                          summaryLabelFontSize={widget.summaryLabelFontSize}
+                        />
+                      ) : (
+                        <EntityHdvWidget
+                          summarize={widget.summarize}
+                          toggleSummary={this.toggleSummary}
+                          data={data}
+                          width={width}
+                          height={maxWidgetHeight}
+                          limit={widget.limit}
+                          isFetching={isFetching}
+                          relationshipData={relationshipData}
+                        />
+                      )}
+                    </div>
+                  </FadeyDiv>
                 </div>
-
-                <div
-                  style={{
-                    paddingLeft,
-                    paddingRight,
-                    paddingBottom,
-                    overflowX: 'hidden'
-                  }}
-                >
-                  {showSummary && widget.summarize === 'true' ? (
-                    <EntityHdvSummary
-                      width={width}
-                      height={maxWidgetHeight - 5}
-                      summarizedHealthStatus={summarizedHealthStatus}
-                      toggleSummary={this.toggleSummary}
-                      isFetching={isFetching}
-                    />
-                  ) : (
-                    <EntityHdvWidget
-                      summarize={widget.summarize}
-                      toggleSummary={this.toggleSummary}
-                      data={data}
-                      width={width}
-                      height={maxWidgetHeight}
-                      limit={widget.limit}
-                      isFetching={isFetching}
-                      relationshipData={relationshipData}
-                    />
-                  )}
-                </div>
-              </div>
-            );
-          }}
-        </AutoSizer>
-      </div>
+              );
+            }}
+          </AutoSizer>
+        </div>
     );
   }
 }

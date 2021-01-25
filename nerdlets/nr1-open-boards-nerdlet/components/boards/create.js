@@ -6,7 +6,8 @@ import {
   Header,
   Radio,
   Popup,
-  Icon
+  Icon,
+  Checkbox
 } from 'semantic-ui-react';
 import {
   writeUserDocument,
@@ -23,6 +24,11 @@ export default class CreateBoard extends React.PureComponent {
     super(props);
     this.state = {
       boardName: '',
+      boardConfig: {
+        autoSize: true,
+        width: 0,
+        height: 0
+      },
       storeLocation: '',
       selectedAccount: null,
       createOpen: false,
@@ -34,7 +40,7 @@ export default class CreateBoard extends React.PureComponent {
   handleClose = () => this.setState({ createOpen: false, boardName: '' });
 
   create = async updateDataStateContext => {
-    const { storeLocation, selectedAccount, boardName } = this.state;
+    const { storeLocation, selectedAccount, boardName, boardConfig } = this.state;
     let boards = [];
     let storageLocation = null;
     const selectedBoard = {
@@ -42,12 +48,12 @@ export default class CreateBoard extends React.PureComponent {
       label: boardName,
       value: boardName,
       type: storageLocation,
-      document: {}
+      document: boardConfig
     };
 
     switch (storeLocation) {
       case 'user': {
-        await writeUserDocument('OpenBoards', boardName, {});
+        await writeUserDocument('OpenBoards', boardName, boardConfig);
         boards = await getUserCollection('OpenBoards');
         storageLocation = {
           key: 'User',
@@ -62,7 +68,7 @@ export default class CreateBoard extends React.PureComponent {
           selectedAccount.value,
           'OpenBoards',
           boardName,
-          {}
+          boardConfig
         );
         boards = await getAccountCollection(
           selectedAccount.value,
@@ -88,7 +94,8 @@ export default class CreateBoard extends React.PureComponent {
       selectedAccount,
       storeLocation,
       createOpen,
-      boards
+      boards,
+      boardConfig
     } = this.state;
 
     return (
@@ -208,6 +215,34 @@ export default class CreateBoard extends React.PureComponent {
                     onChange={e => this.setState({ boardName: e.target.value })}
                     placeholder="Name..."
                   />
+
+                  <Header>Size</Header>
+                  <Checkbox
+                    label="Auto"
+                    checked={boardConfig.autoSize}
+                    onChange={(e => this.setState({ autoSize: !autoSize }))}
+                  />
+                  <Form.Group>
+                    <Form.Input
+                      disabled={boardConfig.autoSize}
+                      label="Height (px)"
+                      onChange={e => this.setState({ height: parseFloat(e.target.value)})}
+                      type='number'
+                      fluid
+                      placeholder="Height..."
+                      min={0}
+                    />
+                    <Form.Input
+                      disabled={boardConfig.autoSize}
+                      label="Width (px)"
+                      onChange={e => this.setState({ width: parseFloat(e.target.value)})}
+                      type='number'
+                      fluid
+                      placeholder="Width..."
+                      min={0}
+                    />
+                  </Form.Group>
+
                 </Form>
               </Modal.Content>
               <Modal.Actions>
