@@ -139,6 +139,11 @@ export default class Map extends React.Component {
     }, this.state.interval);
   };
 
+  calculateZoomLevel = (point_count) => {
+    const { viewport } = this.state;
+    return point_count > 50 ? viewport.zoom + 3 : viewport.zoom + 1.5;
+  }
+
   fetchData = () => {
     const { isFetching } = this.state;
     const geojson = { ...this.state.geojson, timestamp: new Date().getTime() };
@@ -264,7 +269,16 @@ export default class Map extends React.Component {
       f => f.layer.id === 'unclustered-point'
     );
 
-    if (filteredFeatures.length > 0) {
+    const filteredClusters = (map.features || []).filter(
+        ({layer}) => layer.id === 'clusters'
+    );
+
+    if (!filteredFeatures.length && !filteredClusters.length && !isHover) {
+      this.setState({ showPopup: false, popupData: {} });
+      return;
+    }
+
+    if (filteredFeatures.length) {
       const feat = filteredFeatures[0];
       if (feat.properties && feat.properties.location) {
         const key = `${feat.properties.index}:::${feat.properties.name}`;
@@ -281,13 +295,24 @@ export default class Map extends React.Component {
             lng: parseFloat(properties.location.lng)
           }
         });
+
+        if (!isHover) {
+          this.moveViewPort(properties.location.lat, properties.location.lng, 14);
+        }
       }
-    } else {
-      const stateUpdate = { feat: {}, lat: 0, lng: 0 };
-      if (!isHover && !this.state.showPopup) {
-        this.setState({ showPopup: false, ...stateUpdate });
+    } 
+    
+    if (filteredClusters.length) { 
+      if (isHover) {
+        this.setState({ showPopup: false, popupData: {} });
+        return;
       }
-    }
+
+      const [lng,lat] = map.lngLat;
+      const {point_count} = filteredClusters[0].properties;
+      const zoomLevel = this.calculateZoomLevel(point_count);
+      this.moveViewPort(lat, lng, zoomLevel);
+    } 
   };
 
   updateState = state => {
@@ -403,6 +428,7 @@ export default class Map extends React.Component {
           onViewportChange={viewport => this.setState({ viewport })}
           mapboxApiAccessToken={widget.apiToken}
           onClick={this.mapClick}
+          mapStyle={widget.mapStyle}
           onHover={map => this.mapClick(map, true)}
           ref={this.mapRef}
         >
@@ -414,7 +440,7 @@ export default class Map extends React.Component {
             <Popup
               latitude={popupData.lat}
               longitude={popupData.lng}
-              closeButton
+              closeButton={false}
               closeOnClick={false}
               onClose={() => this.setState({ showPopup: false })}
               anchor="top"
@@ -430,28 +456,15 @@ export default class Map extends React.Component {
             type="geojson"
             data={geojson}
             cluster
-            clusterMaxZoom={14}
+            clusterMaxZoom={12}
             clusterRadius={50}
+            clusterProperties={{"maxAlertLevel": ["max", ["get", "alertLevel"]]}}
             ref={this.sourceRef}
           >
             <Layer {...clusterLayer} />
             <Layer {...clusterCountLayer} />
             <Layer {...unclusteredPointLayer} />
           </Source>
-
-          {/* {items.map((item, i) => {
-            return (
-              <Marker
-                key={i}
-                latitude={parseFloat(item.location.lat)}
-                longitude={parseFloat(item.location.lng)}
-              >
-                <div>
-                  <Popup content={item.title} trigger={this.renderIcon(item)} />
-                </div>
-              </Marker>
-            );
-          })} */}
         </ReactMapGL>
       </div>
     );
