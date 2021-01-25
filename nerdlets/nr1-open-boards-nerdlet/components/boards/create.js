@@ -226,7 +226,7 @@ export default class CreateBoard extends React.PureComponent {
                     <Form.Input
                       disabled={boardConfig.autoSize}
                       label="Height (px)"
-                      onChange={e => this.setState({ height: parseFloat(e.target.value)})}
+                      onChange={e => this.setState({ boardConfig: {...boardConfig, height: parseFloat(e.target.value) }})}
                       type='number'
                       fluid
                       placeholder="Height..."
@@ -235,7 +235,7 @@ export default class CreateBoard extends React.PureComponent {
                     <Form.Input
                       disabled={boardConfig.autoSize}
                       label="Width (px)"
-                      onChange={e => this.setState({ width: parseFloat(e.target.value)})}
+                      onChange={e => this.setState({ boardConfig: {...boardConfig, width: parseFloat(e.target.value) }})}
                       type='number'
                       fluid
                       placeholder="Width..."
