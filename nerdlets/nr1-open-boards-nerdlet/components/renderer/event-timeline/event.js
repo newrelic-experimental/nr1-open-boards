@@ -45,6 +45,34 @@ const nrqlEventMessage = event => {
           )}
         </div>
       );
+    case 'services': {
+      const availableAttributes = [];
+      if (event.data.displayName) {
+        availableAttributes.push(event.data.displayName);
+      }
+      if (event.data.Description) {
+        availableAttributes.push(event.data.Description);
+      }
+      if (event.data.summary) {
+        availableAttributes.push(event.data.summary);
+      }
+      return availableAttributes.length === 0 ? (
+        ''
+      ) : (
+        <div>
+          {availableAttributes.map((a, index) => {
+            return index + 1 === availableAttributes.length ? (
+              <>{a}</>
+            ) : (
+              <>
+                {a}
+                <br />
+              </>
+            );
+          })}
+        </div>
+      );
+    }
     default:
       return (
         <div>
