@@ -21,6 +21,7 @@ export default class ManageFilters extends React.Component {
       filterName: '',
       filterDefault: '*',
       operator: null,
+      required: false,
       // ignoreCase: true,
       filters: []
     };
@@ -65,8 +66,19 @@ export default class ManageFilters extends React.Component {
   };
 
   addFilter = (selectedBoard, storageLocation, updateBoard) => {
-    const { filters, filterName, filterDefault, operator } = this.state;
-    const filterValue = { name: filterName, default: filterDefault };
+    const {
+      filters,
+      filterName,
+      filterDefault,
+      operator,
+      required
+    } = this.state;
+
+    const filterValue = {
+      name: filterName,
+      default: filterDefault,
+      required: required
+    };
     if (operator) {
       filterValue.operator = operator;
     }
@@ -76,9 +88,12 @@ export default class ManageFilters extends React.Component {
     const { document } = selectedBoard;
     document.filters = filters;
 
-    this.setState({ filterName: '', filterDefault: '*' }, () => {
-      this.filterUpdate(selectedBoard, storageLocation, updateBoard);
-    });
+    this.setState(
+      { filterName: '', filterDefault: '*', required: false },
+      () => {
+        this.filterUpdate(selectedBoard, storageLocation, updateBoard);
+      }
+    );
   };
 
   editFilter = (index, key, value) => {
@@ -141,7 +156,13 @@ export default class ManageFilters extends React.Component {
           updateBoard,
           updateDataStateContext
         }) => {
-          const { filters, filterName, filterDefault, operator } = this.state;
+          const {
+            filters,
+            filterName,
+            filterDefault,
+            required,
+            operator
+          } = this.state;
 
           return (
             <Modal
@@ -221,6 +242,15 @@ export default class ManageFilters extends React.Component {
                       }
                     />
 
+                    <Form.Checkbox
+                      width="1"
+                      label="Required"
+                      checked={required}
+                      onChange={(e, d) =>
+                        this.setState({ required: d.checked })
+                      }
+                    />
+
                     <Form.Button
                       width="2"
                       label="&nbsp;"
@@ -285,6 +315,15 @@ export default class ManageFilters extends React.Component {
                             value={f.default}
                             onChange={(e, d) =>
                               this.editFilter(i, 'default', d.value)
+                            }
+                          />
+
+                          <Form.Checkbox
+                            width="1"
+                            label="Required"
+                            checked={f.required}
+                            onChange={(e, d) =>
+                              this.editFilter(i, 'required', d.checked)
                             }
                           />
 

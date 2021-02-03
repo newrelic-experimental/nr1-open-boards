@@ -23,6 +23,7 @@ import CreateEventTimelineWidget from '../widgets/create/event-timeline';
 import CreateMapboxWidget from '../widgets/create/mapbox';
 import ConfigSelector from './configuration-selector';
 import GeoMapsConfig from '../configuration/geomaps';
+import ExportFiltersBoard from '../boards/export-filters';
 
 export default class MenuBar extends React.PureComponent {
   changeLocation = async (storageLocation, updateDataStateContext) => {
@@ -95,6 +96,8 @@ export default class MenuBar extends React.PureComponent {
                 <ImportBoard />
 
                 {selectedBoard ? <ExportBoard /> : ''}
+
+                {selectedBoard ? <ExportFiltersBoard /> : ''}
 
                 {selectedBoard && !selectedBoard.document.permalocked ? (
                   <LockBoard />
