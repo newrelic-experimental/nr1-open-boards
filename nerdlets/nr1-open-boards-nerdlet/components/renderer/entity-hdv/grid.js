@@ -134,6 +134,8 @@ class HexagonGrid extends Component {
                 const hexProps = isFunction(this.props.hexProps)
                   ? this.props.hexProps(hexagon)
                   : this.props.hexProps;
+
+
                 return (
                   <Popup
                     key={i}
@@ -144,7 +146,7 @@ class HexagonGrid extends Component {
                         width={hexDim.width}
                         x={`${hexDim.x}px`}
                       >
-                        <Hexagon {...hexProps} flatTop>
+                        <Hexagon {...hexProps} className="grid-hexagon" flatTop>
                           {isFunction(this.props.renderHexagonContent) ? (
                             this.props.renderHexagonContent(hexagon)
                           ) : (

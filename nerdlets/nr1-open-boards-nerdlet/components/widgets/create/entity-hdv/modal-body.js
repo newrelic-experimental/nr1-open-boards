@@ -11,6 +11,8 @@ export default class EntityHdvModalBody extends React.PureComponent {
       value: `domain IN ('INFRA', 'APM')`,
       limit: 0,
       summarize: '',
+      summaryLabel: '',
+      summaryLabelFontSize: 12,
       x: 0,
       y: 0,
       w: 7,
@@ -29,6 +31,8 @@ export default class EntityHdvModalBody extends React.PureComponent {
         limit: widget.limit || 0,
         tagFilters: widget.tagFilters || [],
         summarize: widget.summarize || '',
+        summaryLabel: widget.summaryLabel || '',
+        summaryLabelFontSize: widget.summaryLabelFontSize || 12,
         x: widget.x,
         y: widget.y,
         w: widget.w,
@@ -60,6 +64,8 @@ export default class EntityHdvModalBody extends React.PureComponent {
       value,
       limit,
       summarize,
+      summaryLabel,
+      summaryLabelFontSize,
       tagFilters,
       x,
       y,
@@ -71,6 +77,8 @@ export default class EntityHdvModalBody extends React.PureComponent {
       value,
       limit,
       summarize,
+      summaryLabel,
+      summaryLabelFontSize,
       tagFilters,
       x,
       y,
@@ -125,7 +133,7 @@ export default class EntityHdvModalBody extends React.PureComponent {
       return 'Loading widget...';
     }
 
-    const { name, value, limit, summarize, tagFilters } = this.state;
+    const { name, value, limit, summarize, summaryLabel, summaryLabelFontSize, tagFilters } = this.state;
 
     const filterOptions = [
       { key: 'accountId', text: 'accountId', value: 'accountId' },
@@ -178,6 +186,24 @@ export default class EntityHdvModalBody extends React.PureComponent {
                     />
                   </Form.Field>
                 </Form.Group>
+                {summarize && (
+                  <Form.Group>
+                    <Form.Input
+                      width="4"
+                      label="Summary Label"
+                      value={summaryLabel}
+                      placeholder="Default highest alert severity"
+                      onChange={(({target}) => this.setState({ summaryLabel: target.value })) }
+                    />
+                    <Form.Input
+                      width="4"
+                      label="Summary Label Font Size"
+                      type="number"
+                      value={summaryLabelFontSize}
+                      onChange={(({target}) => this.setState({ summaryLabelFontSize: parseFloat(target.value)}))}
+                    />
+                  </Form.Group>
+                )}
                 <Form.Input
                   width="16"
                   label="Entity search query"

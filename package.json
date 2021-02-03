@@ -9,7 +9,7 @@
     "eslint-fix": "eslint nerdlets/ --fix"
   },
   "nr1": {
-    "uuid": "991e1a1f-bc13-420c-bfcf-234c616fd6e7"
+    "uuid": "fc86db8e-4d4b-4285-b6a0-30cc67cb4c1e"
   },
   "ep-nr1": {
     "id": "28f03e65-b19e-49f4-9945-d706f73a28a4"
@@ -30,6 +30,7 @@
     "prop-types": "^15.6.2",
     "react": "^16.6.3",
     "react-ace": "^9.1.2",
+    "react-animations": "^1.0.0",
     "react-dom": "^16.6.3",
     "react-event-timeline": "^1.6.3",
     "react-grid-layout": "^1.0.0",
@@ -41,6 +42,7 @@
     "react-toastify": "^5.5.0",
     "semantic-ui-react": "^1.1.1",
     "semver": "^7.3.2",
+    "styled-components": "^4.4.1",
     "wildcard-match": "^4.0.0"
   },
   "browserslist": [

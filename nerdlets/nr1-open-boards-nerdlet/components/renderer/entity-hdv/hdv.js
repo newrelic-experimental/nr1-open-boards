@@ -130,6 +130,7 @@ export default class EntityHdvWidget extends React.Component {
       return {
         style: {
           fill,
+          strokeWidth: 15,
           stroke: 'white'
         },
         onClick: () =>
@@ -165,6 +166,7 @@ export default class EntityHdvWidget extends React.Component {
       return {
         style: {
           fill,
+          strokeWidth: 15,
           stroke: 'white'
         },
         onClick: () => this.entityNavigate(hexagon.type, hexagon.guid)
