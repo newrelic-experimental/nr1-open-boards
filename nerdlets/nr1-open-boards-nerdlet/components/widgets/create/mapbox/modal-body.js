@@ -1,25 +1,39 @@
 import React from 'react';
-import { Button, Form, Dropdown } from 'semantic-ui-react';
+import { Button, Form, Dropdown, Icon } from 'semantic-ui-react';
 import { writeUserDocument, writeAccountDocument } from '../../../../lib/utils';
 import { DataConsumer } from '../../../../context/data';
+import MapPreview from './map-preview';
+
+const availableThemes = [
+  'mapbox://styles/mapbox/basic-v9',
+  'mapbox://styles/mapbox/streets-v10',
+  'mapbox://styles/mapbox/satellite-v9',
+  'mapbox://styles/mapbox/bright-v9',
+  'mapbox://styles/mapbox/dark-v10',
+  'mapbox://styles/mapbox/light-v10'
+].sort((a,b) => (a < b ? -1 : (a > b ? 1 : 0)));
 
 export default class MapboxModalBody extends React.PureComponent {
   constructor(props) {
     super(props);
+    this.mapRef = React.createRef();
+
     this.state = {
       name: '',
       value: '',
-      apiToken: '',
+      apiToken: 'pk.eyJ1IjoiamZ1Y2hzMTAiLCJhIjoiY2toMDVzYWVoMGNraTJ3cnNqa2cybHAwaCJ9.iB2LS1CChyFL4wjIi_gZ5g',
+      mapStyle: '',
       defaultAccount: 0,
       latitude: 0,
       longitude: 0,
       ignoreFilters: null,
-      zoom: 8,
+      zoom: 4,
       ms: 0,
       x: 0,
       y: 0,
       w: 7,
-      h: 5
+      h: 5,
+      mapPreviewOpen: false
     };
   }
 
@@ -33,6 +47,7 @@ export default class MapboxModalBody extends React.PureComponent {
         value: widget.value,
         ms: widget.ms || 0,
         apiToken: widget.apiToken || '',
+        mapStyle: widget.mapStyle || '',
         defaultAccount: widget.defaultAccount || 0,
         latitude: widget.latitude || 0,
         longitude: widget.longitude || 0,
@@ -57,6 +72,14 @@ export default class MapboxModalBody extends React.PureComponent {
     });
   };
 
+  updatePreviewViewport = ({ latitude, longitude, zoom }) => {
+    this.setState({ 
+      latitude: parseFloat(latitude.toFixed(5)),
+      longitude: parseFloat(longitude.toFixed(5)),
+      zoom: Math.floor(zoom)
+    });
+  }
+
   create = async (
     selectedBoard,
     storageLocation,
@@ -69,6 +92,7 @@ export default class MapboxModalBody extends React.PureComponent {
       value,
       ms,
       apiToken,
+      mapStyle,
       defaultAccount,
       latitude,
       longitude,
@@ -84,6 +108,7 @@ export default class MapboxModalBody extends React.PureComponent {
       value,
       ms,
       apiToken,
+      mapStyle,
       defaultAccount,
       latitude,
       longitude,
@@ -147,11 +172,13 @@ export default class MapboxModalBody extends React.PureComponent {
       value,
       ms,
       apiToken,
+      mapStyle,
       defaultAccount,
       latitude,
       longitude,
       zoom,
-      ignoreFilters
+      ignoreFilters,
+      mapPreviewOpen
     } = this.state;
 
     return (
@@ -175,8 +202,27 @@ export default class MapboxModalBody extends React.PureComponent {
           );
           accounts.shift();
 
+          const themes = availableThemes.map( text => ({text, key: text, value: text}));
+
           return (
             <>
+              {mapPreviewOpen && (
+                <MapPreview 
+                  onClose={() => this.setState({ 
+                    mapPreviewOpen: false,  
+                    latitude: parseFloat(latitude.toFixed(5)),
+                    longitude: parseFloat(longitude.toFixed(5)),
+                    zoom: Math.floor(zoom)
+                  })}
+                  updateViewport={viewport => this.setState(viewport)}
+                  latitude={latitude}
+                  longitude={longitude}
+                  zoom={zoom}
+                  apiToken={apiToken}
+                  mapStyle={mapStyle}
+                  mapRef={this.mapRef}
+                />
+              )}
               <Form>
                 <Form.Group>
                   <Form.Input
@@ -227,7 +273,7 @@ export default class MapboxModalBody extends React.PureComponent {
                 </Form.Group>
                 <Form.Group>
                   <Form.Select
-                    width="5"
+                    width="3"
                     options={accounts}
                     value={defaultAccount}
                     onChange={(e, d) =>
@@ -239,10 +285,18 @@ export default class MapboxModalBody extends React.PureComponent {
                     placeholder=""
                   />
                   <Form.Input
-                    width="11"
+                    width="9"
                     label="Mapbox API Token"
                     value={apiToken}
                     onChange={(e, d) => this.setState({ apiToken: d.value })}
+                  />
+                  <Form.Select
+                    width="4"
+                    options={themes}
+                    value={mapStyle}
+                    onChange={(e,d) => this.setState({ mapStyle: d.value })}
+                    label="Map Theme"
+                    placeholder="Default: mapbox://styles/mapbox/light-v10"
                   />
                 </Form.Group>
                 <Form.Group>
@@ -278,6 +332,12 @@ export default class MapboxModalBody extends React.PureComponent {
                       })
                     }
                   />
+                  {(apiToken != '') && (
+                    <div style={{ margin: 'auto'}}>
+                      <label>&nbsp;</label>
+                      <Icon style={{lineHeight: '1.25em'}} name="globe" size="big" link onClick={() => this.setState({ mapPreviewOpen: true })} />
+                    </div>
+                  )}
                 </Form.Group>
               </Form>
               <br />

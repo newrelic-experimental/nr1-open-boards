@@ -1,5 +1,30 @@
 import gql from 'graphql-tag';
 
+export const requiredFiltersSet = (filters, dbFilters) => {
+  const requiredFilters = dbFilters.filter(f => f.required);
+
+  if (!requiredFilters.length) {
+    return true;
+  }
+
+  if (requiredFilters.length > filters.length) {
+    return false;
+  }
+
+  let allSet = true;
+  requiredFilters.forEach(rf => {
+    let isSet = false;
+    Object.keys(filters).forEach(f => {
+      if (isSet) return;
+      const filterName = f.replace('filter_', '');
+      isSet = (rf.name === filterName) & (filters[f].value !== '*');
+    });
+    allSet = allSet & isSet;
+  });
+
+  return allSet;
+};
+
 export const buildFilterClause = (filters, dbFilters) => {
   if (Object.keys(filters).length > 0) {
     let value = '';
@@ -240,79 +265,6 @@ export const deriveEvents = (
   });
 
   return newEventData;
-};
-
-export const buildTagFilterQuery = (
-  widgetFilters,
-  accounts,
-  filters,
-  dbFilters
-) => {
-  let query = '';
-  const tfDbFilters = dbFilters || [];
-  const tfFilters = filters || {};
-
-  if (widgetFilters) {
-    let appendedTags = '';
-
-    widgetFilters.forEach(t => {
-      if (t === 'accountId') {
-        const accountsStr = accounts.map(a => `'${a}'`).join(',');
-        const accountTagsQuery = ` AND tags.accountId IN (${accountsStr})`;
-        appendedTags += accountTagsQuery;
-      } else if (t === 'name') {
-        let operator = '';
-        let values = [];
-
-        for (let z = 0; z < tfDbFilters.length; z++) {
-          const { name } = tfDbFilters[z];
-          const names = name.split(',');
-
-          for (let x = 0; x < names.length; x++) {
-            // TODO: Replace this with a filter-mapping capability
-            if (
-              names[x] === 'name' ||
-              names[x] === 'appName' ||
-              names[x] === 'clusterName'
-            ) {
-              operator = tfDbFilters[z].operator;
-              let value = tfDbFilters[z].default;
-              if (`filter_${name}` in tfFilters) {
-                value = tfFilters[`filter_${name}`].value;
-              }
-              value = value.replace(/\*/g, '%');
-              values.push(value);
-            }
-          }
-        }
-
-        values = values.filter(v => v !== '%');
-
-        if (operator && operator !== '>' && operator !== '<') {
-          let allNames = '';
-          for (let x = 0; x < values.length; x++) {
-            if (values[x].includes('%')) {
-              operator = 'LIKE';
-            }
-            if (x === 0) {
-              allNames += ` name ${operator} '${values[x]}' `;
-            } else {
-              allNames += ` OR name ${operator} '${values[x]}' `;
-            }
-          }
-          appendedTags += ` AND (${allNames})`;
-        }
-      } else {
-        // console.log(t);
-      }
-    });
-
-    query += appendedTags;
-  }
-
-  query = query.replace(/AND \(\)/g, '');
-
-  return query;
 };
 
 export const getGuidsQuery = (query, cursor) => gql`{

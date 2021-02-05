@@ -8,6 +8,13 @@ import TimeHandler from './components/time-handler';
 import NerdletStateHandler from './components/nerdletstate-handler';
 
 export default class OpenBoardsRoot extends React.PureComponent {
+  constructor(props) {
+    super(props); 
+    this.state = {
+      width: window.innerWidth,
+      height: window.innerHeight
+    }
+  }
   render() {
     return (
       <DataProvider>
@@ -29,7 +36,7 @@ export default class OpenBoardsRoot extends React.PureComponent {
               <div id="openboards-root">
                 <MenuBar />
                 <FilterBar />
-                <ChartGrid width={width} height={height} />
+                <ChartGrid width={5000} height={5000} />
               </div>
             );
           }}

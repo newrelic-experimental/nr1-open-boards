@@ -1,6 +1,6 @@
 import React from 'react';
 import { DataConsumer } from '../../context/data';
-import { buildFilterClause } from './utils';
+import { buildFilterClause, requiredFiltersSet } from './utils';
 import Grid from './grid';
 import BoardSelector from './board-selector';
 import _ from 'lodash';
@@ -61,20 +61,23 @@ export default class ChartGrid extends React.PureComponent {
             const { document } = selectedBoard;
             const dbFilters = document.filters || [];
             const filterClause = buildFilterClause(filters, dbFilters);
+            const requiredSet = requiredFiltersSet(filters, dbFilters);
 
-            return (
-              <Grid
-                selectedBoard={selectedBoard}
-                width={width}
-                height={height}
-                filters={filters}
-                filterClause={filterClause}
-                timeRange={timeRange}
-                sinceClause={sinceClause}
-                begin_time={begin_time}
-                end_time={end_time}
-              />
-            );
+            if (requiredSet) {
+              return (
+                <Grid
+                  selectedBoard={selectedBoard}
+                  width={width}
+                  height={height}
+                  filters={filters}
+                  filterClause={filterClause}
+                  timeRange={timeRange}
+                  sinceClause={sinceClause}
+                  begin_time={begin_time}
+                  end_time={end_time}
+                />
+              );
+            }
           } else {
             return <BoardSelector />;
           }

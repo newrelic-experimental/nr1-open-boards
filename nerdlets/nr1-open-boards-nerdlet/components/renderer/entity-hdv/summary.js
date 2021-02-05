@@ -20,10 +20,12 @@ export default class EntityHdvSummary extends React.Component {
   render() {
     const {
       summarizedHealthStatus,
+      summaryLabel,
       width,
       height,
       toggleSummary,
-      isFetching
+      isFetching,
+      summaryLabelFontSize
     } = this.props;
     const backgroundColor = severityColor(summarizedHealthStatus);
     const msg = isFetching ? (
@@ -51,10 +53,11 @@ export default class EntityHdvSummary extends React.Component {
             fontWeight: 'bold',
             color: 'white',
             transform: 'translate(-50%, -50%)',
-            left: '50%'
+            left: '50%',
+            fontSize: summaryLabelFontSize || 12
           }}
         >
-          {isFetching ? msg : summarizedHealthStatus}
+          {isFetching ? msg : (summaryLabel || summarizedHealthStatus)}
         </div>
       </div>
     );

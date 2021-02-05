@@ -13,6 +13,10 @@
 //   background-color: green;
 // }
 
+.mapboxgl-popup-content {
+  padding: 10px;
+}
+
 .initial {
   all: initial;
 }
@@ -617,6 +621,9 @@ th {
   color: #3b8a7b;
 }
 
+.grid-hexagon polygon:hover {
+  stroke: none !important;
+}
 // .query {
 //   font: monospace;
 //   color: #464e4e;

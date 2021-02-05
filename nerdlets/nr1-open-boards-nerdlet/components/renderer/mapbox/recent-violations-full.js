@@ -79,8 +79,6 @@ export default class RecentViolations extends React.Component {
       });
     });
 
-    console.log(recentAlertViolations);
-
     this.setState({ recentAlertViolations });
   };
 

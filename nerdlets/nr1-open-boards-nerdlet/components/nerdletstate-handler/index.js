@@ -45,7 +45,7 @@ export default class NerdletStateHandler extends React.PureComponent {
 
         stateUpdate.storageLocation = selectedStorageLocation;
         stateUpdate.selectedBoard = selectedBoard;
-        stateUpdate.filters = filters || [];
+        stateUpdate.filters = filters || {};
 
         updateDataStateContext({ urlStateChecked: true, ...stateUpdate });
       }
