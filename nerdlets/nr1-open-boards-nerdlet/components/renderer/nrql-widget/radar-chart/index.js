@@ -45,11 +45,11 @@ export default class SvgRadarChart extends React.Component {
     summarizedData.forEach(s => {
       radarCaptions[s.group] = s.group;
       if (s.key === 'SLO') {
-        slos[s.group] = s.value;
+        slos[s.group] = s.value || 0;
       } else if (s.key === 'SLA') {
-        slas[s.group] = s.value;
+        slas[s.group] = s.value || 0;
       } else {
-        actuals[s.group] = s.value;
+        actuals[s.group] = s.value || 0;
       }
     });
 
@@ -80,7 +80,9 @@ export default class SvgRadarChart extends React.Component {
               wordWrap: 'break-word'
             }}
           >
-            {radarData.length > 0 && Object.keys(radarCaptions).length > 0 ? (
+            {radarData.length > 0 &&
+            Object.keys(radarData[0].data || {}).length > 0 &&
+            Object.keys(radarCaptions).length > 0 ? (
               <RadarChart
                 captions={radarCaptions}
                 data={radarData}
