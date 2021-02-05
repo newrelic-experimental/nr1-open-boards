@@ -62,12 +62,12 @@ const nrqlEventMessage = event => {
         <div>
           {availableAttributes.map((a, index) => {
             return index + 1 === availableAttributes.length ? (
-              <>{a}</>
+              <React.Fragment key={index}>{a}</React.Fragment>
             ) : (
-              <>
+              <React.Fragment key={index}>
                 {a}
                 <br />
-              </>
+              </React.Fragment>
             );
           })}
         </div>
