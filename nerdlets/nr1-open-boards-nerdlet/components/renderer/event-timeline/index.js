@@ -131,6 +131,21 @@ export default class EventTimeline extends React.Component {
             return true;
           }
         }
+
+        if (e.data) {
+          const keys = Object.keys(e.data);
+          for (let z = 0; z < keys.length; z++) {
+            if (
+              typeof e.data[keys[z]] === 'string' ||
+              e.data[keys[z]] instanceof String
+            ) {
+              if (e.data[keys[z]].toLowerCase().includes(searchTxt)) {
+                return true;
+              }
+            }
+          }
+        }
+
         return false;
       }
       return true;
